@@ -6,7 +6,9 @@ setup(
     py_modules=["yasha"],
     install_requires=[
         "Click",
-        "Jinja2"
+        "Jinja2",
+        "pytoml",
+        "pyyaml",
     ],
     entry_points='''
         [console_scripts]

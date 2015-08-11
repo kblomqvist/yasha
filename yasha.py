@@ -10,23 +10,20 @@ def parse_conf(src, conf):
     jinja_params = {}
 
     if not conf:
-        try:
-            src_path = os.path.abspath(src.name)
-            src_name, src_extension = os.path.splitext(src.name)
+        src_path = os.path.abspath(src.name)
+        src_name, src_extension = os.path.splitext(src.name)
 
-            src_name = src_name.split(".")
-            conf_path = "." + os.path.sep
-            for _ in range(src_path.count(os.path.sep)):
-                if conf:
-                    break
-                for i, _ in enumerate(src_name):
-                    for ext in CONF_EXTENSIONS_LIST:
-                        f = conf_path + ".".join(src_name[0:i+1]) + ext
-                        try: conf = click.open_file(f, "rb")
-                        except: pass
-                conf_path = conf_path + ".." + os.path.sep
-        except:
-            pass
+        src_name = src_name.split(".")
+        conf_path = "." + os.path.sep
+        for _ in range(src_path.count(os.path.sep)):
+            if conf:
+                break
+            for i, _ in enumerate(src_name):
+                for ext in CONF_EXTENSIONS_LIST:
+                    f = conf_path + ".".join(src_name[0:i+1]) + ext
+                    try: conf = click.open_file(f, "rb")
+                    except: pass
+            conf_path = conf_path + ".." + os.path.sep
 
     if conf:
         conf_name, conf_extension = os.path.splitext(conf.name)

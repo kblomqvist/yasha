@@ -6,6 +6,13 @@ import yaml
 CONF_EXTENSIONS = {"toml": [".toml"], "yaml": [".yaml", ".yml"]}
 CONF_EXTENSIONS_LIST = sum(CONF_EXTENSIONS.values(), [])
 
+def possible_conf_names(src_name):
+    conf_names = []
+    src_name = src_name.split(".")
+    for i, _ in enumerate(src_name):
+        conf_names.insert(0, ".".join(src_name[0:i+1]))
+    return conf_names
+
 def parse_conf(src, conf):
     jinja_params = {}
 
@@ -13,14 +20,15 @@ def parse_conf(src, conf):
         src_path = os.path.abspath(src.name)
         src_name, src_extension = os.path.splitext(src.name)
 
-        src_name = src_name.split(".")
         conf_path = "." + os.path.sep
+        conf_names = possible_conf_names(src_name)
         for _ in range(src_path.count(os.path.sep)):
             if conf:
                 break
-            for i, _ in enumerate(src_name):
+            for conf_name in conf_names:
                 for ext in CONF_EXTENSIONS_LIST:
-                    f = conf_path + ".".join(src_name[0:i+1]) + ext
+                    f = conf_path + conf_name + ext
+                    print f
                     try: conf = click.open_file(f, "rb")
                     except: pass
             conf_path = conf_path + ".." + os.path.sep

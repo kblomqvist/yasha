@@ -6,31 +6,36 @@ import yaml
 CONF_EXTENSIONS = {"toml": [".toml"], "yaml": [".yaml", ".yml"]}
 CONF_EXTENSIONS_LIST = sum(CONF_EXTENSIONS.values(), [])
 
+def possible_conf_paths(src):
+    conf_paths = ["."]
+    src_path = os.path.abspath(src.name)
+    for _ in range(src_path.count(os.path.sep)):
+        conf_paths.append(os.path.join(conf_paths[-1], ".."))
+    return conf_paths
+
+def possible_conf_names(src):
+    conf_names = []
+    src_name, src_extension = os.path.splitext(src.name)
+    src_name = os.path.basename(src_name)
+    src_name = src_name.split(".")
+    for i, _ in enumerate(src_name):
+        conf_names.insert(0, ".".join(src_name[0:i+1]))
+    return conf_names
+
 def parse_conf(src, conf):
     jinja_params = {}
 
-    def possible_conf_names(src_name):
-        conf_names = []
-        src_name = src_name.split(".")
-        for i, _ in enumerate(src_name):
-            conf_names.insert(0, ".".join(src_name[0:i+1]))
-        return conf_names
-
     if not conf:
-        src_path = os.path.abspath(src.name)
-        src_name, src_extension = os.path.splitext(src.name)
-
-        conf_path = "." + os.path.sep
-        conf_names = possible_conf_names(src_name)
-        for _ in range(src_path.count(os.path.sep)):
+        conf_paths = possible_conf_paths(src)
+        conf_names = possible_conf_names(src)
+        for conf_path in conf_paths:
             if conf:
                 break
             for conf_name in conf_names:
                 for extension in CONF_EXTENSIONS_LIST:
-                    f = conf_path + conf_name + extension
+                    f = os.path.join(conf_path, conf_name + extension)
                     try: conf = click.open_file(f, "rb")
                     except: pass
-            conf_path = conf_path + ".." + os.path.sep
 
     if conf:
         conf_name, conf_extension = os.path.splitext(conf.name)
@@ -45,9 +50,13 @@ def parse_conf(src, conf):
 @click.argument("src", type=click.File("rb"))
 @click.option("--conf", type=click.File("rb"))
 @click.option("--no-conf", is_flag=True)
-def cli(src, conf, no_conf):
+@click.option("--filters", type=click.File("rb"))
+@click.option("--no-filters", is_flag=True)
+def cli(src, conf, no_conf, filters, no_filters):
     """Example"""
     jinja_params = parse_conf(src, conf) if not no_conf else {}
+    #print possible_conf_paths(src)
+    #print possible_conf_names(src)
     click.echo(jinja_params)
 
 

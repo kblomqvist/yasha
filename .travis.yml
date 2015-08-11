@@ -5,4 +5,5 @@ python:
 install:
   - pip install .
 
-script: yasha
+script:
+  - yasha --help

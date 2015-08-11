@@ -13,17 +13,17 @@ def parse_conf(src, conf):
         try:
             src_path = os.path.abspath(src.name)
             src_name, src_extension = os.path.splitext(src.name)
-            
+
+            src_name = src_name.split(".")
             conf_path = "." + os.path.sep
-            for x in range(0, src_path.count(os.path.sep)):
+            for _ in range(src_path.count(os.path.sep)):
                 if conf:
                     break
-                for ext in CONF_EXTENSIONS_LIST:
-                    try:
-                        f = conf_path + src_name + ext
-                        conf = click.open_file(f, "rb")
-                    except:
-                        pass
+                for i, _ in enumerate(src_name):
+                    for ext in CONF_EXTENSIONS_LIST:
+                        f = conf_path + ".".join(src_name[0:i+1]) + ext
+                        try: conf = click.open_file(f, "rb")
+                        except: pass
                 conf_path = conf_path + ".." + os.path.sep
         except:
             pass

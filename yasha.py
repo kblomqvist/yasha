@@ -44,9 +44,10 @@ def parse_conf(src, conf):
 @click.command()
 @click.argument("src", type=click.File("rb"))
 @click.option("--conf", type=click.File("rb"))
-def cli(src, conf):
+@click.option("--no-conf", is_flag=True)
+def cli(src, conf, no_conf):
     """Example"""
-    jinja_params = parse_conf(src, conf)
+    jinja_params = parse_conf(src, conf) if not no_conf else {}
     click.echo(jinja_params)
 
 

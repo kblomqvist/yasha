@@ -60,7 +60,7 @@ the `foo.toml` configuration file is used for both templates. And just for your 
 
 ## Custom Jinja filters and tests
 
-Seems like the day has arrived when you would like use a [custom Jinja filter](http://jinja.pocoo.org/docs/dev/api/#custom-filters) or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) in your template file. Fortunately yasha has been far-wise and supports this out of box. Like configuration file, yasha will automatically look for `foo.py` file for custom filters and tests.
+Seems like the day has arrived when you would like use [custom Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) in your template file. Fortunately yasha has been a far-wise and supports this out of box. The functionality is the same as above for the configuration file. So for a given `foo.jinja` template file, yasha will automatically seek `foo.py` file where you can define your custom Jinja filter and test functions.
 
 An example of `foo.py` file could be:
 

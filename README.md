@@ -60,7 +60,7 @@ the `foo.toml` configuration file is used for both templates. For your convenien
   foo.toml
 ```
 
-## Custom Jinja extension
+## Custom Jinja extensions
 
 Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) in your template file. Fortunately yasha has been a far-wise and supports these out of box. The functionality is the same as above for the configuration file. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file where you can define your custom filters and tests.
 

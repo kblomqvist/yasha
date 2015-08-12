@@ -1,6 +1,4 @@
-import os, sys
-import importlib
-
+import os
 import click
 import yaml
 import pytoml as toml
@@ -24,23 +22,31 @@ def possible_conf_names(src):
         conf_names.insert(0, ".".join(src_name[0:i+1]))
     return conf_names
 
+def find_conf(src, extensions=CONF_EXTENSIONS_LIST):
+    conf = None
+    conf_paths = possible_conf_paths(src)
+    conf_names = possible_conf_names(src)
+    
+    for conf_path in conf_paths:
+        if conf:
+            break
+        for conf_name in conf_names:
+            if conf:
+                break
+            for ext in extensions:
+                test = os.path.join(conf_path, conf_name + ext)
+                if os.path.isfile(test):
+                    conf = os.path.abspath(test)
+                    break
+
+    return conf
+
 def parse_conf(src, conf):
     jinja_params = {}
 
     if not conf:
-        conf_paths = possible_conf_paths(src)
-        conf_names = possible_conf_names(src)
-        for conf_path in conf_paths:
-            if conf != None:
-                break
-            for conf_name in conf_names:
-                for extension in CONF_EXTENSIONS_LIST:
-                    f = os.path.join(conf_path, conf_name + extension)
-                    try:
-                        conf = click.open_file(f, "rb")
-                        break
-                    except:
-                        pass
+        conf = find_conf(src)
+        conf = click.open_file(conf, "rb")
 
     if conf:
         conf_name, conf_extension = os.path.splitext(conf.name)
@@ -53,21 +59,12 @@ def parse_conf(src, conf):
 
 def load_filters(src, module):
     if not module:
-        conf_paths = possible_conf_paths(src)
-        conf_names = possible_conf_names(src)
-        for conf_path in conf_paths:
-            if module:
-                break
-            for conf_name in conf_names:
-                conf_name = conf_name.replace(".", "_")
-                test = os.path.join(conf_path, conf_name + ".py")
-                if os.path.isfile(test):
-                    module = os.path.abspath(test)
-                    break
+        module = find_conf(src, [".py"])
     else: # is click file
         module = module.name
 
     if module:
+        import sys, importlib
         sys.path.append(os.path.dirname(module))
         module = os.path.basename(module)
         module = os.path.splitext(module)[0]

@@ -58,14 +58,44 @@ the `foo.toml` configuration file is used for both templates. And just for your 
   foo.toml
 ```
 
-## Custom Jinja filters
+## Custom Jinja filters and tests
 
-Seems like the day has arrived when you would like use a [custom Jinja filter](http://jinja.pocoo.org/docs/dev/api/#custom-filters) in your template file. Fortunately yasha has been far-wise and supports this out of box. Like configuration file, yasha will automatically look for `foo.py` file for custom filters.
+Seems like the day has arrived when you would like use a [custom Jinja filter](http://jinja.pocoo.org/docs/dev/api/#custom-filters) in your template file. Fortunately yasha has been far-wise and supports this out of box. Like configuration file, yasha will automatically look for `foo.py` file for custom filters and tests.
 
-An example of explicit use of filters file would be:
+An example of `foo.py` file could be:
+
+```python
+import math
+
+def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
+    return value.strftime(format)
+    
+def test_is_prime(n):
+    if n == 2:
+        return True
+    for i in xrange(2, int(math.ceil(math.sqrt(n))) + 1):
+        if n % i == 0:
+            return False
+    return True
+```
+
+When these custom filters and tests are used in the template file, `filter_` and `test_` function prefixes are removed:
 
 ```
-$ yasha foo.jinja --conf foo.toml --filters foo.py
+{{ pub_date|datetimeformat }}
+{{ pub_date|datetimeformat('%d-%m-%Y') }}
+
+{% if 42 is prime %}
+    42 is a prime number
+{% else %}
+    42 is not a prime number
+{% endif %}
 ```
 
-There's also `--no-filters` option operating in a similar manner with `--no-conf`. And finally I want to mention that the file sharing works for filters as it works for the configuration file.
+Instead of relying on the automatic custom file look up, it can be given explicitly too:
+
+```
+$ yasha foo.jinja --conf foo.toml --custom foo.py
+```
+
+There's also `--no-custom` option operating in a similar manner with `--no-conf`. And finally I want to mention that the file sharing works for custom file as it works for the configuration file.

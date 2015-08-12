@@ -1,12 +1,14 @@
 # yasha
 
-Yasha is a code generator based on [Jinja](http://jinja.pocoo.org/) template engine. For example:
+Yasha is a code generator based on [Jinja](http://jinja.pocoo.org/) template engine.
+
+For example, the following command-line call
 
 ```
 $ yasha foo.jinja
 ```
 
-will render `foo.jinja` Jinja template file into new file called `foo`.
+will render `foo.jinja` Jinja template file into a new file named as `foo`. See how the `.jinja` file extension is removed.
 
 Template variables can be defined in a separate configuration file. [TOML](https://github.com/toml-lang/toml) and [YAML](http://yaml.org/) are supported. Yasha will look for this file if not given explicitly. For example, the above example call tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) first from the same folder with `foo.jinja` and if not found there subfolders will be checked.
 
@@ -16,7 +18,7 @@ An example of explicit use of configuration file would be:
 $ yasha foo.jinja --conf foo.toml
 ```
 
-And finally if configuration file shouldn't be used in spite of its existence, ``--no-conf`` can be used.
+Finally if the configuration file shouldn't be used in spite of its existence, ``--no-conf`` can be used.
 
 ## Configuration file sharing
 
@@ -46,7 +48,7 @@ $ yasha include/foo.h.jinja
 $ yasha source/foo.c.jinja
 ```
 
-the `foo.toml` configuration file is used for both templates. And just for your convenience here is the file listing after the above two yasha calls:
+the `foo.toml` configuration file is used for both templates. For your convenience here is the file listing after the above two yasha calls:
 
 ```
   include/
@@ -98,4 +100,4 @@ Instead of relying on the automatic custom file look up, it can be given explici
 $ yasha foo.jinja --conf foo.toml --custom foo.py
 ```
 
-There's also `--no-custom` option operating in a similar manner with `--no-conf`. And finally I want to mention that the file sharing works for custom file as it works for the configuration file.
+There's also `--no-custom` option operating in a similar manner with `--no-conf`. It's also worth mentioning that the file sharing works for custom file as it works for the configuration file.

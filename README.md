@@ -1,1 +1,71 @@
 # yasha
+
+Yasha is a code generator based on [Jinja](http://jinja.pocoo.org/) template engine. For example:
+
+```
+$ yasha foo.jinja
+```
+
+will render `foo.jinja` Jinja template file into new file called `foo`.
+
+Template variables can be defined in a separate configuration file. [TOML](https://github.com/toml-lang/toml) and [YAML](http://yaml.org/) are supported. Yasha will look for this file if not given explicitly. For example, the above example call tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) first from the same folder with `foo.jinja` and if not found there subfolders will be checked.
+
+An example of explicit use of configuration file would be:
+
+```
+$ yasha foo.jinja --conf foo.toml
+```
+
+And finally if configuration file shouldn't be used in spite of its existence, ``--no-conf`` can be used.
+
+## Custom Jinja filters
+
+Seems like the day has arrived when you would like use a custom Jinja filter in your template file. Fortunately yasha has been far-wise and supports this out of box. Like configuration file, yasha will automatically look for `foo.py` file for [custom Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters). An example of explicit use of filters file would be:
+
+```
+$ yasha foo.jinja --conf foo.toml --filters foo.py
+```
+
+There's also `--no-filters` option operating in a similar manner with `--no-conf`.
+
+## Configuration and filter file share
+
+Imagine that you would be writing a C code and have the following template files for yasha to be generated
+
+```
+  include/
+    foo.h.jinja
+  source/
+    foo.c.jinja
+```
+
+and you would like to share the same configuration file between these two C files. So instead of creating separate `foo.h.toml` and `foo.c.toml` files you can make one `foo.toml` like this:
+
+```
+  include/
+    foo.h.jinja
+  source/
+    foo.c.jinja
+  foo.toml
+```
+
+Now when you call
+
+```
+$ yasha include/foo.h.jinja
+$ yasha source/foo.c.jinja
+```
+
+the `foo.toml` configuration file is used for both templates. This works for custom filters file too.
+
+And just for your convenience here is the directory structure after the above two yasha calls:
+
+```
+  include/
+    foo.h
+    foo.h.jinja
+  source/
+    foo.c
+    foo.c.jinja
+  foo.toml
+```

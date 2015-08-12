@@ -60,7 +60,7 @@ the `foo.toml` configuration file is used for both templates. And just for your 
 
 ## Custom Jinja filters and tests
 
-Seems like the day has arrived when you would like use a [custom Jinja filter](http://jinja.pocoo.org/docs/dev/api/#custom-filters) in your template file. Fortunately yasha has been far-wise and supports this out of box. Like configuration file, yasha will automatically look for `foo.py` file for custom filters and tests.
+Seems like the day has arrived when you would like use a [custom Jinja filter](http://jinja.pocoo.org/docs/dev/api/#custom-filters) or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests)in your template file. Fortunately yasha has been far-wise and supports this out of box. Like configuration file, yasha will automatically look for `foo.py` file for custom filters and tests.
 
 An example of `foo.py` file could be:
 
@@ -81,7 +81,7 @@ def test_is_prime(n):
 
 When these custom filters and tests are used in the template file, `filter_` and `test_` function prefixes are removed:
 
-```
+```jinja
 {{ pub_date|datetimeformat }}
 {{ pub_date|datetimeformat('%d-%m-%Y') }}
 

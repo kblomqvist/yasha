@@ -18,19 +18,9 @@ $ yasha foo.jinja --conf foo.toml
 
 And finally if configuration file shouldn't be used in spite of its existence, ``--no-conf`` can be used.
 
-## Custom Jinja filters
+## Configuration file sharing
 
-Seems like the day has arrived when you would like use a custom Jinja filter in your template file. Fortunately yasha has been far-wise and supports this out of box. Like configuration file, yasha will automatically look for `foo.py` file for [custom Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters). An example of explicit use of filters file would be:
-
-```
-$ yasha foo.jinja --conf foo.toml --filters foo.py
-```
-
-There's also `--no-filters` option operating in a similar manner with `--no-conf`.
-
-## Configuration and filter file share
-
-Imagine that you would be writing a C code and have the following template files for yasha to be generated
+Imagine that you would be writing a C code and have the following template files in two separate folders
 
 ```
   include/
@@ -39,7 +29,7 @@ Imagine that you would be writing a C code and have the following template files
     foo.c.jinja
 ```
 
-and you would like to share the same configuration file between these two C files. So instead of creating separate `foo.h.toml` and `foo.c.toml` files you can make one `foo.toml` like this:
+and you would like to share the same configuration file between these two templates. So instead of creating separate `foo.h.toml` and `foo.c.toml` files you can make one `foo.toml` like this:
 
 ```
   include/
@@ -56,9 +46,7 @@ $ yasha include/foo.h.jinja
 $ yasha source/foo.c.jinja
 ```
 
-the `foo.toml` configuration file is used for both templates. This works for custom filters file too.
-
-And just for your convenience here is the directory structure after the above two yasha calls:
+the `foo.toml` configuration file is used for both templates. And just for your convenience here is the directory structure after the above two yasha calls:
 
 ```
   include/
@@ -69,3 +57,15 @@ And just for your convenience here is the directory structure after the above tw
     foo.c.jinja
   foo.toml
 ```
+
+## Custom Jinja filters
+
+Seems like the day has arrived when you would like use a [custom Jinja filter](http://jinja.pocoo.org/docs/dev/api/#custom-filters) in your template file. Fortunately yasha has been far-wise and supports this out of box. Like configuration file, yasha will automatically look for `foo.py` file for custom filters.
+
+An example of explicit use of filters file would be:
+
+```
+$ yasha foo.jinja --conf foo.toml --filters foo.py
+```
+
+There's also `--no-filters` option operating in a similar manner with `--no-conf`. And finally I want to mention that the file sharing works for filters as it works for the configuration file.

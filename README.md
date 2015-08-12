@@ -94,9 +94,9 @@ As it can be seen the file is standard Python, although the file extension is no
 {% endif %}
 ```
 
-In addition to filters and tests, larger extensions ([extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext)) are also supported. All defined classes postfixed by _Extension_ are added and available within template.
+In addition to filters and tests, larger extensions ([extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext)) are also supported. All defined classes postfixed by _Extension_ are added and available within the template.
 
-And in the end, instead of relying on the automatic extension file look up, it can be given explicitly as well
+And as you might guess, instead of relying on the automatic extension file look up, it can be given explicitly as well
 
 ```
 $ yasha foo.jinja --extensions foo.py

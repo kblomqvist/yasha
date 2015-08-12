@@ -62,9 +62,9 @@ the `foo.toml` configuration file is used for both templates. For your convenien
 
 ## Custom Jinja extensions
 
-Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) in your template file. Fortunately yasha has been a far-wise and supports these out of box. The functionality is the same as above for the configuration file. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file where you can define your custom filters and tests.
+Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) in your template file. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the configuration file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file, which can contain your custom filters and tests.
 
-An example of the `foo.jinja-ext` containing a one filter and one test can be as given below.
+Here is an example of the `foo.jinja-ext` file containing a one filter and one test.
 
 ```python
 import math

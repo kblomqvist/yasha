@@ -41,19 +41,19 @@ def find_conf(src, extensions=CONF_EXTENSIONS_LIST):
 
     return conf
 
-def parse_conf(src, conf):
+def parse_conf(src, file):
     jinja_params = {}
 
-    if not conf:
-        conf = find_conf(src)
-        conf = click.open_file(conf, "rb") if conf else None
+    if not file:
+        file = find_conf(src)
+        file = click.open_file(file, "rb") if file else None
 
-    if conf:
-        conf_name, conf_extension = os.path.splitext(conf.name)
+    if file:
+        conf_name, conf_extension = os.path.splitext(file.name)
         if conf_extension in CONF_EXTENSIONS["toml"]:
-            jinja_params = toml.load(conf)
+            jinja_params = toml.load(file)
         if conf_extension in CONF_EXTENSIONS["yaml"]:
-            jinja_params = yaml.load(conf)
+            jinja_params = yaml.load(file)
 
     return jinja_params
 

@@ -8,7 +8,7 @@ For example, the following command-line call
 $ yasha foo.jinja
 ```
 
-will render `foo.jinja` Jinja template file into a new file named as `foo`. See how the `.jinja` file extension is removed.
+will render `foo.jinja` template file into a new file named as `foo`. See how the `.jinja` file extension is removed.
 
 Template variables can be defined in a separate configuration file. [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported. Yasha will look for this file if not given explicitly. For example, the above example call tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) first from the same folder with `foo.jinja` and if not found there subfolders will be checked.
 
@@ -62,9 +62,9 @@ the `foo.toml` configuration file is used for both templates. For your convenien
 
 ## Custom Jinja extension
 
-Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) in your template file. Fortunately yasha has been a far-wise and supports these out of box. The functionality is the same as above for the configuration file. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file where you can define your custom Jinja filter and test functions and extension classes.
+Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) in your template file. Fortunately yasha has been a far-wise and supports these out of box. The functionality is the same as above for the configuration file. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file where you can define your custom filters and tests.
 
-An example of the `foo.jinja-ext` containing a one filter and one test:
+An example of the `foo.jinja-ext` containing a one filter and one test can be as given below.
 
 ```python
 import math
@@ -83,6 +83,8 @@ def test_prime(n):
 
 As it can be seen the file is standard Python, although the file extension is not `.py`. Furthermore, notice that the functions intended to work as a filter has to be prefixed by `filter_`. Similarly test functions has to be prefixed by `test_`.
 
+And here is shown how these would be used within a template.
+
 ```jinja
 {{ pub_date|datetimeformat }}
 {{ pub_date|datetimeformat('%d-%m-%Y') }}
@@ -94,7 +96,7 @@ As it can be seen the file is standard Python, although the file extension is no
 {% endif %}
 ```
 
-In addition to filters and tests, larger extensions ([extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext)) are also supported. All defined classes postfixed by _Extension_ are added and available within the template.
+In addition to filters and tests, larger extensions ([extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext)) are also supported. Meaning that all defined classes having an _Extension_ suffix are available within the template.
 
 And as you might guess, instead of relying on the automatic extension file look up, it can be given explicitly as well
 

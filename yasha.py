@@ -46,7 +46,7 @@ def parse_conf(src, conf):
 
     if not conf:
         conf = find_conf(src)
-        conf = click.open_file(conf, "rb")
+        conf = click.open_file(conf, "rb") if conf else None
 
     if conf:
         conf_name, conf_extension = os.path.splitext(conf.name)
@@ -57,18 +57,18 @@ def parse_conf(src, conf):
 
     return jinja_params
 
-def load_filters(src, module):
-    if not module:
-        module = find_conf(src, [".py"])
-    else: # is click file
-        module = module.name
+def load_filters(src, file):
+    if not file:
+        file = find_conf(src, [".py"])
+        file = click.open_file(file, "rb") if file else None
 
-    if module:
-        import sys, importlib
-        sys.path.append(os.path.dirname(module))
-        module = os.path.basename(module)
-        module = os.path.splitext(module)[0]
-        return importlib.import_module(module)
+    if file:
+        import imp
+        pathname = os.path.basename(file.name)
+        name = os.path.splitext(pathname)[0]
+        name = name.replace(".", "_")
+        desc = (".py", "rb", imp.PY_SOURCE)
+        return imp.load_module(name, file, pathname, desc)
 
 @click.command()
 @click.argument("src", type=click.File("rb"))

@@ -46,7 +46,7 @@ $ yasha include/foo.h.jinja
 $ yasha source/foo.c.jinja
 ```
 
-the `foo.toml` configuration file is used for both templates. And just for your convenience here is the directory structure after the above two yasha calls:
+the `foo.toml` configuration file is used for both templates. And just for your convenience here is the file listing after the above two yasha calls:
 
 ```
   include/

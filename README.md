@@ -18,11 +18,17 @@ An example of explicit use of configuration file would be:
 $ yasha foo.jinja --conf foo.toml
 ```
 
-In case the configuration file shouldn't be used in spite of its existence, option ``--no-conf`` can be given. And that's not all. Yasha accept conf parameter given from environment variables as well:
+Yasha accept configuration file given via environment variables as well:
 
 ```
 $ export YASHA_CONF=$HOME/foo.toml
 $ yasha foo.jinja
+```
+
+In case the configuration file shouldn't be used in spite of its existence there's an option ``--no-conf``:
+
+```
+$ yasha foo.jinja --no-conf
 ```
 
 ## Configuration file sharing

@@ -117,33 +117,30 @@ $ yasha foo.jinja --extensions foo.py
 
 There's also `--no-extensions` option operating in a similar manner with `--no-conf`. It's also worth mentioning that the file sharing works for the extensions file as it works for the variables file and that the environment variable name for the extensions is YASHA_EXTENSIONS.
 
-## Custom variable file parser
+## Custom template variables parser
 
 By default Yasha supports TOML and YAML files for variables. However, it's possible to define custom parser to be used according to the file extension of the given `--variables` file.
 
 ...
 
-## Makefile integration
+## Example Makefile using Yasha
 
 ```Makefile
-C_TEMPLATES=foo.c.jinja bar.c.jinja
-
-C_SOURCES=main.c
-C_SOURCES+=$(basename $(C_TEMPLATES))
-
-OBJECTS=$(C_SOURCES:.c=.o)
+TEMPLATES =foo.c.jinja bar.c.jinja
+SOURCES   =main.c $(basename $(TEMPLATES))
+OBJECTS   =$(SOURCES:.c=.o)
 
 program: $(OBJECTS)
     $(CC) -o $@ $<
 
-$(basename $(C_TEMPLATES)): $(C_TEMPLATES)
+$(basename $(TEMPLATES)): $(TEMPLATES)
     yasha $<
 
 %.o: %.c
     $(CC) -Wall $< -c -o $@
 
 clean:
-    -rm -f $(OBJECTS) $(basename $(C_TEMPLATES)) program
+    -rm -f program $(basename $(TEMPLATES)) $(OBJECTS)
 
 .phony: clean
 ```

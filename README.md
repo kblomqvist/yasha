@@ -2,15 +2,13 @@
 
 Yasha is a code generator based on [Jinja](http://jinja.pocoo.org/) template engine.
 
-For example, the following command-line call
-
 ```
 $ yasha foo.jinja
 ```
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
-Template variables can be defined in a separate file. By default [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported. Yasha will look for this file if not given explicitly. For example, the above example tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) from the same folder with the template. If the file is not found, subfolders will be checked until the root directory.
+Template variables can be defined in a separate template configuration file. By default [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported. Yasha will look for this file if not given explicitly. For example, the above example tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) from the same folder with the template. If the file is not found, subfolders will be checked until the root directory is reached.
 
 Explicitly the file containing the template variables can be given as:
 
@@ -18,20 +16,20 @@ Explicitly the file containing the template variables can be given as:
 $ yasha foo.jinja --variables foo.toml
 ```
 
-Or via environment variables:
+Or via environment variable:
 
 ```
 $ export YASHA_VARIABLES=$HOME/foo.toml
 $ yasha foo.jinja
 ```
 
-In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` optin flag:
+In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
 
 ```
 $ yasha foo.jinja --no-variables
 ```
 
-## Variables sharing across templates
+## Template variables sharing
 
 Imagine that you would be writing C code and have the following two templates in two different folders
 
@@ -115,7 +113,7 @@ And as you might guess, instead of relying on the automatic extension file look 
 $ yasha foo.jinja --extensions foo.py
 ```
 
-There's also `--no-extensions` option operating in a similar manner with `--no-conf`. It's also worth mentioning that the file sharing works for the extensions file as it works for the variables file and that the environment variable name for the extensions is YASHA_EXTENSIONS.
+There's also `--no-extensions` option flag operating in a similar manner with `--no-variables`. It's also worth mentioning that the file sharing works for the extensions file as it works for the variables and that the environment variable name for the extensions is YASHA_EXTENSIONS.
 
 ## Custom template variables parser
 

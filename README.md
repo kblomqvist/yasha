@@ -23,7 +23,7 @@ $ export YASHA_VARIABLES=$HOME/foo.toml
 $ yasha foo.jinja
 ```
 
-In case variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
+In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
 
 ```
 $ yasha foo.jinja --no-variables
@@ -71,7 +71,7 @@ the variables defined in `foo.toml` are used within both templates. For your con
 
 ## Custom Jinja extensions
 
-Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the variables file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext`.
+Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the variables file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file.
 
 Here is an example of the `foo.jinja-ext` file containing a filter and a test.
 
@@ -90,7 +90,7 @@ def test_prime(n):
     return True
 ```
 
-As can be seen the file is standard Python, although the file extension is not `.py` but `.jinja-ext`. Furthermore, note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
+As can be seen the file is standard Python, although the file extension is not `.py` but `.jinja-ext`. Furthermore, note that the functions intended to work as a filter hves to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
 
 Here is shown how the two extensions described above would be used within a template.
 
@@ -124,24 +124,31 @@ By default Yasha supports TOML and YAML files for variables. However, it's possi
 ## Example Makefile using Yasha
 
 ```Makefile
-TEMPLATES =foo.c.jinja bar.c.jinja
-SOURCES   =main.c $(basename $(TEMPLATES))
+TEMPLATES =foo.c.jinja foo.h.jinja
+SOURCES   =main.c $(filter %.c, $(basename $(TEMPLATES)))
 OBJECTS   =$(SOURCES:.c=.o)
 
 program : $(OBJECTS)
-  $(CC) $^ -o $@
+        $(CC) $^ -o $@
 
-%.o : %.c
-  $(CC) -Wall $< -c -o $@
+%.o : %.c | $(filter %.h, $(basename $(TEMPLATES)))
+        $(CC) -Wall $< -c -o $@
+        $(CC) -MM $< > $*.d
 
 %.c : %.c.jinja
-  yasha $< -o $@
+        yasha $< -o $@
+
+%.h : %.h.jinja
+        yasha $< -o $@
+
+# Pull in dependency info for existing .o files
+-include $(OBJECTS:.o=.d)
 
 clean :
-  -rm -f program $(OBJECTS) $(basename $(TEMPLATES))
+        -rm -f program *.o *.d $(basename $(TEMPLATES))
 
 .phony : clean
 
-# Prevent Make to consider rendered templates as intermediate files
+# Prevent Make to consider rendered templates as intermediate file
 .secondary : $(basename $(TEMPLATES))
 ```

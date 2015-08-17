@@ -102,9 +102,6 @@ def cli(template, variables, extensions, output, no_variables, no_extensions):
     var_dict = parse_variables(template, variables) if not no_variables else {}
     ext_module = load_extensions(template, extensions) if not no_extensions else None
 
-    if ext_module:
-        print ext_module
-
     t_realpath = os.path.realpath(template.name)
     t_basename = os.path.basename(t_realpath)
     t_dirname = os.path.dirname(t_realpath)

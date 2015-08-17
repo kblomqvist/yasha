@@ -129,16 +129,16 @@ SOURCES   =main.c $(basename $(TEMPLATES))
 OBJECTS   =$(SOURCES:.c=.o)
 
 program: $(OBJECTS)
-    $(CC) -o $@ $<
-
-$(basename $(TEMPLATES)): $(TEMPLATES)
-    yasha $<
+        $(CC) $^ -o $@
 
 %.o: %.c
-    $(CC) -Wall $< -c -o $@
+        $(CC) -Wall $< -c -o $@
+
+%.c: %.c.jinja
+        yasha $< -o $@
 
 clean:
-    -rm -f program $(basename $(TEMPLATES)) $(OBJECTS)
+        -rm -f program $(OBJECTS)
 
 .phony: clean
 ```

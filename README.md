@@ -8,30 +8,30 @@ For example, the following command-line call
 $ yasha foo.jinja
 ```
 
-will render `foo.jinja` template into a new file named as `foo`. See how the created file is named according to the template. The template itself remains unchanged.
+will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
-Template variables can be defined in a separate configuration file: [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported. Yasha will look for the config file if not given explicitly. For example, the above example tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) from the same folder with the tamplate. If the file is not found, subfolders will be checked until the root directory.
+Template variables can be defined in a separate file. By default [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported. Yasha will look for this file if not given explicitly. For example, the above example tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) from the same folder with the template. If the file is not found, subfolders will be checked until the root directory.
 
-An example of explicit use of configuration file would be:
-
-```
-$ yasha foo.jinja --conf foo.toml
-```
-
-Yasha accept configuration file given via environment variables as well:
+Explicitly the file containing the template variables can be given as:
 
 ```
-$ export YASHA_CONF=$HOME/foo.toml
+$ yasha foo.jinja --variables foo.toml
+```
+
+Or via environment variables:
+
+```
+$ export YASHA_VARIABLES=$HOME/foo.toml
 $ yasha foo.jinja
 ```
 
-In case the configuration file shouldn't be used in spite of its existence there's an option ``--no-conf``:
+In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` optin flag:
 
 ```
-$ yasha foo.jinja --no-conf
+$ yasha foo.jinja --no-variables
 ```
 
-## Configuration file sharing
+## Variables sharing across templates
 
 Imagine that you would be writing C code and have the following two templates in two different folders
 
@@ -42,7 +42,7 @@ Imagine that you would be writing C code and have the following two templates in
     foo.c.jinja
 ```
 
-and you would like to share the same configuration file between these two templates. So instead of creating separate `foo.h.toml` and `foo.c.toml` files you can make one `foo.toml` like this:
+and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.toml` and `foo.c.toml` files you can make one `foo.toml` like this:
 
 ```
   include/
@@ -59,7 +59,7 @@ $ yasha include/foo.h.jinja
 $ yasha source/foo.c.jinja
 ```
 
-the `foo.toml` configuration file is used for both templates. For your convenience here is the file listing after the above two yasha calls:
+the variables defined in `foo.toml` are used within both templates. For your convenience here is the file listing after the above two yasha calls:
 
 ```
   include/
@@ -73,7 +73,7 @@ the `foo.toml` configuration file is used for both templates. For your convenien
 
 ## Custom Jinja extensions
 
-Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the configuration file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file.
+Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the variables file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file.
 
 Here is an example of the `foo.jinja-ext` file containing a filter and a test.
 
@@ -115,4 +115,35 @@ And as you might guess, instead of relying on the automatic extension file look 
 $ yasha foo.jinja --extensions foo.py
 ```
 
-There's also `--no-extensions` option operating in a similar manner with `--no-conf`. It's also worth mentioning that the file sharing works for the extensions file as it works for the configuration file and that the environment variable name for the extensions is YASHA_EXTENSIONS.
+There's also `--no-extensions` option operating in a similar manner with `--no-conf`. It's also worth mentioning that the file sharing works for the extensions file as it works for the variables file and that the environment variable name for the extensions is YASHA_EXTENSIONS.
+
+## Custom variable file parser
+
+By default Yasha supports TOML and YAML files for variables. However, it's possible to define custom parser to be used according to the file extension of the given `--variables` file.
+
+...
+
+## Makefile integration
+
+```Makefile
+C_TEMPLATES=foo.c.jinja bar.c.jinja
+
+C_SOURCES=main.c
+C_SOURCES+=$(basename $(C_TEMPLATES))
+
+OBJECTS=$(C_SOURCES:.c=.o)
+
+program: $(OBJECTS)
+    $(CC) -o $@ $<
+
+$(basename $(C_TEMPLATES)): $(C_TEMPLATES)
+    yasha $<
+
+%.o: %.c
+    $(CC) -Wall $< -c -o $@
+
+clean:
+    -rm -f $(OBJECTS) $(basename $(C_TEMPLATES)) program
+
+.phony: clean
+```

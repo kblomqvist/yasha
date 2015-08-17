@@ -3,49 +3,65 @@ import click
 import yaml
 import pytoml as toml
 
+from jinja2 import Environment, FileSystemLoader
+
 CONF_EXTENSIONS = {"toml": [".toml"], "yaml": [".yaml", ".yml"]}
 CONF_EXTENSIONS_LIST = sum(CONF_EXTENSIONS.values(), [])
 
-def possible_conf_paths(src):
-    conf_paths = ["."]
-    src_path = os.path.abspath(src.name)
-    for _ in range(src_path.count(os.path.sep)):
-        conf_paths.append(os.path.join(conf_paths[-1], ".."))
-    return conf_paths
+class TomlParser():
+    file_extensions = [".toml"]
 
-def possible_conf_names(src):
-    conf_names = []
-    src_name, src_extension = os.path.splitext(src.name)
+    def parse(file):
+        import pytoml as toml
+        return toml.load(file)
+
+class YamlParser():
+    file_extensions = [".yaml", ".yml"]
+
+    def parse(file):
+        import yaml
+        return yaml.load(file)
+
+def possible_variables_filepaths(template):
+    paths = ["."]
+    src_path = os.path.abspath(template.name)
+    for _ in range(src_path.count(os.path.sep)):
+        paths.append(os.path.join(paths[-1], ".."))
+    return paths
+
+def possible_variables_filenames(template):
+    files = []
+    src_name, src_extension = os.path.splitext(template.name)
     src_name = os.path.basename(src_name)
     src_name = src_name.split(".")
     for i, _ in enumerate(src_name):
-        conf_names.insert(0, ".".join(src_name[0:i+1]))
-    return conf_names
+        files.insert(0, ".".join(src_name[0:i+1]))
+    return files
 
-def find_conf(src, extensions=CONF_EXTENSIONS_LIST):
-    conf = None
-    conf_paths = possible_conf_paths(src)
-    conf_names = possible_conf_names(src)
+def find_variables(template, extensions=CONF_EXTENSIONS_LIST):
+    variables = None
+    filepaths = possible_variables_filepaths(template)
+    filenames = possible_variables_filenames(template)
     
-    for conf_path in conf_paths:
-        if conf:
+    for path in filepaths:
+        if variables:
             break
-        for conf_name in conf_names:
-            if conf:
+        for variables_name in filenames:
+            if variables:
                 break
             for ext in extensions:
-                test = os.path.join(conf_path, conf_name + ext)
+                test = os.path.join(path, variables_name + ext)
                 if os.path.isfile(test):
-                    conf = os.path.abspath(test)
+                    variables = os.path.abspath(test)
                     break
 
-    return conf
+    return variables
 
-def parse_conf(src, file):
+def parse_variables(template, file):
     jinja_params = {}
 
     if not file:
-        file = find_conf(src)
+        file = find_variables(template)
         file = click.open_file(file, "rb") if file else None
 
     if file:
@@ -57,9 +73,9 @@ def parse_conf(src, file):
 
     return jinja_params
 
-def load_filters(src, file):
+def load_extensions(template, file):
     if not file:
-        file = find_conf(src, [".py"])
+        file = find_variables(template, [".jinja-ext"])
         file = click.open_file(file, "rb") if file else None
 
     if file:
@@ -70,19 +86,34 @@ def load_filters(src, file):
         desc = (".py", "rb", imp.PY_SOURCE)
         return imp.load_module(name, file, pathname, desc)
 
-@click.command()
-@click.argument("src", type=click.File("rb"))
-@click.option("--conf", type=click.File("rb"))
-@click.option("--no-conf", is_flag=True)
-@click.option("--filters", type=click.File("rb"))
-@click.option("--no-filters", is_flag=True)
-def cli(src, conf, no_conf, filters, no_filters):
-    jinja_params = parse_conf(src, conf) if not no_conf else {}
-    filters = load_filters(src, filters) if not no_filters else None
 
-    click.echo(jinja_params)
+@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.argument("template", type=click.File("rb"))
+@click.option("--variables", "-a", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Template variables file name.")
+@click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Custom Jinja extensions file name.")
+@click.option("--output", "-o", type=click.File("wb"), help="Output file name. Standard output works too.")
+@click.option("--no-variables", is_flag=True, help="Omit template variables.")
+@click.option("--no-extensions", is_flag=True, help="Omit Jinja extensions.")
+def cli(template, variables, extensions, output, no_variables, no_extensions):
+    """This script reads the given Jinja template and renders its content
+    into new file, which name is derived from the given template name. For
+    example the rendered foo.c.jinja template will be written into foo.c if
+    not explicitly specified."""
+    var_dict = parse_variables(template, variables) if not no_variables else {}
+    ext_module = load_extensions(template, extensions) if not no_extensions else None
 
-    if filters:
-        print dir(filters)
+    if ext_module:
+        print ext_module
 
+    t_realpath = os.path.realpath(template.name)
+    t_basename = os.path.basename(t_realpath)
+    t_dirname = os.path.dirname(t_realpath)
 
+    jinja = Environment(loader=FileSystemLoader(t_dirname))
+    t = jinja.get_template(t_basename)
+
+    if not output:
+        o_realpath = os.path.splitext(t_realpath)[0]
+        output = click.open_file(o_realpath, "wb")
+
+    output.write(t.render(var_dict))

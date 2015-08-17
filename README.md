@@ -128,17 +128,20 @@ TEMPLATES =foo.c.jinja bar.c.jinja
 SOURCES   =main.c $(basename $(TEMPLATES))
 OBJECTS   =$(SOURCES:.c=.o)
 
-program: $(OBJECTS)
-        $(CC) $^ -o $@
+program : $(OBJECTS)
+  $(CC) $^ -o $@
 
-%.o: %.c
-        $(CC) -Wall $< -c -o $@
+%.o : %.c
+  $(CC) -Wall $< -c -o $@
 
-%.c: %.c.jinja
-        yasha $< -o $@
+%.c : %.c.jinja
+  yasha $< -o $@
 
-clean:
-        -rm -f program $(OBJECTS)
+clean :
+  -rm -f program $(OBJECTS) $(basename $(TEMPLATES))
 
-.phony: clean
+.phony : clean
+
+# Prevent Make to consider rendered templates as intermediate file
+.secondary : $(basename $(TEMPLATES))
 ```

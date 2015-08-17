@@ -23,7 +23,7 @@ $ export YASHA_VARIABLES=$HOME/foo.toml
 $ yasha foo.jinja
 ```
 
-In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
+In case variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
 
 ```
 $ yasha foo.jinja --no-variables
@@ -142,6 +142,6 @@ clean :
 
 .phony : clean
 
-# Prevent Make to consider rendered templates as intermediate file
+# Prevent Make to consider rendered templates as intermediate files
 .secondary : $(basename $(TEMPLATES))
 ```

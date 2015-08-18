@@ -121,12 +121,12 @@ By default Yasha supports TOML and YAML files for variables. However, it's possi
 
 ...
 
-## Example Makefile using Yasha
+## Example Makefile utilizing yasha for C
 
 ```Makefile
-TEMPLATES =foo.c.jinja foo.h.jinja
-SOURCES   =main.c $(filter %.c, $(basename $(TEMPLATES)))
-OBJECTS   =$(SOURCES:.c=.o)
+TEMPLATES = foo.c.jinja foo.h.jinja
+SOURCES   = main.c $(filter %.c, $(basename $(TEMPLATES)))
+OBJECTS   = $(SOURCES:.c=.o)
 
 program : $(OBJECTS)
         $(CC) $^ -o $@

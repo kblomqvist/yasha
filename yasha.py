@@ -87,26 +87,31 @@ def load_extensions(template, file):
 
 def load_jinja(searchpath, extmodule):
     import inspect
-    from jinja2 import Environment, FileSystemLoader
+    import jinja2
 
     if not extmodule:
-        return Environment(loader=FileSystemLoader(searchpath))
+        return Environment(loader=jinja2.FileSystemLoader(searchpath))
 
-    tags = [getattr(extmodule, x) for x in dir(extmodule) if x.endswith("Tag")]
-    tags = [x for x in tags if inspect.isclass(x)]
-    
-    jinja = Environment(extensions=tags, loader=FileSystemLoader(searchpath))
+    extattr = [getattr(extmodule, x) for x in dir(extmodule) if not x.startswith("__")]
+    tests = []; filters = []; classes = []
 
-    filters = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("filter_")]
-    filters = [x for x in filters if inspect.isfunction(x)]
-    for filt in filters:
-        jinja.filters[filt.__name__.replace("filter_", "")] = filt
+    for x in extattr:
+        if inspect.isfunction(x):
+            if x.__name__.startswith("test_"):
+                tests.append(x)
+            elif x.__name__.startswith("filter_"):
+                filters.append(x)
+        elif inspect.isclass(x):
+            if issubclass(x, jinja2.ext.Extension):
+                classes.append(x)
 
-    tests = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("test_")]
-    tests = [x for x in tests if inspect.isfunction(x)]
+    jinja = jinja2.Environment(extensions=classes,
+        loader=jinja2.FileSystemLoader(searchpath))
+
     for test in tests:
         jinja.tests[test.__name__.replace("test_", "")] = test
-
+    for filt in filters:
+        jinja.filters[filt.__name__.replace("filter_", "")] = filt
     return jinja
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))

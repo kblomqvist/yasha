@@ -105,7 +105,7 @@ Here is shown how the two extensions described above would be used within a temp
 {% endif %}
 ```
 
-In addition to filters and tests [custom tags](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. Meaning that all defined classes having a _Tag_ suffix in their name are loaded and available within the template.
+In addition to filters and tests, [extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. Meaning that all classes derived from `jinja2.ext.Extension` are loaded and available within the template.
 
 And as you might guess, instead of relying on the automatic extension file look up, it can be given explicitly as well.
 

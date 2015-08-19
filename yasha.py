@@ -86,26 +86,27 @@ def load_extensions(template, file):
         return imp.load_module(name, file, pathname, desc)
 
 def load_jinja(searchpath, extmodule):
+    import inspect
     from jinja2 import Environment, FileSystemLoader
-    jinja = Environment(loader=FileSystemLoader(searchpath))
 
     if not extmodule:
-        return jinja
+        return Environment(loader=FileSystemLoader(searchpath))
 
-    def is_function(obj):
-        import types
-        return isinstance(obj, types.FunctionType)
+    tags = [getattr(extmodule, x) for x in dir(extmodule) if x.endswith("Tag")]
+    tags = [x for x in tags if inspect.isclass(x)]
+    
+    jinja = Environment(extensions=tags, loader=FileSystemLoader(searchpath))
 
     filters = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("filter_")]
-    filters = [x for x in filters if is_function(x)]
+    filters = [x for x in filters if inspect.isfunction(x)]
     for filt in filters:
         jinja.filters[filt.__name__.replace("filter_", "")] = filt
 
     tests = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("test_")]
-    tests = [x for x in tests if is_function(x)]
+    tests = [x for x in tests if inspect.isfunction(x)]
     for test in tests:
         jinja.tests[test.__name__.replace("test_", "")] = test
-    
+
     return jinja
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))

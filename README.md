@@ -76,11 +76,18 @@ Seems like the day has arrived when you would like to use custom [Jinja filters]
 Here is an example of the `foo.jinja-ext` file containing a filter and a test.
 
 ```python
+import math
+
 def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
     
-def test_even(number):
-    return number % 2 == 0
+def test_prime(n):
+    if n == 2:
+        return True
+    for i in xrange(2, int(math.ceil(math.sqrt(n))) + 1):
+        if n % i == 0:
+            return False
+    return True
 ```
 
 As can be seen the file is standard Python, although the file extension is not `.py` but `.jinja-ext`. Furthermore, note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
@@ -88,11 +95,13 @@ As can be seen the file is standard Python, although the file extension is not `
 Here is shown how the two extensions described above would be used within a template.
 
 ```jinja
-{{ date|datetimeformat }}
-{{ date|datetimeformat('%d-%m-%Y') }}
+{{ pub_date|datetimeformat }}
+{{ pub_date|datetimeformat('%d-%m-%Y') }}
 
-{% if 42 is even %}
-    42 is even
+{% if 42 is prime %}
+    42 is a prime number
+{% else %}
+    42 is not a prime number
 {% endif %}
 ```
 
@@ -124,7 +133,7 @@ program : $(OBJECTS)
 
 %.o : %.c | $(filter %.h, $(basename $(TEMPLATES)))
         $(CC) -Wall $< -c -o $@
-        $(CC) -MM $< > $*.d
+        $(CC) -MM -MT $@ $< > $*.d
 
 %.c : %.c.jinja
         yasha $< -o $@

@@ -96,18 +96,16 @@ def load_jinja(searchpath, extmodule):
         import types
         return isinstance(obj, types.FunctionType)
 
-    tests = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("test_")]
-    tests = [x for x in tests if is_function(x)]
-
     filters = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("filter_")]
     filters = [x for x in filters if is_function(x)]
-
     for filt in filters:
         jinja.filters[filt.__name__.replace("filter_", "")] = filt
-    
+
+    tests = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("test_")]
+    tests = [x for x in tests if is_function(x)]
     for test in tests:
         jinja.tests[test.__name__.replace("test_", "")] = test
-
+    
     return jinja
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))

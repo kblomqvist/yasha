@@ -76,8 +76,6 @@ Seems like the day has arrived when you would like to use custom [Jinja filters]
 Here is an example of the `foo.jinja-ext` file containing a filter and a test.
 
 ```python
-import math
-
 def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
     

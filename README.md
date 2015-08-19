@@ -91,7 +91,7 @@ Here is shown how the two extensions described above would be used within a temp
 {{ date|datetimeformat }}
 {{ date|datetimeformat('%d-%m-%Y') }}
 
-{% if 42 is prime %}
+{% if 42 is even %}
     42 is even
 {% endif %}
 ```

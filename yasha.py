@@ -90,7 +90,7 @@ def load_jinja(searchpath, extmodule):
     import jinja2
 
     if not extmodule:
-        return Environment(loader=jinja2.FileSystemLoader(searchpath))
+        return jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath))
 
     extattr = [getattr(extmodule, x) for x in dir(extmodule) if not x.startswith("__")]
     tests = []; filters = []; classes = []

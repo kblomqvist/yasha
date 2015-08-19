@@ -90,7 +90,7 @@ def test_prime(n):
     return True
 ```
 
-As can be seen the file is standard Python, although the file extension is not `.py` but `.jinja-ext`. Furthermore, note that the functions intended to work as a filter hves to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
+As can be seen the file is standard Python, although the file extension is not `.py` but `.jinja-ext`. Furthermore, note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
 
 Here is shown how the two extensions described above would be used within a template.
 

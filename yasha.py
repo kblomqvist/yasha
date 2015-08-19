@@ -3,7 +3,6 @@ import click
 import yaml
 import pytoml as toml
 
-from jinja2 import Environment, FileSystemLoader
 
 CONF_EXTENSIONS = {"toml": [".toml"], "yaml": [".yaml", ".yml"]}
 CONF_EXTENSIONS_LIST = sum(CONF_EXTENSIONS.values(), [])
@@ -86,6 +85,30 @@ def load_extensions(template, file):
         desc = (".py", "rb", imp.PY_SOURCE)
         return imp.load_module(name, file, pathname, desc)
 
+def load_jinja(searchpath, extmodule):
+    from jinja2 import Environment, FileSystemLoader
+    jinja = Environment(loader=FileSystemLoader(searchpath))
+
+    if not extmodule:
+        return jinja
+
+    def is_function(obj):
+        import types
+        return isinstance(obj, types.FunctionType)
+
+    tests = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("test_")]
+    tests = [x for x in tests if is_function(x)]
+
+    filters = [getattr(extmodule, x) for x in dir(extmodule) if x.startswith("filter_")]
+    filters = [x for x in filters if is_function(x)]
+
+    for filt in filters:
+        jinja.filters[filt.__name__.replace("filter_", "")] = filt
+    
+    for test in tests:
+        jinja.tests[test.__name__.replace("test_", "")] = test
+
+    return jinja
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("template", type=click.File("rb"))
@@ -99,18 +122,19 @@ def cli(template, variables, extensions, output, no_variables, no_extensions):
     into new file, which name is derived from the given template name. For
     example the rendered foo.c.jinja template will be written into foo.c if
     not explicitly specified."""
-    var_dict = parse_variables(template, variables) if not no_variables else {}
-    ext_module = load_extensions(template, extensions) if not no_extensions else None
+
+    vardict = parse_variables(template, variables) if not no_variables else {}
+    extmodule = load_extensions(template, extensions) if not no_extensions else None
 
     t_realpath = os.path.realpath(template.name)
     t_basename = os.path.basename(t_realpath)
     t_dirname = os.path.dirname(t_realpath)
 
-    jinja = Environment(loader=FileSystemLoader(t_dirname))
+    jinja = load_jinja(t_dirname, extmodule)
     t = jinja.get_template(t_basename)
 
     if not output:
         o_realpath = os.path.splitext(t_realpath)[0]
         output = click.open_file(o_realpath, "wb")
 
-    output.write(t.render(var_dict))
+    output.write(t.render(vardict))

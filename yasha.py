@@ -155,7 +155,7 @@ def cli(template, variables, extensions, output, no_variables, no_extensions, mm
         "variable_parsers": [TomlParser(), YamlParser()],
     }
 
-    if not (extensions and no_extensions):
+    if not extensions and not no_extensions:
         extpath = find_extensions(template.name)
         extensions = click.open_file(extpath, "rb") if extpath else None
 
@@ -163,7 +163,7 @@ def cli(template, variables, extensions, output, no_variables, no_extensions, mm
         extmodule = load_extensions(extensions)
         extdict = parse_extensions(extmodule, extdict)
 
-    if not (variables and no_variables):
+    if not variables and not no_variables:
         filext = [p.file_extension for p in extdict["variable_parsers"]]
         varpath = find_variables(template.name, sum(filext, []))
         variables = click.open_file(varpath, "rb") if varpath else None

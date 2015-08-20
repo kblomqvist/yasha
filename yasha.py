@@ -168,9 +168,6 @@ def cli(template, variables, extensions, output, no_variables, no_extensions, mm
         varpath = find_variables(template.name, sum(filext, []))
         variables = click.open_file(varpath, "rb") if varpath else None
 
-    if variables and not no_variables:
-        vardict = parse_variables(variables, extdict["variable_parsers"])
-
     if mm:
         if mt:
             deps = mt + ": "
@@ -182,7 +179,10 @@ def cli(template, variables, extensions, output, no_variables, no_extensions, mm
         if extensions:
             deps += os.path.relpath(extensions.name)
         click.echo(deps)
-        exit(0)
+        return
+
+    if variables and not no_variables:
+        vardict = parse_variables(variables, extdict["variable_parsers"])
 
     jinja = load_jinja(t_dirname, extdict)
     t = jinja.get_template(t_basename)

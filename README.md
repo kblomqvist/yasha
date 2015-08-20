@@ -111,7 +111,7 @@ There's also `--no-extensions` option flag operating in a similar manner with `-
 By default Yasha supports TOML and YAML files for variables. However, it's possible to declare custom parser in `.jinja-ext` file.
 
 ```python
-class MyParsers(): # will be extended from yasha.Parser later
+class MyParser(): # will be extended from yasha.Parser later
     file_extensions = [".my", ".mine"]
 
     def parse(file):
@@ -143,6 +143,7 @@ program : $(OBJECTS)
 
 # Pull in dependency info for existing .o files
 -include $(OBJECTS:.o=.d)
+-include $(addsuffix .d, $(basename $(TEMPLATES)))
 
 clean :
         -rm -f program *.o *.d $(basename $(TEMPLATES))

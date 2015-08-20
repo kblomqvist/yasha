@@ -108,15 +108,16 @@ There's also `--no-extensions` option flag operating in a similar manner with `-
 
 ## Custom template variables parser
 
-By default Yasha supports TOML and YAML files for variables. However, it's possible to declare custom parser in `.jinja-ext` file.
+By default Yasha supports TOML and YAML files for variables. However, it's possible to declare custom parser in `.jinja-ext` file. Below is shown an example parser for [CMSIS-SVD](http://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) files.
 
 ```python
-class MyParser(): # Has to be extended from yasha.Parser in future release
-    file_extensions = [".my", ".mine"]
+class CmsisSvdParser(): # Has to be extended from yasha.Parser in future release
+    file_extension = [".xml"]
 
-    def parse(file):
-        """Has to return dictionary"""
-        return {}
+    def parse(self, file):
+        from cmsis_svd.parser import SVDParser
+        parser = SVDParser.for_xml_file(file.name)
+        return parser.get_device().to_dict()
 ```
 
 ## Example Makefile utilizing yasha for C

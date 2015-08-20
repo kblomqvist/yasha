@@ -108,9 +108,16 @@ There's also `--no-extensions` option flag operating in a similar manner with `-
 
 ## Custom template variables parser
 
-By default Yasha supports TOML and YAML files for variables. However, it's possible to define custom parser to be used according to the file extension of the given `--variables` file.
+By default Yasha supports TOML and YAML files for variables. However, it's possible to declare custom parser in `.jinja-ext` file.
 
-...
+```python
+class MyParsers(): # will be extended from yasha.Parser later
+    file_extensions = [".my", ".mine"]
+
+    def parse(file):
+        """Has to return dictionary"""
+        return {}
+```
 
 ## Example Makefile utilizing yasha for C
 
@@ -128,9 +135,11 @@ program : $(OBJECTS)
 
 %.c : %.c.jinja
         yasha $< -o $@
+        yasha -MM $< > $@.d
 
 %.h : %.h.jinja
         yasha $< -o $@
+        yasha -MM $< > $@.d
 
 # Pull in dependency info for existing .o files
 -include $(OBJECTS:.o=.d)

@@ -108,7 +108,7 @@ def parse_extensions(extmodule, extdict):
             if issubclass(x, Extension):
                 extdict["jinja_extensions"].append(x)
             elif x.__name__.endswith("Parser"):
-                extdict["variable_parsers"].insert(0, x) # Parsers are prepended
+                extdict["variable_parsers"].insert(0, x()) # Parsers are prepended
 
     return extdict
 

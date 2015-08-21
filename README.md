@@ -166,6 +166,9 @@ program : $(OBJECTS)
 # Make sure that this built-in implicit rule is cancelled
 %.o : %.c
 
+# Prevent Make to consider rendered templates as intermediate file
+.secondary : $(basename $(TEMPLATES))
+
 # Pull in dependency info for existing .o files
 -include $(OBJECTS:.o=.d)
 -include $(TEMPLATES:.jinja=.d)
@@ -174,7 +177,4 @@ clean :
         -rm -f program *.o *.d $(basename $(TEMPLATES))
 
 .phony : clean
-
-# Prevent Make to consider rendered templates as intermediate file
-.secondary : $(basename $(TEMPLATES))
 ```

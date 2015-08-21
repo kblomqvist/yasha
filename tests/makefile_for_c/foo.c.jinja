@@ -1,0 +1,7 @@
+#include <stdio.h>
+#include "foo.h"
+
+void foo() {
+	char foo[] = "{{ foo }}";
+	printf("%s has %d chars ...\n", foo, {{ foo|length }});
+}

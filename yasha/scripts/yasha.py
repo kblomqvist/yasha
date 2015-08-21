@@ -116,7 +116,7 @@ def load_jinja(searchpath, extdict):
 @click.argument("template", type=click.File("rb"))
 @click.option("--variables", "-a", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Template variables file name.")
 @click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Custom Jinja extensions file name.")
-@click.option("--output", "-o", type=click.File("wb"), help="Output file name. Standard output works too.")
+@click.option("--output", "-o", type=click.File("wt"), help="Output file name. Standard output works too.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
 @click.option("--no-extensions", is_flag=True, help="Omit Jinja extensions.")
 @click.option("-MM", is_flag=True, help="Works as GCC's -MM.")

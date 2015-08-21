@@ -176,6 +176,6 @@ def cli(template, variables, extensions, output, no_variables, no_extensions, mm
 
     if not output:
         o_realpath = os.path.splitext(t_realpath)[0]
-        output = click.open_file(o_realpath, "wb")
+        output = click.open_file(o_realpath, "wt")
 
     output.write(t.render(vardict))

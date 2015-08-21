@@ -22,20 +22,7 @@ THE SOFTWARE.
 
 import os
 import click
-
-class TomlParser():
-    file_extension = [".toml"]
-
-    def parse(self, file):
-        import pytoml as toml
-        return toml.load(file)
-
-class YamlParser():
-    file_extension = [".yaml", ".yml"]
-
-    def parse(self, file):
-        import yaml
-        return yaml.load(file)
+from ..parser import Parser, TomlParser, YamlParser
 
 def possible_variables_filepaths(template):
     paths = [os.path.dirname(template)]
@@ -107,8 +94,8 @@ def parse_extensions(extmodule, extdict):
         elif inspect.isclass(x):
             if issubclass(x, Extension):
                 extdict["jinja_extensions"].append(x)
-            elif x.__name__.endswith("Parser"):
-                extdict["variable_parsers"].insert(0, x()) # Parsers are prepended
+            elif issubclass(x, Parser):
+                extdict["variable_parsers"].insert(0, x()) # Prepend custom parser
 
     return extdict
 
@@ -172,7 +159,7 @@ def cli(template, variables, extensions, output, no_variables, no_extensions, mm
         if mt:
             deps = mt + ": "
         else:
-            deps = os.path.relpath(template.name)
+            deps = os.path.basename(template.name)
             deps = os.path.splitext(deps)[0] + ": "
         if variables:
             deps += os.path.relpath(variables.name) + " "

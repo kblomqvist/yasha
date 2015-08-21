@@ -1,9 +1,10 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="yasha",
-    version="0.1",
-    py_modules=["yasha"],
+    version="1.0",
+    packages=find_packages(),
+    include_package_data=True,
     install_requires=[
         "Click",
         "Jinja2",
@@ -12,6 +13,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        yasha=yasha:cli
+        yasha=yasha.scripts.yasha:cli
     ''',
 )

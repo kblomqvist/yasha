@@ -123,6 +123,24 @@ class CmsisSvdParser(Parser):
         return parser.get_device().to_dict()
 ```
 
+If you need to post-process the parsed variables accomplished by the built-in TOML and YAML parsers, cou can just declare new parsers to handle TOML and YAML files.
+
+```python
+from yasha.parser import TomlParser, YamlParser
+
+def postprocess(vars):
+    vars["foo"] = "bar" # foo should always be bar
+    return vars
+
+class NewTomlParser(TomlParser):
+    def parse(self, file):
+        return postprocess(TomlParser.parse(file))
+
+class NewYamlParser(YamlParser):
+    def parse(self, file):
+        return postprocess(YamlParser.parse(file))
+```
+
 ## Example Makefile utilizing yasha for C
 
 ```Makefile
@@ -144,6 +162,9 @@ program : $(OBJECTS)
 %.h : %.h.jinja
         yasha $< -o $@
         yasha -MM -MT $@ $< > $@.d
+
+# Make sure that this built-in implicit rule is cancelled
+%.o : %.c
 
 # Pull in dependency info for existing .o files
 -include $(OBJECTS:.o=.d)

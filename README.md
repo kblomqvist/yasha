@@ -134,11 +134,13 @@ def postprocess(vars):
 
 class NewTomlParser(TomlParser):
     def parse(self, file):
-        return postprocess(TomlParser.parse(file))
+        vars = TomlParser.parse(file)
+        return postprocess(vars)
 
 class NewYamlParser(YamlParser):
     def parse(self, file):
-        return postprocess(YamlParser.parse(file))
+        vars = YamlParser.parse(file)
+        return postprocess(vars)
 ```
 
 ## Example Makefile utilizing yasha for C

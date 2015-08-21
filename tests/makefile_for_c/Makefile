@@ -26,5 +26,8 @@ clean :
 
 .phony : clean
 
+# Disable Make built-in rules
+.suffixes :
+
 # Prevent Make to consider rendered templates as intermediate file
 .secondary : $(basename $(TEMPLATES))

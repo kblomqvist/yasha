@@ -1,4 +1,6 @@
-# yasha ![travis-ci](https://travis-ci.org/kblomqvist/yasha.svg?branch=master)
+[![Build Status](https://travis-ci.org/kblomqvist/yasha.svg?branch=master)](https://travis-ci.org/kblomqvist/yasha)
+
+# yasha
 
 Yasha is a code generator based on [Jinja](http://jinja.pocoo.org/) template engine.
 

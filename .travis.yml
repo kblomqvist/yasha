@@ -8,6 +8,7 @@ install:
 
 script:
   - yasha --help
-  - make -C tests/makefile_for_c
-  - touch tests/makefile_for_c/foo.c.jinja
-  - make -C tests/makefile_for_c
+  - cd tests/makefile_for_c
+  - make
+  - touch foo.c.jinja
+  - make

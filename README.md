@@ -123,7 +123,7 @@ class CmsisSvdParser(Parser):
         return parser.get_device().to_dict()
 ```
 
-If you need to post-process the parsed variables accomplished by the built-in TOML and YAML parsers, cou can just declare new parsers to handle TOML and YAML files.
+If you need to post-process the parsed variables accomplished by the built-in TOML and YAML parsers, uou can just declare new parsers to handle TOML and YAML files.
 
 ```python
 from yasha.parser import TomlParser, YamlParser
@@ -141,6 +141,18 @@ class NewYamlParser(YamlParser):
     def parse(self, file):
         vars = YamlParser.parse(file)
         return postprocess(vars)
+```
+
+Sometimes the variables dictionary may be very large, for example in case of CMSIS-SVD files. Then you might want to take a quick look into the variables to get an idea of the content. To do this you can write the following template
+
+```jinja
+{{ peripherals|pprint }}
+```
+
+and render it
+
+```bash
+$ yasha pprint.jinja --variables nrf51.xml -o - | more
 ```
 
 ## Example Makefile utilizing yasha for C

@@ -4,7 +4,7 @@ setup(
     name="yasha",
     author="Kim Blomqvist",
     author_email="kblomqvist@iki.fi",
-    version="1.0",
+    version="1.1",
     description="A command-line tool to render Jinja templates",
     keywords=["jinja", "code generator"],
     packages=find_packages(),
@@ -25,5 +25,5 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     url="https://github.com/kblomqvist/yasha",
-    download_url="https://github.com/kblomqvist/yasha/tarball/1.0",
+    download_url="https://github.com/kblomqvist/yasha/tarball/1.1",
 )

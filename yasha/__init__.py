@@ -27,4 +27,4 @@ from .parser import Parser, TomlParser, YamlParser
 
 __all__ = ["Parser", "TomlParser", "YamlParser"]
 
-__version__ = "1.0"
+__version__ = "1.1"

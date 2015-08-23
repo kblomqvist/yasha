@@ -123,7 +123,7 @@ class CmsisSvdParser(Parser):
         return parser.get_device().to_dict()
 ```
 
-If you need to post-process the parsed variables accomplished by the built-in TOML and YAML parsers, uou can just declare new parsers to handle TOML and YAML files.
+If you need to post-process the parsed variables accomplished by the built-in TOML and YAML parsers, you can just declare new parsers to handle TOML and YAML files.
 
 ```python
 from yasha.parser import TomlParser, YamlParser
@@ -143,7 +143,7 @@ class NewYamlParser(YamlParser):
         return postprocess(vars)
 ```
 
-Sometimes the variables dictionary may be very large and you might want to take a quick look into it to get an idea of the content. To do this you use `pprint` filter
+Sometimes the variables dictionary may be very large and you might want to take a quick look into it to get an idea of its content. To do this you use Jinja's built-in `pprint` filter:
 
 ```bash
 $ yasha - --variables foo.toml # input file is stdin

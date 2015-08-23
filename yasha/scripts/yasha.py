@@ -122,9 +122,8 @@ def load_jinja(searchpath, extdict):
 @click.option("--output", "-o", type=click.File("wt"), help="Output file name. Standard output works too.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
 @click.option("--no-extensions", is_flag=True, help="Omit Jinja extensions.")
-@click.option("-MM", is_flag=True, help="Works as GCC's -MM.")
-@click.option("-MT", type=click.STRING, help="Works as GCC's -MT.")
-def cli(template, variables, extensions, output, no_variables, no_extensions, mm, mt):
+@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside rendering.")
+def cli(template, variables, extensions, output, no_variables, no_extensions, md):
     """This script reads the given Jinja template and renders its content
     into new file, which name is derived from the given template name. For
     example the rendered foo.c.jinja template will be written into foo.c if
@@ -158,27 +157,38 @@ def cli(template, variables, extensions, output, no_variables, no_extensions, mm
         varpath = find_variables(template.name, sum(filext, []))
         variables = click.open_file(varpath, "rb") if varpath else None
 
-    if mm:
-        if mt:
-            deps = mt + ": "
-        else:
-            deps = os.path.basename(template.name)
-            deps = os.path.splitext(deps)[0] + ": "
-        if variables:
-            deps += os.path.relpath(variables.name) + " "
-        if extensions:
-            deps += os.path.relpath(extensions.name)
-        click.echo(deps)
-        return
-
     if variables and not no_variables:
         vardict = parse_variables(variables, extdict["variable_parsers"])
 
     jinja = load_jinja(t_dirname, extdict)
-    t = jinja.get_template(t_basename)
+    
+    if template.name == "<stdin>":
+        template_string = ""
+        while True:
+            chunk = template.read(1024)
+            if not chunk:
+                break
+            template_string += chunk.decode("utf-8")
+        t = jinja.from_string(template_string)
+    else:
+        t = jinja.get_template(t_basename)
 
     if not output:
-        o_realpath = os.path.splitext(t_realpath)[0]
-        output = click.open_file(o_realpath, "wt")
+        if template.name == "<stdin>":
+            output = click.open_file("-", "wt")
+        else:
+            o_realpath = os.path.splitext(t_realpath)[0]
+            output = click.open_file(t_realpath, "wt")
 
     output.write(t.render(vardict))
+
+    if md and not output.name == "<stdout>":
+        deps = os.path.basename(template.name)
+        deps = os.path.splitext(deps)[0] + ": " + deps + " "
+        if variables:
+            deps += os.path.relpath(variables.name) + " "
+        if extensions:
+            deps += os.path.relpath(extensions.name)
+        deps += os.linesep
+        output_d = click.open_file(output.name + ".d", "wt")
+        output_d.write(deps)

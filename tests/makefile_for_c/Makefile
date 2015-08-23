@@ -2,32 +2,33 @@ TEMPLATES = foo.c.jinja foo.h.jinja
 SOURCES   = main.c $(filter %.c, $(basename $(TEMPLATES)))
 OBJECTS   = $(SOURCES:.c=.o)
 
+DEPENDENCIES = $(OBJECTS:.o=.d) $(TEMPLATES:.jinja=.d)
+
 program : $(OBJECTS)
 	$(CC) $^ -o $@
 	
 %.o : %.c | $(filter %.h, $(basename $(TEMPLATES)))
-	$(CC) -Wall $< -c -o $@
-	$(CC) -MM -MT $@ $< > $*.d
+	$(CC) -MMD -MP $< -c -o $@
 
 %.c : %.c.jinja
-	yasha $< -o $@
-	yasha -MM -MT $@ $< > $@.d
+	yasha -MD $< -o $@
 
 %.h : %.h.jinja
-	yasha $< -o $@
-	yasha -MM -MT $@ $< > $@.d
+	yasha -MD $< -o $@
 
 # Make sure that this built-in implicit rule is cancelled
 %.o : %.c
 
-# Pull in dependency info for existing .o files
--include $(OBJECTS:.o=.d)
--include $(TEMPLATES:.jinja=.d)
-
-clean :
-	-rm -f program *.o *.d $(basename $(TEMPLATES))
-
-.phony : clean
+# Pull in dependency info for existing .o and template files
+-include $(DEPENDENCIES)
 
 # Prevent Make to consider rendered templates as intermediate file
 .secondary : $(basename $(TEMPLATES))
+
+clean :
+	-rm -f program
+	-rm -f $(OBJECTS)
+	-rm -f $(DEPENDENCIES)
+	-rm -f $(basename $(TEMPLATES))
+
+.phony : clean

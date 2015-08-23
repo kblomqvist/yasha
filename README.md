@@ -143,16 +143,12 @@ class NewYamlParser(YamlParser):
         return postprocess(vars)
 ```
 
-Sometimes the variables dictionary may be very large, for example in case of CMSIS-SVD files. Then you might want to take a quick look into the variables to get an idea of the content. To do this you can write the following template
-
-```jinja
-{{ peripherals|pprint }}
-```
-
-and render it
+Sometimes the variables dictionary may be very large and you might want to take a quick look into it to get an idea of the content. To do this you use `pprint` filter
 
 ```bash
-$ yasha pprint.jinja --variables nrf51.xml -o - | more
+$ yasha - --variables foo.toml # input file is stdin
+{{ foo|pprint }}
+^D
 ```
 
 ## Example Makefile utilizing yasha for C
@@ -176,7 +172,7 @@ program : $(OBJECTS)
 %.h : %.h.jinja
     yasha -MD $< -o $@
 
-# Make sure that this built-in implicit rule is cancelled
+# Make sure that the following built-in implicit rule is cancelled
 %.o : %.c
 
 # Pull in dependency info for existing .o and template files

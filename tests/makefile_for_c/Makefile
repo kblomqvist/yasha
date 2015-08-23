@@ -16,7 +16,7 @@ program : $(OBJECTS)
 %.h : %.h.jinja
 	yasha -MD $< -o $@
 
-# Make sure that this built-in implicit rule is cancelled
+# Make sure that the following built-in implicit rule is cancelled
 %.o : %.c
 
 # Pull in dependency info for existing .o and template files

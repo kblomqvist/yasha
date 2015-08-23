@@ -117,13 +117,13 @@ def load_jinja(searchpath, extdict):
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("template", type=click.File("rb"))
-@click.option("--variables", "-a", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Template variables file name.")
-@click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Custom Jinja extensions file name.")
-@click.option("--output", "-o", type=click.File("wt"), help="Output file name. Standard output works too.")
+@click.option("--output", "-o", type=click.File("wt"), help="Explicit output file.")
+@click.option("--variables", "-v", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Explicit template variables file.")
+@click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Explicit custom Jinja extensions file.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
 @click.option("--no-extensions", is_flag=True, help="Omit Jinja extensions.")
-@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside rendering.")
-def cli(template, variables, extensions, output, no_variables, no_extensions, md):
+@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside rendering. Not active with stdin.")
+def cli(template, output, variables, extensions, no_variables, no_extensions, md):
     """This script reads the given Jinja template and renders its content
     into new file, which name is derived from the given template name. For
     example the rendered foo.c.jinja template will be written into foo.c if

@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 import os
 import click
-from ..parser import Parser, TomlParser, YamlParser
+from ..parsers import Parser, TomlParser, YamlParser
 
 def possible_variables_filepaths(template):
     paths = [os.path.dirname(template)]

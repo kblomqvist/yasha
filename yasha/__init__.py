@@ -23,7 +23,7 @@ THE SOFTWARE.
 
 """
 
-from .parser import Parser, TomlParser, YamlParser
+from .parsers import Parser, TomlParser, YamlParser
 
 __all__ = ["Parser", "TomlParser", "YamlParser"]
 

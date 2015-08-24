@@ -23,6 +23,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
+        "Topic :: Software Development :: Code Generators",
     ],
     url="https://github.com/kblomqvist/yasha",
     download_url="https://github.com/kblomqvist/yasha/tarball/1.1",

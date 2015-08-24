@@ -20,10 +20,11 @@ setup(
         yasha=yasha.scripts.yasha:cli
     ''',
     classifiers=[
-        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Topic :: Software Development :: Code Generators",
+        "Development Status :: 5 - Production/Stable",
+        "License :: OSI Approved :: MIT License",
     ],
     url="https://github.com/kblomqvist/yasha",
     download_url="https://github.com/kblomqvist/yasha/tarball/1.1",

@@ -178,7 +178,7 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, md
             output = click.open_file("-", "wt")
         else:
             o_realpath = os.path.splitext(t_realpath)[0]
-            output = click.open_file(t_realpath, "wt")
+            output = click.open_file(o_realpath, "wt")
 
     output.write(t.render(vardict))
 

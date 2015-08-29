@@ -123,13 +123,12 @@ class XmlParser(Parser):
         
         vars = {"persons": []}
         for elem in root.iter("person"):
-          vars["persons"].append({
-            "name": elem.find("name").text,
-            "address": elem.find("address").text,
-          })
-        
+            vars["persons"].append({
+                "name": elem.find("name").text,
+                "address": elem.find("address").text,
+            })
+
         return vars # Return value has to be dictionary
-		    
 ```
 
 If you need to post-process the parsed variables accomplished by the built-in TOML and YAML parsers, you can just declare new parsers to handle TOML and YAML files.

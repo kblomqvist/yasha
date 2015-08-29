@@ -108,7 +108,7 @@ There's also `--no-extensions` option flag operating in a similar manner with `-
 
 ## Custom template variables parser
 
-By default Yasha supports TOML and YAML files for template variables. However, it's possible to declare custom parser in `.jinja-ext` file. For example, below is shown an example parser for [CMSIS-SVD](http://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) files. All classes derived from `yasha.parsers.Parser` are considered as a custom parser and will be loaded.
+By default Yasha supports TOML and YAML files for template variables. However, it's possible to declare custom parser in `.jinja-ext` file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.parsers.Parser` are considered as a custom parser and will be loaded.
 
 ```python
 from yasha.parsers import Parser
@@ -116,11 +116,20 @@ from yasha.parsers import Parser
 class CmsisSvdParser(Parser):
     file_extension = [".xml"]
 
-    def parse(self, file):
-        """Has to return Python dict. File is click.File object"""
-        from cmsis_svd.parser import SVDParser
-        parser = SVDParser.for_xml_file(file.name)
-        return parser.get_device().to_dict()
+    def parse(self, file): # file type is click.File
+        import xml.etree.ElementTree as et
+        tree = et.parse(file.name)
+        root = tree.getroot()
+        
+        vars = {"persons": []}
+        for elem in root.iter("person"):
+          vars["persons"].append({
+            "name": elem.find("name").text,
+            "address": elem.find("address").text,
+          })
+        
+        return vars # Return value has to be dictionary
+		    
 ```
 
 If you need to post-process the parsed variables accomplished by the built-in TOML and YAML parsers, you can just declare new parsers to handle TOML and YAML files.
@@ -141,14 +150,6 @@ class NewYamlParser(YamlParser):
     def parse(self, file):
         vars = YamlParser.parse(file)
         return postprocess(vars)
-```
-
-Sometimes the variables dictionary may be very large and you might want to take a quick look into it to get an idea of its content. To do this you use Jinja's built-in `pprint` filter:
-
-```bash
-$ yasha - --variables foo.toml # input file is stdin
-{{ foo|pprint }}
-^D
 ```
 
 ## Example Makefile utilizing yasha for C

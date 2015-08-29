@@ -113,7 +113,7 @@ By default Yasha supports TOML and YAML files for template variables. However, i
 ```python
 from yasha.parsers import Parser
 
-class CmsisSvdParser(Parser):
+class XmlParser(Parser):
     file_extension = [".xml"]
 
     def parse(self, file): # file type is click.File

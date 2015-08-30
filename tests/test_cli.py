@@ -24,6 +24,9 @@ THE SOFTWARE.
 
 import pytest
 import subprocess
+from os import path, chdir
+
+SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
 @pytest.fixture(params=["foo.c.jinja", "sub/foo.c.jinja"])
 def template(request, tmpdir):
@@ -43,18 +46,14 @@ def test_empty_template(template):
 
 	errno = subprocess.call(["yasha", t_name])
 	assert errno == 0
-
-	from os.path import isfile
-	assert isfile(t_name.replace(".jinja", ""))
+	assert path.isfile(t_name.replace(".jinja", ""))
 
 def test_makefile_for_c():
-	from os import path, chdir
-	chdir(path.dirname(path.realpath(__file__)))
+	chdir(SCRIPT_PATH)
 	chdir("makefile_for_c")
 
 	# Initial build
-	errno = subprocess.call(["make"])
-	assert errno == 0
+	subprocess.call(["make"])
 	out = subprocess.check_output("./program")
 	assert out == b"foo has 3 chars ...\n"
 
@@ -65,5 +64,4 @@ def test_makefile_for_c():
 		assert not b"is up to date" in out
 
 	# Remember to clean the build
-	errno = subprocess.call(["make", "clean"])
-	assert errno == 0
+	subprocess.call(["make", "clean"])

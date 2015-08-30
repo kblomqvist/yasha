@@ -8,7 +8,3 @@ install:
 
 script:
   - py.test -v tests
-  - cd tests/makefile_for_c
-  - make
-  - touch foo.c.jinja
-  - make

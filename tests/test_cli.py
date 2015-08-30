@@ -23,12 +23,13 @@ THE SOFTWARE.
 """
 
 import pytest
+import subprocess
 
 @pytest.fixture(params=["foo.c.jinja", "sub/foo.c.jinja"])
 def template(request, tmpdir):
 	""" Returns template. The current working directory (cwd)
 	is changed to the root of the template."""
-	tmpdir.chdir()
+	cwd = tmpdir.chdir()
 	subdir = request.param.rsplit("/", 1)
 	if len(subdir) > 1:
 		p = tmpdir.mkdir(subdir[0]).join(subdir[1])
@@ -40,9 +41,35 @@ def test_empty_template(template):
 	t, t_name = template
 	t.write("")
 
-	import subprocess
 	errno = subprocess.call(["yasha", t_name])
 	assert errno == 0
 
 	from os.path import isfile
 	assert isfile(t_name.replace(".jinja", ""))
+
+def test_makefile_for_c():
+	from os import path, chdir
+	chdir(path.dirname(path.realpath(__file__)))
+	chdir("makefile_for_c")
+
+	errno = subprocess.call(["make"])
+	assert errno == 0
+
+	subprocess.call(["touch", "foo.h"])
+	out = subprocess.check_output(["make"])
+	assert out != b"make: 'program' is up to date.\n"
+
+	subprocess.call(["touch", "foo.toml"])
+	out = subprocess.check_output(["make"])
+	assert out != b"make: 'program' is up to date.\n"
+
+	subprocess.call(["touch", "foo.h.jinja"])
+	out = subprocess.check_output(["make"])
+	assert out != b"make: 'program' is up to date.\n"
+
+	subprocess.call(["touch", "foo.c.jinja"])
+	out = subprocess.check_output(["make"])
+	assert out != b"make: 'program' is up to date.\n"
+
+	errno = subprocess.call(["make", "clean"])
+	assert errno == 0

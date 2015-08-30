@@ -27,7 +27,7 @@ import pytest
 @pytest.fixture(params=["foo.c.jinja", "sub/foo.c.jinja"])
 def template(request, tmpdir):
 	""" Returns template. The current working directory (cwd)
-	is changed to the root of the template """
+	is changed to the root of the template."""
 	tmpdir.chdir()
 	subdir = request.param.rsplit("/", 1)
 	if len(subdir) > 1:

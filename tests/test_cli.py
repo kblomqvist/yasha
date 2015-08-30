@@ -52,24 +52,16 @@ def test_makefile_for_c():
 	chdir(path.dirname(path.realpath(__file__)))
 	chdir("makefile_for_c")
 
+	# Initial build
 	errno = subprocess.call(["make"])
 	assert errno == 0
 
-	subprocess.call(["touch", "foo.h"])
-	out = subprocess.check_output(["make"])
-	assert out != b"make: 'program' is up to date.\n"
+	# Test Make dependencies
+	for touch in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+		subprocess.call(["touch", touch])
+		out = subprocess.check_output(["make"])
+		assert not b"is up to date" in out
 
-	subprocess.call(["touch", "foo.toml"])
-	out = subprocess.check_output(["make"])
-	assert out != b"make: 'program' is up to date.\n"
-
-	subprocess.call(["touch", "foo.h.jinja"])
-	out = subprocess.check_output(["make"])
-	assert out != b"make: 'program' is up to date.\n"
-
-	subprocess.call(["touch", "foo.c.jinja"])
-	out = subprocess.check_output(["make"])
-	assert out != b"make: 'program' is up to date.\n"
-
+	# Remember to clean the build
 	errno = subprocess.call(["make", "clean"])
 	assert errno == 0

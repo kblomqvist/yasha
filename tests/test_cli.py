@@ -55,6 +55,8 @@ def test_makefile_for_c():
 	# Initial build
 	errno = subprocess.call(["make"])
 	assert errno == 0
+	out = subprocess.check_output("./program")
+	assert out == b"foo has 3 chars ...\n"
 
 	# Test Make dependencies
 	for touch in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:

@@ -29,23 +29,23 @@ from os import path, chdir
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
 @pytest.fixture(params=["toml", "yaml"])
-def tmplvars(request):
+def tmplvar(request):
 	if request.param == "toml":
-		return {"filext": ".toml", "pattern": "number={}"}
+		return {"filext": ".toml", "content": "number={}"}
 	if request.param == "yaml":
-		return {"filext": ".yaml", "pattern": "number: {}"}
+		return {"filext": ".yaml", "content": "number: {}"}
 
-def test_template_in_subdir(tmpdir, tmplvars):
+def test_template_in_subdir(tmpdir, tmplvar):
 	cwd = tmpdir.chdir()
 
-	varfile = [v + tmplvars["filext"] for v in
+	varfile = [v + tmplvar["filext"] for v in
 		["foo", "sub/foo", "sub/foo.c"]]
 
 	t = tmpdir.mkdir("sub").join("foo.c.jinja")
 	t.write("int x = {{ number }};")
 
 	v0 = tmpdir.join(varfile[0])
-	v0.write(tmplvars["pattern"].format(0))
+	v0.write(tmplvar["content"].format(0))
 
 	errno = subprocess.call(["yasha", "sub/foo.c.jinja"])
 	assert errno == 0
@@ -55,13 +55,13 @@ def test_template_in_subdir(tmpdir, tmplvars):
 	assert o.read() == "int x = 0;"
 
 	v1 = tmpdir.join(varfile[1])
-	v1.write(tmplvars["pattern"].format(1))
+	v1.write(tmplvar["content"].format(1))
 
 	subprocess.call(["yasha", "sub/foo.c.jinja"])
 	assert o.read() == "int x = 1;"
 
 	v2 = tmpdir.join(varfile[2])
-	v2.write(tmplvars["pattern"].format(2))
+	v2.write(tmplvar["content"].format(2))
 
 	subprocess.call(["yasha", "sub/foo.c.jinja"])
 	assert o.read() == "int x = 2;"

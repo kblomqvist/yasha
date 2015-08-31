@@ -28,25 +28,39 @@ from os import path, chdir
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
-@pytest.fixture(params=["foo.c.jinja", "sub/foo.c.jinja"])
-def template(request, tmpdir):
-	""" Returns template. The current working directory (cwd)
-	is changed to the root of the template."""
+def test_template_in_suddir(tmpdir):
 	cwd = tmpdir.chdir()
-	subdir = request.param.rsplit("/", 1)
-	if len(subdir) > 1:
-		p = tmpdir.mkdir(subdir[0]).join(subdir[1])
-	else:
-		p = tmpdir.join(subdir[0])
-	return p, request.param
 
-def test_empty_template(template):
-	t, t_name = template
-	t.write("")
+	t = tmpdir.mkdir("sub").join("foo.c.jinja")
+	t.write("{{ number }}")
 
-	errno = subprocess.call(["yasha", t_name])
+	v = tmpdir.join("foo.toml")
+	v.write("number=1")
+
+	errno = subprocess.call(["yasha", "sub/foo.c.jinja"])
 	assert errno == 0
-	assert path.isfile(t_name.replace(".jinja", ""))
+	assert path.isfile("sub/foo.c")
+
+	o = tmpdir.join("sub/foo.c")
+	assert o.read() == "1"
+
+	v2 = tmpdir.join("sub/foo.toml")
+	v2.write("number=2")
+
+	subprocess.call(["yasha", "sub/foo.c.jinja"])
+	assert o.read() == "2"
+
+	v3 = tmpdir.join("sub/foo.c.toml")
+	v3.write("number=3")
+
+	subprocess.call(["yasha", "sub/foo.c.jinja"])
+	assert o.read() == "3"
+
+	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", "sub/foo.toml"])
+	assert o.read() == "2"
+
+	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", "foo.toml"])
+	assert o.read() == "1"
 
 def test_makefile_for_c():
 	chdir(SCRIPT_PATH)

@@ -69,7 +69,6 @@ def test_template_in_subdir(tmpdir, tmplvars):
 	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", varfile[1]])
 	assert o.read() == "int x = 1;"
 
-	variables = "foo" + tmplvars["filext"]
 	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
 	assert o.read() == "int x = 0;"
 

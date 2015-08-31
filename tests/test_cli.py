@@ -28,39 +28,50 @@ from os import path, chdir
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
-def test_template_in_subdir(tmpdir):
+@pytest.fixture(params=["toml", "yaml"])
+def tmplvars(request):
+	if request.param == "toml":
+		return {"filext": ".toml", "pattern": "number={}"}
+	if request.param == "yaml":
+		return {"filext": ".yaml", "pattern": "number: {}"}
+
+def test_template_in_subdir(tmpdir, tmplvars):
 	cwd = tmpdir.chdir()
 
-	t = tmpdir.mkdir("sub").join("foo.c.jinja")
-	t.write("{{ number }}")
+	varfile = [v + tmplvars["filext"] for v in
+		["foo", "sub/foo", "sub/foo.c"]]
 
-	v1 = tmpdir.join("foo.toml")
-	v1.write("number=1")
+	t = tmpdir.mkdir("sub").join("foo.c.jinja")
+	t.write("int x = {{ number }};")
+
+	v0 = tmpdir.join(varfile[0])
+	v0.write(tmplvars["pattern"].format(0))
 
 	errno = subprocess.call(["yasha", "sub/foo.c.jinja"])
 	assert errno == 0
 	assert path.isfile("sub/foo.c")
 
 	o = tmpdir.join("sub/foo.c")
-	assert o.read() == "1"
+	assert o.read() == "int x = 0;"
 
-	v2 = tmpdir.join("sub/foo.toml")
-	v2.write("number=2")
-
-	subprocess.call(["yasha", "sub/foo.c.jinja"])
-	assert o.read() == "2"
-
-	v3 = tmpdir.join("sub/foo.c.toml")
-	v3.write("number=3")
+	v1 = tmpdir.join(varfile[1])
+	v1.write(tmplvars["pattern"].format(1))
 
 	subprocess.call(["yasha", "sub/foo.c.jinja"])
-	assert o.read() == "3"
+	assert o.read() == "int x = 1;"
 
-	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", "sub/foo.toml"])
-	assert o.read() == "2"
+	v2 = tmpdir.join(varfile[2])
+	v2.write(tmplvars["pattern"].format(2))
 
-	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", "foo.toml"])
-	assert o.read() == "1"
+	subprocess.call(["yasha", "sub/foo.c.jinja"])
+	assert o.read() == "int x = 2;"
+
+	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", varfile[1]])
+	assert o.read() == "int x = 1;"
+
+	variables = "foo" + tmplvars["filext"]
+	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
+	assert o.read() == "int x = 0;"
 
 def test_makefile_for_c():
 	chdir(SCRIPT_PATH)

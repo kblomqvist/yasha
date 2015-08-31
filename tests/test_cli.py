@@ -28,14 +28,14 @@ from os import path, chdir
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
-def test_template_in_suddir(tmpdir):
+def test_template_in_subdir(tmpdir):
 	cwd = tmpdir.chdir()
 
 	t = tmpdir.mkdir("sub").join("foo.c.jinja")
 	t.write("{{ number }}")
 
-	v = tmpdir.join("foo.toml")
-	v.write("number=1")
+	v1 = tmpdir.join("foo.toml")
+	v1.write("number=1")
 
 	errno = subprocess.call(["yasha", "sub/foo.c.jinja"])
 	assert errno == 0

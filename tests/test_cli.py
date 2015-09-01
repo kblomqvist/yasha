@@ -146,7 +146,7 @@ class XmlParser(Parser):
 			vars["persons"].append({
 				"name": elem.find("name").text,
 				"address": elem.find("address").text,
-		})
+			})
 		return vars
 	""")
 
@@ -155,7 +155,6 @@ class XmlParser(Parser):
 	assert path.isfile("foo.toml")
 
 	o = tmpdir.join("foo.toml")
-	print(o.read())
 	assert o.read() == """[[persons]]
 	name = "Foo"
 	address = "Foo Valley"

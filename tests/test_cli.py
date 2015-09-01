@@ -108,6 +108,62 @@ def test_template_in_subdir(tmpdir, tmplvar):
 	subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
 	assert o.read() == "int x = 0;"
 
+def test_custom_xmlparser(tmpdir):
+	cwd = tmpdir.chdir()
+
+	t = tmpdir.join("foo.toml.jinja")
+	t.write("""{% for p in persons -%}
+	[[persons]]
+	name = "{{ p.name }}"
+	address = "{{ p.address }}"
+	{% endfor -%}
+	""")
+
+	vars = tmpdir.join("foo.xml")
+	vars.write("""<persons>
+	<person>
+		<name>Foo</name>"
+		<address>Foo Valley</address>
+	</person>
+	<person>
+		<name>Bar</name>
+		<address>Bar Valley</address>
+	</person>
+	</persons>
+	""")
+
+	j2ext = tmpdir.join("foo.jinja-ext")
+	j2ext.write("""from yasha.parsers import Parser
+class XmlParser(Parser):
+	file_extension = [".xml"]
+
+	def parse(self, file):
+		import xml.etree.ElementTree as et
+		tree = et.parse(file.name)
+		root = tree.getroot()
+		vars = {"persons": []}
+		for elem in root.iter("person"):
+			vars["persons"].append({
+				"name": elem.find("name").text,
+				"address": elem.find("address").text,
+		})
+		return vars
+	""")
+
+	errno = subprocess.call(["yasha", "foo.toml.jinja"])
+	assert errno == 0
+	assert path.isfile("foo.toml")
+
+	o = tmpdir.join("foo.toml")
+	print(o.read())
+	assert o.read() == """[[persons]]
+	name = "Foo"
+	address = "Foo Valley"
+	[[persons]]
+	name = "Bar"
+	address = "Bar Valley"
+	"""
+
 def test_makefile_for_c():
 	chdir(SCRIPT_PATH)
 	chdir("makefile_for_c")

@@ -36,6 +36,42 @@ def tmplvar(request):
 		return {"filext": ".yaml", "content": "number: {}"}
 
 def test_template_in_subdir(tmpdir, tmplvar):
+	""" This test contains several steps to test that the variables file
+	    is correctly found when the template is placed in sub directory:
+
+	    Step 1:
+	        sub/
+	          foo.c.jinja
+	        foo.toml        <-- should be used
+
+	    Step 2:
+	        sub/
+	          foo.c.jinja
+	          foo.toml      <-- should be used
+	        foo.toml 
+
+	    Step 3:
+	        sub/
+	          foo.c.jinja
+	          foo.c.toml    <-- should be used
+	          foo.toml      
+	        foo.toml
+
+	    Step 4:
+	        sub/
+	          foo.c.jinja
+	          foo.c.toml    
+	          foo.toml      <-- explicitly specified
+	        foo.toml      
+
+	    Step 5:
+	        sub/
+	          foo.c.jinja
+	          foo.c.toml    
+	          foo.toml      
+	        foo.toml        <-- explicitly specified
+	"""
+
 	cwd = tmpdir.chdir()
 
 	varfile = [v + tmplvar["filext"] for v in

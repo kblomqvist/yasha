@@ -1,6 +1,6 @@
 # yasha [![Build Status](https://travis-ci.org/kblomqvist/yasha.svg?branch=master)](https://travis-ci.org/kblomqvist/yasha)
 
-Yasha is a code generator based on [Jinja](http://jinja.pocoo.org/) template engine.
+Yasha is a code generator based on [Jinja](http://jinja.pocoo.org/) template engine. The following command-line call
 <img src="https://raw.githubusercontent.com/kblomqvist/yasha/master/yasha.png" align="right" />
 ```
 $ yasha foo.jinja

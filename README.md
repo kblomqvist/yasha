@@ -141,12 +141,12 @@ def postprocess(vars):
     vars["foo"] = "bar" # foo should always be bar
     return vars
 
-class NewTomlParser(TomlParser):
+class MyTomlParser(TomlParser):
     def parse(self, file):
         vars = TomlParser.parse(file)
         return postprocess(vars)
 
-class NewYamlParser(YamlParser):
+class MyYamlParser(YamlParser):
     def parse(self, file):
         vars = YamlParser.parse(file)
         return postprocess(vars)

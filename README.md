@@ -155,10 +155,15 @@ class MyYamlParser(YamlParser):
 ## Example Makefile utilizing yasha for C
 
 ```Makefile
+SOURCES   = main.c
 TEMPLATES = foo.c.jinja foo.h.jinja
-SOURCES   = main.c $(filter %.c, $(basename $(TEMPLATES)))
-OBJECTS   = $(SOURCES:.c=.o)
 
+# Add rendered .c templates to sources list
+SOURCES += $(filter %.c, $(basename $(TEMPLATES)))
+
+# Resolve object files along with the .d files which lists what files
+# the object file depends on
+OBJECTS      = $(SOURCES:.c=.o)
 DEPENDENCIES = $(OBJECTS:.o=.d) $(TEMPLATES:.jinja=.d)
 
 program : $(OBJECTS)

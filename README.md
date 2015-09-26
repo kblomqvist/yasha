@@ -162,7 +162,7 @@ TEMPLATES = foo.c.jinja foo.h.jinja
 SOURCES += $(filter %.c, $(basename $(TEMPLATES)))
 
 # Resolve object files along with the .d files which lists what files
-# the object file depends on
+# the object and template file depends on
 OBJECTS      = $(SOURCES:.c=.o)
 DEPENDENCIES = $(OBJECTS:.o=.d) $(TEMPLATES:.jinja=.d)
 

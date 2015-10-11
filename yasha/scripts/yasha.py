@@ -47,7 +47,7 @@ def find_variables(template, filext):
     varpath = None
     filepaths = possible_variables_filepaths(template)
     filenames = possible_variables_filenames(template)
-    
+
     for path in filepaths:
         if varpath:
             break
@@ -122,8 +122,9 @@ def load_jinja(searchpath, extdict):
 @click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Explicit custom Jinja extensions file.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
 @click.option("--no-extensions", is_flag=True, help="Omit Jinja extensions.")
+@click.option("--trim", is_flag=True, help="Strips extra whitespace. Spares the single empty lines, though.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside rendering. Not active with stdin.")
-def cli(template, output, variables, extensions, no_variables, no_extensions, md):
+def cli(template, output, variables, extensions, no_variables, no_extensions, trim, md):
     """This script reads the given Jinja template and renders its content
     into new file, which name is derived from the given template name. For
     example the rendered foo.c.jinja template will be written into foo.c if
@@ -132,11 +133,11 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, md
     t_realpath = os.path.realpath(template.name)
     t_basename = os.path.basename(t_realpath)
     t_dirname = os.path.dirname(t_realpath)
-    
+
     vardict = {
 
     }
-    
+
     extdict = {
         "jinja_tests": [],
         "jinja_filters": [],
@@ -161,7 +162,7 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, md
         vardict = parse_variables(variables, extdict["variable_parsers"])
 
     jinja = load_jinja(t_dirname, extdict)
-    
+
     if template.name == "<stdin>":
         template_string = ""
         while True:
@@ -180,7 +181,16 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, md
             o_realpath = os.path.splitext(t_realpath)[0]
             output = click.open_file(o_realpath, "wt")
 
-    output.write(t.render(vardict))
+    if trim:
+        prevline = os.linesep
+        for line in t.render(vardict).splitlines():
+            line = line.rstrip() + os.linesep
+            if line == os.linesep and line == prevline:
+                continue
+            output.write(line)
+            prevline = line
+    else:
+        output.write(t.render(vardict))
 
     if md and not output.name == "<stdout>":
         deps = os.path.basename(template.name)

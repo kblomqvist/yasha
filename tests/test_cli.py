@@ -190,3 +190,33 @@ def test_makefile_for_c():
 
     # Remember to clean the build
     subprocess.call(["make", "clean"])
+
+def test_trim(tmpdir):
+    template = """
+
+    [[persons]]
+    name = "Foo"\t
+    address = "Foo Valley"\n\n
+
+    [[persons]]
+    name = "Bar"  \t
+    address = "Bar Valley"
+    """
+
+    cwd = tmpdir.chdir()
+
+    file = tmpdir.join("foo.toml.jinja")
+    file.write(template)
+
+    errno = subprocess.call(["yasha", "foo.toml.jinja", "--trim"])
+    assert errno == 0
+    assert path.isfile("foo.toml")
+
+    o = tmpdir.join("foo.toml")
+    assert o.read() == """    [[persons]]
+    name = "Foo"
+    address = "Foo Valley"
+
+    [[persons]]
+    name = "Bar"
+    address = "Bar Valley"\n\n""" # Click writes extra newline :U

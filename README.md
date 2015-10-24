@@ -4,7 +4,7 @@
 ![MIT license](https://img.shields.io/pypi/l/yasha.svg)
 <img src="https://raw.githubusercontent.com/kblomqvist/yasha/master/yasha.png" align="right" />
 
-Yasha is a code generator based on [Jinja](http://jinja.pocoo.org/) template engine. The following command-line call
+Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. The following command-line call
 ```
 $ yasha foo.jinja
 ```
@@ -74,19 +74,19 @@ the variables defined in `foo.toml` are used within both templates. For your con
 
 ## Custom Jinja extensions
 
-Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the variables file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.jinja-ext` file.
+Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the variables file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.j2ext` file.
 
-Here is an example of the `foo.jinja-ext` file containing a filter and a test.
+Here is an example of the `foo.j2ext` file containing a filter and a test.
 
 ```python
 def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
-    
+
 def test_even(number):
     return number % 2 == 0
 ```
 
-As can be seen the file is standard Python, although the file extension is not `.py` but `.jinja-ext`. Furthermore, note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
+As can be seen the file is standard Python, although the file extension is not `.py` but `.j2ext`. Furthermore, note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
 
 Here is shown how the two extensions described above would be used within a template.
 
@@ -111,7 +111,7 @@ There's also `--no-extensions` option flag operating in a similar manner with `-
 
 ## Custom template variables parser
 
-By default Yasha supports TOML and YAML files for template variables. However, it's possible to declare custom parser in `.jinja-ext` file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.parsers.Parser` are considered as a custom parser and will be loaded.
+By default Yasha supports TOML and YAML files for template variables. However, it's possible to declare custom parser in `.j2ext` file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.parsers.Parser` are considered as a custom parser and will be loaded.
 
 ```python
 from yasha.parsers import Parser
@@ -123,7 +123,7 @@ class XmlParser(Parser):
         import xml.etree.ElementTree as et
         tree = et.parse(file.name)
         root = tree.getroot()
-        
+
         vars = {"persons": []}
         for elem in root.iter("person"):
             vars["persons"].append({
@@ -170,7 +170,7 @@ DEPENDENCIES = $(OBJECTS:.o=.d) $(TEMPLATES:.jinja=.d)
 
 program : $(OBJECTS)
     $(CC) $^ -o $@
-    
+
 %.o : %.c | $(filter %.h, $(basename $(TEMPLATES)))
     $(CC) -MMD -MP $< -c -o $@
 

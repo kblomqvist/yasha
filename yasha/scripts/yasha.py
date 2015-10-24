@@ -63,7 +63,7 @@ def find_variables(template, filext):
     return varpath
 
 def find_extensions(template):
-    return find_variables(template, [".jinja-ext"])
+    return find_variables(template, [".j2ext", ".jinja-ext"])
 
 def parse_variables(file, parsers):
     if file:

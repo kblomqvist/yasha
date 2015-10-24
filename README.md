@@ -37,20 +37,20 @@ $ yasha foo.jinja --no-variables
 Imagine that you would be writing C code and have the following two templates in two different folders
 
 ```
-  include/
-    foo.h.jinja
-  source/
-    foo.c.jinja
+include/
+  foo.h.jinja
+source/
+  foo.c.jinja
 ```
 
 and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.toml` and `foo.c.toml` files you can make one `foo.toml` like this:
 
 ```
-  include/
-    foo.h.jinja
-  source/
-    foo.c.jinja
-  foo.toml
+include/
+  foo.h.jinja
+source/
+  foo.c.jinja
+foo.toml
 ```
 
 Now when you call
@@ -63,13 +63,13 @@ $ yasha source/foo.c.jinja
 the variables defined in `foo.toml` are used within both templates. For your convenience here is the file listing after the above two yasha calls:
 
 ```
-  include/
-    foo.h
-    foo.h.jinja
-  source/
-    foo.c
-    foo.c.jinja
-  foo.toml
+include/
+  foo.h
+  foo.h.jinja
+source/
+  foo.c
+  foo.c.jinja
+foo.toml
 ```
 
 ## Custom Jinja extensions
@@ -88,7 +88,7 @@ def test_even(number):
 
 As can be seen the file is standard Python, although the file extension is not `.py` but `.j2ext`. Furthermore, note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
 
-Here is shown how the two extensions described above would be used within a template.
+Here it is shown how the two extensions described above would be used within a template.
 
 ```jinja
 {{ date|datetimeformat }}

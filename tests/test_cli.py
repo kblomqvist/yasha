@@ -156,7 +156,7 @@ class XmlParser(Parser):
     file = tmpdir.join("foo.toml.jinja")
     file.write(template)
 
-    file = tmpdir.join("foo.jinja-ext")
+    file = tmpdir.join("foo.j2ext")
     file.write(extensions)
 
     errno = subprocess.call(["yasha", "foo.toml.jinja"])

@@ -39,3 +39,22 @@ class YamlParser(Parser):
     def parse(self, file):
         import yaml
         return yaml.load(file)
+
+class CmsisSvdParser(Parser):
+    """
+    CMSIS System View Description format (CMSIS-SVD)
+    http://www.keil.com/pack/doc/CMSIS/SVD/html/index.html
+    """
+    file_extension = [".svd"]
+
+    def parse(self, file):
+        from . import svd
+        f = svd.File(file)
+        f.parse()
+
+        vars = {
+            "cpu": f.cpu,
+            "device": f.device,
+            "peripherals": [f.peripherals[name] for name in f.peripherals_order],
+        }
+        return vars

@@ -127,7 +127,7 @@ def test_custom_xmlparser(tmpdir):
             <name>Bar</name>
             <address>Bar Valley</address>
         </person>
-        </persons>
+    </persons>
     """
 
     extensions = """

@@ -23,8 +23,8 @@ THE SOFTWARE.
 
 """
 
-from .parsers import Parser, TomlParser, YamlParser
+from .parsers import Parser, TomlParser, YamlParser, CmsisSvdParser
 
-__all__ = ["Parser", "TomlParser", "YamlParser"]
+__all__ = ["Parser", "TomlParser", "YamlParser", "CmsisSvdParser"]
 
-__version__ = "1.2"
+__version__ = "1.4"

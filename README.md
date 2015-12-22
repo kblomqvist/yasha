@@ -11,7 +11,9 @@ $ yasha foo.jinja
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
-Template variables can be defined in a separate template configuration file. For example, [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported. Yasha will look for this file if not given explicitly. For example, the above example tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) from the same folder with the template. If the file is not found, subfolders will be checked until the root directory is reached.
+Template variables can be defined in a separate template variable/configuration file. For example, [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported.
+
+If the variable file is not given explicitly, Yasha will look for the file. Thus the above example tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) from the same folder with the template. If the file is not found, subfolders will be checked until the root directory is reached.
 
 Explicitly the file containing the template variables can be given as:
 

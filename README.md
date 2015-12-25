@@ -205,25 +205,28 @@ clean :
 ```python
 import os
 
-def yasha_scanner(node, env, path):
-  try:
-    with open(str(node) + ".d") as f:
-      return env.File(f.readline().split()[2:])
-  except:
-    return []
+def scan(node, env, path):
+    try:
+      with open(str(node) + ".d") as f:
+        return env.File(f.readline().split()[2:])
+    except:
+        return []
 
-def yasha_emitter(target, source, env):
-  env.Clean(target, str(target[0]) + ".d")
-  return target, source
+def emit(target, source, env):
+    env.Clean(target, str(target[0]) + ".d")
+    return target, source
 
-yasha_builder = Builder(
-  action = "yasha -MD $SOURCE",
-  target_scanner = Scanner(function=yasha_scanner),
-  emitter = yasha_emitter,
-  single_source = True
+env = Environment(
+    ENV = os.environ,
+    BUILDERS = {
+        "Yasha": Builder(
+            action = "yasha -MD $SOURCE",
+            emitter = emit,
+            target_scanner = Scanner(function=scan),
+            single_source = True
+        )
+    }
 )
-
-env = Environment(ENV=os.environ, BUILDERS={"Yasha": yasha_builder})
 
 sources = ["main.c"]
 sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])

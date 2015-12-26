@@ -1,19 +1,18 @@
 from SCons.Builder import BuilderBase
-import SCons.Scanner
-import SCons.Action
+from SCons.Scanner import Scanner
+from SCons.Action import Action
 
 class CBuilderBase(BuilderBase):
-    def _execute(self, env, target, source, overwarn={}, executor_kw={}):
+    def _execute(self, env, target, source, ow={}, exec_kw={}):
         """
         Override _execute() to remove C header files from the sources list
         """
         def is_not_header(file):
+            suffix = str(file).rsplit(".", 1)[1]
             headers = ["h", "hh", "hpp"]
-            if str(file).rsplit(".", 1)[1] not in headers:
-                return True
-            return False
+            return True if suffix not in headers else False
 
-        src = BuilderBase._execute(self, env, target, source, overwarn, executor_kw)
+        src = BuilderBase._execute(self, env, target, source, ow, exec_kw)
         return [x for x in src if is_not_header(x)]
 
 def CBuilder():
@@ -30,9 +29,9 @@ def CBuilder():
         return target, source
 
     return CBuilderBase(
-        action = SCons.Action.Action("yasha -MD $SOURCE"),
+        action = Action("yasha -MD $SOURCE"),
         emitter = emit,
-        target_scanner = SCons.Scanner.Scanner(function=scan),
+        target_scanner = Scanner(function=scan),
         single_source = True
     )
 

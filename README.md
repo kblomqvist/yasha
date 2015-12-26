@@ -39,6 +39,20 @@ $ yasha foo.jinja --no-variables
 - `.toml` files are parsed as TOML
 - `.yaml` and `.yml` files are parsed as YAML
 
+## Installation
+
+As a regular user:
+
+```
+pip install yasha
+```
+
+As a developer (for the latest development version):
+
+```
+git clone https://github.com/kblomqvist/yasha
+pip install -e yasha
+```
 
 ## Template variables sharing
 

@@ -202,32 +202,15 @@ clean :
 .phony : clean
 ```
 
-### Example SConstruct file for SCons
+### Example SConstruct file (for SCons)
 
 ```python
 import os
-
-def scan(node, env, path):
-    try:
-      with open(str(node) + ".d") as f:
-        return env.File(f.readline().split()[2:])
-    except:
-        return []
-
-def emit(target, source, env):
-    env.Clean(target, str(target[0]) + ".d")
-    return target, source
+import yasha.scons
 
 env = Environment(
     ENV = os.environ,
-    BUILDERS = {
-        "Yasha": Builder(
-            action = "yasha -MD $SOURCE",
-            emitter = emit,
-            target_scanner = Scanner(function=scan),
-            single_source = True
-        )
-    }
+    BUILDERS = {"Yasha": yasha.scons.CBuilder()}
 )
 
 sources = ["main.c"]

@@ -156,7 +156,9 @@ class MyYamlParser(YamlParser):
         return postprocess(vars)
 ```
 
-## Example Makefile utilizing yasha for C
+## Utilizing Yasha for C
+
+### Example Makefile
 
 ```Makefile
 SOURCES   = main.c
@@ -200,7 +202,7 @@ clean :
 .phony : clean
 ```
 
-## Example SCons SConstruct file utilizing Yasha for C
+### Example SConstruct file for SCons
 
 ```python
 import os

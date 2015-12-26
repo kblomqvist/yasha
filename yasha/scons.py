@@ -15,7 +15,7 @@ class CBuilderBase(BuilderBase):
         src = BuilderBase._execute(self, env, target, source, ow, exec_kw)
         return [x for x in src if is_not_header(x)]
 
-def CBuilder():
+def CBuilder(action="yasha -MD $SOURCE"):
     """Yasha SCons builder for C"""
     def scan(node, env, path):
         try: # Resolve template dependencies from the generated .d file
@@ -29,7 +29,7 @@ def CBuilder():
         return target, source
 
     return CBuilderBase(
-        action = Action("yasha -MD $SOURCE"),
+        action = Action(action),
         emitter = emit,
         target_scanner = Scanner(function=scan),
         single_source = True

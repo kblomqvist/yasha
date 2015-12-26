@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 import pytest
 import subprocess
-from os import path, chdir
+from os import path, chdir, utime
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
@@ -173,23 +173,51 @@ class XmlParser(Parser):
     address = "Bar Valley"
     """
 
-def test_makefile_for_c():
+def test_make():
     chdir(SCRIPT_PATH)
-    chdir("makefile_for_c")
+    chdir("yasha_for_c")
 
-    # Initial build
-    subprocess.call(["make"])
-    out = subprocess.check_output("./program")
-    assert out == b"foo has 3 chars ...\n"
+    # First build
+    out = subprocess.check_output(["make"])
+    assert not b"is up to date" in out
+    assert path.isfile("program")
 
-    # Test Make dependencies
-    for touch in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
-        subprocess.call(["touch", touch])
-        out = subprocess.check_output(["make"])
-        assert not b"is up to date" in out
+    # Second build shouldn't do anything
+    out = subprocess.check_output(["make"])
+    assert b"is up to date" in out
+
+    # Test template dependencies
+    # for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+        # out = subprocess.check_output(["touch", dep, "&&", "make"], shell=True)
+        # assert not b"is up to date" in out
 
     # Remember to clean the build
     subprocess.call(["make", "clean"])
+    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
+        assert not path.isfile(f)
+
+def test_scons():
+    chdir(SCRIPT_PATH)
+    chdir("yasha_for_c")
+
+    # First build
+    out = subprocess.check_output(["scons"])
+    assert not b"is up to date" in out
+    assert path.isfile("program")
+
+    # TODO: Bug in SCons. Second build shouldn't do anything
+    # out = subprocess.check_output(["scons"])
+    # assert b"is up to date" in out
+
+    # Test template dependencies
+    # for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+    #     out = subprocess.check_output(["touch", dep, "&&", "scons"], shell=True)
+    #     assert not b"is up to date" in out
+
+    # Remember to clean the build
+    subprocess.call(["scons", "-c"])
+    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
+        assert not path.isfile(f)
 
 def test_trim(tmpdir):
     template = """

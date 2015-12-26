@@ -5,17 +5,16 @@
 <img src="https://raw.githubusercontent.com/kblomqvist/yasha/master/yasha.png" align="right" />
 
 Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. The following command-line call
+
 ```
 $ yasha foo.jinja
 ```
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
-Template variables can be defined in a separate template variable/configuration file. For example, [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported.
+Template variables can be defined in a separate template variable/configuration file. For example, [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported. If the variable file is not given explicitly, Yasha will look for it. Thus the above example tries to find `foo.toml`, `foo.yaml` or `foo.yml` from the same folder with the template itself. If the file is not found, subfolders will be checked until the root directory is reached.
 
-If the variable file is not given explicitly, Yasha will look for the file. Thus the above example tries to find `foo.toml` or `foo.yaml` (or `foo.yml`) from the same folder with the template. If the file is not found, subfolders will be checked until the root directory is reached.
-
-Explicitly the file containing the template variables can be given as:
+The file containing the template variables can be given explicitly too:
 
 ```
 $ yasha foo.jinja --variables foo.toml
@@ -33,6 +32,13 @@ In case the variables shouldn't be used in spite of the file existence use ``--n
 ```
 $ yasha foo.jinja --no-variables
 ```
+
+#### Default variable parsers
+
+- `.svd` files are parsed as CMSIS-SVD
+- `.toml` files are parsed as TOML
+- `.yaml` and `.yml` files are parsed as YAML
+
 
 ## Template variables sharing
 
@@ -218,9 +224,3 @@ sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
 
 env.Program("program", sources)
 ```
-
-## Default variable parsers
-
-- `.svd` files are parsed as CMSIS-SVD
-- `.toml` files are parsed as TOML
-- `.yaml` and `.yml` files are parsed as YAML

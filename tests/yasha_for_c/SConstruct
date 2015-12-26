@@ -11,5 +11,5 @@ env = Environment(
 sources = ["main.c"]
 sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
 
-Decider("timestamp-newer") # Added due to testing
-Program("program", sources)
+env.Program("a.out", sources)
+env.Decider("timestamp-newer") # Added due to testing

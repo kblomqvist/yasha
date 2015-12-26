@@ -1,12 +1,18 @@
-TEMPLATES = foo.c.jinja foo.h.jinja
-SOURCES   = main.c $(filter %.c, $(basename $(TEMPLATES)))
-OBJECTS   = $(SOURCES:.c=.o)
+SOURCES    = main.c
+TEMPLATES  = foo.c.jinja foo.h.jinja
+EXECUTABLE = a.out
 
+# Add rendered .c templates to sources list
+SOURCES += $(filter %.c, $(basename $(TEMPLATES)))
+
+# Resolve object files along with the .d files which lists what files
+# the object and template file depends on
+OBJECTS      = $(SOURCES:.c=.o)
 DEPENDENCIES = $(OBJECTS:.o=.d) $(TEMPLATES:.jinja=.d)
 
-program : $(OBJECTS)
+$(EXECUTABLE) : $(OBJECTS)
 	$(CC) $^ -o $@
-	
+
 %.o : %.c | $(filter %.h, $(basename $(TEMPLATES)))
 	$(CC) -MMD -MP $< -c -o $@
 
@@ -26,7 +32,7 @@ program : $(OBJECTS)
 .secondary : $(basename $(TEMPLATES))
 
 clean :
-	-rm -f program
+	-rm -f $(EXECUTABLE)
 	-rm -f $(OBJECTS)
 	-rm -f $(DEPENDENCIES)
 	-rm -f $(basename $(TEMPLATES))

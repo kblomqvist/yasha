@@ -180,7 +180,7 @@ def test_make():
     # First build
     out = subprocess.check_output(["make"])
     assert not b"is up to date" in out
-    assert path.isfile("program")
+    assert path.isfile("a.out")
 
     # Second build shouldn't do anything
     out = subprocess.check_output(["make"])
@@ -203,7 +203,7 @@ def test_scons():
     # First build
     out = subprocess.check_output(["scons"])
     assert not b"is up to date" in out
-    assert path.isfile("program")
+    assert path.isfile("a.out")
 
     # TODO: Bug in SCons. Second build shouldn't do anything
     # out = subprocess.check_output(["scons"])

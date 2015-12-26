@@ -5,6 +5,7 @@ python:
 
 install:
   - pip install .
+  - pip install scons
 
 script:
   - py.test -v tests

@@ -158,7 +158,7 @@ class MyYamlParser(YamlParser):
 
 ## Utilizing Yasha for C
 
-### Example Makefile
+#### Makefile
 
 ```Makefile
 SOURCES   = main.c
@@ -202,7 +202,7 @@ clean :
 .phony : clean
 ```
 
-### Example SConstruct file (for SCons)
+#### SConstruct (SCons)
 
 ```python
 import os

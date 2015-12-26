@@ -197,6 +197,10 @@ def test_make():
         assert not path.isfile(f)
 
 def test_scons():
+    import sys
+    if sys.version_info[0] == 3:
+        return
+
     chdir(SCRIPT_PATH)
     chdir("yasha_for_c")
 

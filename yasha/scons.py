@@ -27,22 +27,26 @@ from SCons.Builder import BuilderBase
 from SCons.Scanner import Scanner
 from SCons.Action import Action, CommandGeneratorAction
 
+def is_c_file(file):
+    suffix = os.path.splitext(str(file))[1]
+    accept = [".c", ".cc", ".cpp", ".h", ".hh", ".hpp", ".s", ".S", ".asm"]
+    return True if suffix in accept else False
+
 class CBuilderBase(BuilderBase):
     def _execute(self, env, target, source, ow={}, exec_kw={}):
         """
         Override _execute() to remove C header files from the sources list
         """
-        def is_not_header(file):
-            suffix = str(file).rsplit(".", 1)[1]
-            headers = ["h", "hh", "hpp"]
-            return True if suffix not in headers else False
-
-        src = BuilderBase._execute(self, env, target, source, ow, exec_kw)
-        return [x for x in src if is_not_header(x)]
+        sources = BuilderBase._execute(self, env, target,source, ow, exec_kw)
+        return [x for x in sources if is_c_file(x)]
 
 def CBuilder(action="yasha -MD $SOURCE -o $TARGET"):
-    """Yasha SCons builder for C"""
+    """
+    Yasha SCons builder for C
+    """
+
     def target_scan(node, env, path):
+        """No used. Most likely will be removed."""
         try: # Resolve template dependencies from the generated .d file
             with open(str(node) + ".d") as f:
                 # IMPORTANT! Don't duplicate template dependency, thus [2:]
@@ -70,15 +74,17 @@ def CBuilder(action="yasha -MD $SOURCE -o $TARGET"):
         return target, source
 
     def gtor(source, target, env, for_signature):
-        cmd = action.replace("$SOURCE", str(source[0]))
-        cmd = cmd.replace("$TARGET", str(target[0]))
+        cmd = ""
+        if is_c_file(target[0]):
+            cmd = action.replace("$SOURCE", str(source[0]))
+            cmd = cmd.replace("$TARGET", str(target[0]))
         return cmd
 
     return CBuilderBase(
         action = CommandGeneratorAction(gtor, {}),
         #action = Action(action),
         emitter = emit,
-        target_scanner = Scanner(function=target_scan),
-        source_scanner = Scanner(function=source_scan),
-        single_source = True,
+        #target_scanner = Scanner(function=target_scan),
+        #source_scanner = Scanner(function=source_scan),
+        single_source = True
     )

@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import os
 from SCons.Builder import BuilderBase
 from SCons.Scanner import Scanner
 from SCons.Action import Action, CommandGeneratorAction
@@ -44,13 +45,25 @@ def CBuilder(action="yasha -MD $SOURCE -o $TARGET"):
     def target_scan(node, env, path):
         try: # Resolve template dependencies from the generated .d file
             with open(str(node) + ".d") as f:
-                deps = f.readline().split()[1:]
+                # IMPORTANT! Don't duplicate template dependency, thus [2:]
+                deps = f.readline().split()[2:]
                 return env.File(deps)
         except:
             return []
 
     def source_scan(node, env, path):
-        return []
+        """
+        TODO: Doesn't take custom parses into account.
+        """
+        deps = []
+        file, extension = os.path.splitext(str(node))
+        while extension:
+            for suffix in [".toml", ".yml", ".yaml", ".j2ext", ".jinja-ext"]:
+                dep = file + suffix
+                if os.path.isfile(dep):
+                    deps.append(dep)
+            file, extension = os.path.splitext(file)
+        return env.File(deps)
 
     def emit(target, source, env):
         env.Clean(target[0], str(target[0]) + ".d")

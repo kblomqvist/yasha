@@ -7,17 +7,12 @@ env = Environment(
 )
 
 # See how the duplication of sources affect to paths
-# WARNING! Unit testing assumes duplicate=1
-duplicate = 1
+# WARNING! Unit testing assumes duplicate=0
+duplicate = 0
 
-if duplicate:
-	env.VariantDir("build", "src", duplicate=duplicate)
-	sources = ["build/main.c"]
-	sources += env.Yasha(["build/foo.c.jinja", "build/foo.h.jinja"])
-else:
-	env.VariantDir("build", "src", duplicate=duplicate)
-	sources = ["build/main.c"]
-	sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
+env.VariantDir("build", "src", duplicate=duplicate)
+sources = ["build/main.c"]
+sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
 
 env.Program("build/a.out", sources)
 env.Decider("timestamp-newer") # Added due to unit testing

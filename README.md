@@ -254,7 +254,7 @@ sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
 env.Program("a.out", sources)
 ```
 
-Another example with separate build directory with sources in `src/`
+Another example with separate build directory with sources in `src/`. Source code duplication doesn't work, because I have no idea how to tell SCons to copy template depencies like variable files.
 
 ```python
 import os
@@ -265,17 +265,9 @@ env = Environment(
     BUILDERS = {"Yasha": yasha.scons.CBuilder()}
 )
 
-# See how the duplication of sources affect to paths
-duplicate = 1
-
-if duplicate:
-    env.VariantDir("build", "src", duplicate=duplicate)
-    sources = ["build/main.c"]
-    sources += env.Yasha(["build/foo.c.jinja", "build/foo.h.jinja"])
-else:
-    env.VariantDir("build", "src", duplicate=duplicate)
-    sources = ["build/main.c"]
-    sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
+env.VariantDir("build", "src", duplicate=0) # duplicate=1 doesn't work
+sources = ["build/main.c"]
+sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
 
 env.Program("build/a.out", sources)
 ```

@@ -182,13 +182,17 @@ def test_make():
     assert not b"is up to date" in out
     assert path.isfile("build/a.out")
 
+    # Check program output
+    out = subprocess.check_output(["./build/a.out"])
+    assert b"foo has 3 chars ...\n" == out
+
     # Second build shouldn't do anything
     out = subprocess.check_output(["make"])
     assert b"is up to date" in out
 
     # Test template dependencies
     for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
-        subprocess.call(["touch", "src/"+dep])
+        subprocess.call(["touch", "src/" + dep])
         out = subprocess.check_output(["make"])
         assert not b"is up to date" in out
 
@@ -210,15 +214,21 @@ def test_scons():
     assert not b"is up to date" in out
     assert path.isfile("build/a.out")
 
-# TODO: Bug in SCons. Second build shouldn't do anything
-    # out = subprocess.check_output(["scons"])
-    # assert b"is up to date" in out
+    # Check program output
+    out = subprocess.check_output(["./build/a.out"])
+    assert b"foo has 3 chars ...\n" == out
 
-# TODO: Bug in SCons? Test template dependencies
-    # for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
-    #     subprocess.call(["touch", "src/"+dep])
-    #     out = subprocess.check_output(["scons"])
-    #     assert not b"is up to date" in out
+    # Second build shouldn't do anything
+    out = subprocess.check_output(["scons"])
+    assert b"is up to date" in out
+
+# TODO: Fix race condition. Every now and then fails. Though,
+# subprocess.call() shouldn't return before finished.
+
+#    for dep in ["foo.toml"]: #, "foo.h.jinja", "foo.c.jinja"]:
+#        subprocess.call(["touch", "src/" + dep])
+#        out = subprocess.check_output(["scons"])
+#        assert not b"is up to date" in out
 
     # Remember to clean the build
     subprocess.call(["scons", "-c"])

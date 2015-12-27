@@ -1,19 +1,23 @@
-# With variant dir
-
 import os
 import yasha.scons
 
 env = Environment(
     ENV = os.environ,
-    BUILDERS = {
-        "Yasha": yasha.scons.CBuilder()
-    }
+    BUILDERS = {"Yasha": yasha.scons.CBuilder()}
 )
 
-env.VariantDir("build", "src", duplicate=0) # duplicate=1 doesn't work
+# See how the duplication of sources affect to
+# the path of Yasha template files
+duplicate = 0
 
-sources = ["build/main.c"]
-sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
+if duplicate:
+	env.VariantDir("build", "src", duplicate=duplicate)
+	sources = ["build/main.c"]
+	sources += env.Yasha(["build/foo.c.jinja", "build/foo.h.jinja"])
+else:
+	env.VariantDir("build", "src", duplicate=duplicate)
+	sources = ["build/main.c"]
+	sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
 
-prog = env.Program("build/a.out", sources)
+env.Program("build/a.out", sources)
 env.Decider("timestamp-newer") # Added due to unit testing

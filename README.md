@@ -254,7 +254,7 @@ sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
 env.Program("a.out", sources)
 ```
 
-With the separate build directory (variant dir)
+Another example with separate build directory with sources in `src/`
 
 ```python
 import os
@@ -265,10 +265,18 @@ env = Environment(
     BUILDERS = {"Yasha": yasha.scons.CBuilder()}
 )
 
-env.VariantDir("build", "src", duplicate=0) # duplicate=1 doesn't work
+# See how the duplication of sources affects how you
+# define the path of Yasha template files
+duplicate = 0
 
-sources = ["build/main.c"]
-sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
+if duplicate:
+    env.VariantDir("build", "src", duplicate=duplicate)
+    sources = ["build/main.c"]
+    sources += env.Yasha(["build/foo.c.jinja", "build/foo.h.jinja"])
+else:
+    env.VariantDir("build", "src", duplicate=duplicate)
+    sources = ["build/main.c"]
+    sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
 
-prog = env.Program("build/a.out", sources)
+env.Program("build/a.out", sources)
 ```

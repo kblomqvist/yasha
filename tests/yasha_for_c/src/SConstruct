@@ -5,13 +5,11 @@ import yasha.scons
 
 env = Environment(
     ENV = os.environ,
-    BUILDERS = {
-        "Yasha": yasha.scons.CBuilder()
-    }
+    BUILDERS = {"Yasha": yasha.scons.CBuilder()}
 )
 
 sources = ["main.c"]
 sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
 
-prog = env.Program("a.out", sources)
+env.Program("a.out", sources)
 env.Decider("timestamp-newer") # Added due to unit testing

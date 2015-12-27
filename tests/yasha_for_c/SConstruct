@@ -8,8 +8,10 @@ env = Environment(
     }
 )
 
-sources = ["main.c"]
-sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
+env.VariantDir("build", "src", duplicate=0)
 
-env.Program("a.out", sources)
-env.Decider("timestamp-newer") # Added due to testing
+sources = ["build/main.c"]
+sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
+
+prog = env.Program("build/a.out", sources)
+env.Decider("timestamp-newer") # Added due to unit testing

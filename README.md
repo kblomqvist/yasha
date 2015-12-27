@@ -181,22 +181,28 @@ class MyYamlParser(YamlParser):
 #### Makefile
 
 ```Makefile
-SOURCES    = main.c
-TEMPLATES  = foo.c.jinja foo.h.jinja
-EXECUTABLE = a.out
+# User variables
+SOURCES    = src/main.c
+TEMPLATES  = src/foo.c.jinja src/foo.h.jinja
+EXECUTABLE = build/a.out
 
 # Add rendered .c templates to sources list
 SOURCES += $(filter %.c, $(basename $(TEMPLATES)))
 
+# Resolve build dir from executable
+BUILDDIR = $(dir $(EXECUTABLE))
+
 # Resolve object files along with the .d files which lists what files
 # the object and template file depends on
-OBJECTS      = $(SOURCES:.c=.o)
-DEPENDENCIES = $(OBJECTS:.o=.d) $(TEMPLATES:.jinja=.d)
+OBJECTS     = $(addprefix $(BUILDDIR), $(SOURCES:.c=.o))
+OBJECTS_D   = $(OBJECTS:.o=.d)
+TEMPLATES_D = $(TEMPLATES:.jinja=.d)
 
 $(EXECUTABLE) : $(OBJECTS)
     $(CC) $^ -o $@
 
-%.o : %.c | $(filter %.h, $(basename $(TEMPLATES)))
+$(BUILDDIR)%.o : %.c | $(filter %.h, $(basename $(TEMPLATES)))
+    @mkdir -p $(dir $@)
     $(CC) -MMD -MP $< -c -o $@
 
 %.c : %.c.jinja
@@ -209,15 +215,19 @@ $(EXECUTABLE) : $(OBJECTS)
 %.o : %.c
 
 # Pull in dependency info for existing .o and template files
--include $(DEPENDENCIES)
+-include $(OBJECTS_D) $(TEMPLATES_D)
 
 # Prevent Make to consider rendered templates as intermediate file
 .secondary : $(basename $(TEMPLATES))
 
 clean :
+ifeq ($(BUILDDIR),./)
     -rm -f $(EXECUTABLE)
     -rm -f $(OBJECTS)
-    -rm -f $(DEPENDENCIES)
+else
+    -rm -rf $(BUILDDIR)
+endif
+    -rm -f $(TEMPLATES_D)
     -rm -f $(basename $(TEMPLATES))
 
 .phony : clean
@@ -238,4 +248,24 @@ sources = ["main.c"]
 sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
 
 env.Program("a.out", sources)
+```
+
+Or with build dir
+
+```python
+import os
+import yasha.scons
+
+env = Environment(
+    ENV = os.environ,
+    BUILDERS = {
+        "Yasha": yasha.scons.CBuilder()
+    }
+)
+
+sources = ["build/main.c"]
+sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])
+
+env.VariantDir("build", "src", duplicate=0) # duplicate=1 doesn't work
+prog = env.Program("build/a.out", sources)
 ```

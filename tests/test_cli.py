@@ -180,7 +180,7 @@ def test_make():
     # First build
     out = subprocess.check_output(["make"])
     assert not b"is up to date" in out
-    assert path.isfile("a.out")
+    assert path.isfile("build/a.out")
 
     # Second build shouldn't do anything
     out = subprocess.check_output(["make"])
@@ -194,7 +194,7 @@ def test_make():
     # Remember to clean the build
     subprocess.call(["make", "clean"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile(f)
+        assert not path.isfile("src/" + f)
 
 def test_scons():
     import sys
@@ -207,7 +207,7 @@ def test_scons():
     # First build
     out = subprocess.check_output(["scons"])
     assert not b"is up to date" in out
-    assert path.isfile("a.out")
+    assert path.isfile("build/a.out")
 
     # TODO: Bug in SCons. Second build shouldn't do anything
     # out = subprocess.check_output(["scons"])

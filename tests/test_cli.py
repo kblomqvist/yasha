@@ -187,9 +187,10 @@ def test_make():
     assert b"is up to date" in out
 
     # Test template dependencies
-    # for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
-        # out = subprocess.check_output(["touch", dep, "&&", "make"], shell=True)
-        # assert not b"is up to date" in out
+    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+        subprocess.call(["touch", "src/"+dep])
+        out = subprocess.check_output(["make"])
+        assert not b"is up to date" in out
 
     # Remember to clean the build
     subprocess.call(["make", "clean"])
@@ -209,19 +210,20 @@ def test_scons():
     assert not b"is up to date" in out
     assert path.isfile("build/a.out")
 
-    # TODO: Bug in SCons. Second build shouldn't do anything
+# TODO: Bug in SCons. Second build shouldn't do anything
     # out = subprocess.check_output(["scons"])
     # assert b"is up to date" in out
 
-    # Test template dependencies
+# TODO: Bug in SCons? Test template dependencies
     # for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
-    #     out = subprocess.check_output(["touch", dep, "&&", "scons"], shell=True)
+    #     subprocess.call(["touch", "src/"+dep])
+    #     out = subprocess.check_output(["scons"])
     #     assert not b"is up to date" in out
 
     # Remember to clean the build
     subprocess.call(["scons", "-c"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile(f)
+        assert not path.isfile("build/"+f)
 
 def test_trim(tmpdir):
     template = """

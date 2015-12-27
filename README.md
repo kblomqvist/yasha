@@ -265,9 +265,8 @@ env = Environment(
     BUILDERS = {"Yasha": yasha.scons.CBuilder()}
 )
 
-# See how the duplication of sources affects how you
-# define the path of Yasha template files
-duplicate = 0
+# See how the duplication of sources affect to paths
+duplicate = 1
 
 if duplicate:
     env.VariantDir("build", "src", duplicate=duplicate)

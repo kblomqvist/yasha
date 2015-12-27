@@ -3,4 +3,5 @@ yasha.egg-info/
 dist/
 
 *.pyc
+tests/yasha_for_c/build
 tests/yasha_for_c/**/.sconsign.dblite

@@ -1,3 +1,5 @@
+# With variant dir
+
 import os
 import yasha.scons
 
@@ -8,7 +10,7 @@ env = Environment(
     }
 )
 
-env.VariantDir("build", "src", duplicate=0)
+env.VariantDir("build", "src", duplicate=0) # duplicate=1 doesn't work
 
 sources = ["build/main.c"]
 sources += env.Yasha(["src/foo.c.jinja", "src/foo.h.jinja"])

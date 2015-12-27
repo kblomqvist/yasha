@@ -235,6 +235,8 @@ endif
 
 #### SConstruct (SCons)
 
+Without so called build directory
+
 ```python
 import os
 import yasha.scons
@@ -250,7 +252,7 @@ sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
 env.Program("a.out", sources)
 ```
 
-Or with build dir
+With build directory (variant dir)
 
 ```python
 import os

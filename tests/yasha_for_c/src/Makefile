@@ -1,7 +1,7 @@
 # User variables
-SOURCES    = $(wildcard src/*.c)
-TEMPLATES  = $(wildcard src/*.jinja)
-EXECUTABLE = build/a.out
+SOURCES    = $(wildcard *.c)
+TEMPLATES  = $(wildcard *.jinja)
+EXECUTABLE = a.out
 
 # Add rendered .c templates to sources list
 SOURCES += $(filter %.c, $(basename $(TEMPLATES)))

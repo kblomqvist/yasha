@@ -227,6 +227,7 @@ clean :
 ifeq ($(BUILDDIR),./)
     -rm -f $(EXECUTABLE)
     -rm -f $(OBJECTS)
+    -rm -f $(OBJECTS_D)
 else
     -rm -rf $(BUILDDIR)
 endif

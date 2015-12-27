@@ -180,10 +180,13 @@ class MyYamlParser(YamlParser):
 
 #### Makefile
 
+The below Makefile can work with or without separate build directory.
+It can be given as part of EXECUTABLE name.
+
 ```Makefile
 # User variables
-SOURCES    = src/main.c
-TEMPLATES  = src/foo.c.jinja src/foo.h.jinja
+SOURCES    = $(wildcard src/*.c)
+TEMPLATES  = $(wildcard src/*.jinja)
 EXECUTABLE = build/a.out
 
 # Add rendered .c templates to sources list

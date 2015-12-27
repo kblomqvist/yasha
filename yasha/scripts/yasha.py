@@ -193,8 +193,7 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
         output.write(t.render(vardict))
 
     if md and not output.name == "<stdout>":
-        deps = os.path.basename(template.name)
-        deps = os.path.splitext(deps)[0] + ": " + deps + " "
+        deps = os.path.relpath(output.name) + ": " + template.name + " "
         if variables:
             deps += os.path.relpath(variables.name) + " "
         if extensions:

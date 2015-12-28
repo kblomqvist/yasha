@@ -135,10 +135,23 @@ class SvdElement():
                 value = getattr(element, key)
                 setattr(self, key, value)
 
+    def to_dict(self):
+        d = {}
+        for k in self.props:
+            v = getattr(self, k)
+            if type(v) == list:
+                v = [i.to_dict() for i in v]
+            d[k] = v
+        return d
+
 
 class Device(SvdElement):
     type = "device"
     cast_to_integer = ["size"]
+    props = [
+        "name", "version", "description", "addressUnitBits", "width", "size",
+        "access", "resetValue", "resetMask", "vendor", "vendorID", "series",
+        "licenseText", "headerSystemFilename", "headerDefinitionsPrefix"]
 
     def init(self):
         self.name = None
@@ -160,6 +173,10 @@ class Device(SvdElement):
 
 class Cpu(SvdElement):
     type = "cpu"
+    props = [
+        "name", "revision", "endian", "mpuPresent", "fpuPresent", "fpuDP",
+        "icachePresent", "dcachePresent", "itcmPresent", "dtcmPresent",
+        "vtorPresent", "nvicPrioBits", "vendorSystickConfig"]
 
     def init(self):
         self.name = None
@@ -180,6 +197,11 @@ class Cpu(SvdElement):
 class Peripheral(SvdElement):
     type = "peripheral"
     cast_to_integer = ["size", "baseAddress"]
+    props = [
+        "registers", "interrupts", "derivedFrom", "name", "version",
+        "description", "groupName", "prependToName", "appendToName",
+        "disableCondition", "baseAddress", "size", "access", "resetValue",
+        "resetMask", "alternatePeripheral"]
 
     def init(self):
         self.registers = []
@@ -220,6 +242,11 @@ class Peripheral(SvdElement):
 class Register(SvdElement):
     type = "register"
     cast_to_integer = ["size", "addressOffset", "dim", "dimIncrement", "resetValue", "resetMask"]
+    props = [
+        "fields", "derivedFrom", "dim", "dimIncrement", "dimIndex", "name",
+        "displayName", "description", "alternateGroup", "addressOffset", "size",
+        "access", "resetValue", "resetMask", "modifiedWriteValues",
+        "readAction", "alternateRegister", "dataType"]
 
     def init(self):
         self.fields = []
@@ -293,6 +320,9 @@ class Register(SvdElement):
 class Cluster(SvdElement):
     type = "cluster"
     cast_to_integer = ["addressOffset", "dim", "dimIncrement"]
+    props = [
+        "registers", "derivedFrom", "dim", "dimIncrement", "dimIndex", "name",
+        "description", "alternateCluster", "headerStructName", "addressOffset"]
 
     def init(self):
         self.registers = []
@@ -325,6 +355,10 @@ class Cluster(SvdElement):
 class Field(SvdElement):
     type = "field"
     cast_to_integer = ["bitOffset", "bitWidth", "lsb", "msb"]
+    props = [
+        "derivedFrom", "name", "description", "bitOffset", "bitWidth", "lsb",
+        "msb", "bitRange", "access", "modifiedWriteValues", "writeConstraint",
+        "readAction"]
 
     def init(self):
         self.enumeratedValues = {
@@ -374,6 +408,7 @@ class Field(SvdElement):
 class EnumeratedValue(SvdElement):
     type = "enumeratedValue"
     cast_to_integer = ["value"]
+    props = ["derivedFrom", "name", "description", "value", "isDefault"]
 
     def init(self):
         self.derivedFrom = None
@@ -386,6 +421,7 @@ class EnumeratedValue(SvdElement):
 class Interrupt(SvdElement):
     type = "interrupt"
     cast_to_integer = ["value"]
+    props = ["name", "value"]
 
     def init(self):
         self.name = None

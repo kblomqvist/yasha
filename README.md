@@ -239,6 +239,8 @@ endif
 
 #### SConstruct (SCons)
 
+Important! Template dependencies, like variable file, need to be explicitely defined using `env.Depends()`. This will hopefully be changed when I figure out how.
+
 ```python
 import os
 import yasha.scons
@@ -249,12 +251,16 @@ env = Environment(
 )
 
 sources = ["main.c"]
-sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
+templates = ["foo.c.jinja", "foo.h.jinja"]
 
+generated = env.Yasha(templates)
+env.Depends(generated, "foo.toml") # Shared variables
+
+sources += generated
 env.Program("a.out", sources)
 ```
 
-Another example with separate build directory with sources in `src/`.
+Another example with separate `build/` and `src/` directories.
 
 ```python
 import os
@@ -265,23 +271,21 @@ env = Environment(
     BUILDERS = {"Yasha": yasha.scons.CBuilder()}
 )
 
-duplicate = 1 # See how the duplication affects to the template file paths
+duplicate = 0 # See how the duplication affects to the file paths
 env.VariantDir("build", "src", duplicate=duplicate)
 
 sources = ["build/main.c"]
 
 if duplicate:
     templates = ["build/foo.c.jinja", "build/foo.h.jinja"]
-    sources += env.Yasha(templates)
-
-    # Important! Template dependencies need to be explicitely defined,
-    # in case there are any and duplication=1. This will hopefully be
-    # changed when I figure out how.
-    env.Depends(templates, "build/foo.toml")
+    generated = env.Yasha(templates)
+    env.Depends(generated, "build/foo.toml")
 
 else:
     templates = ["src/foo.c.jinja", "src/foo.h.jinja"]
-    sources += env.Yasha(templates)
+    generated = env.Yasha(templates)
+    env.Depends(generated, "src/foo.toml")
 
+sources += generated
 env.Program("build/a.out", sources)
 ```

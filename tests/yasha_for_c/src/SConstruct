@@ -9,7 +9,11 @@ env = Environment(
 )
 
 sources = ["main.c"]
-sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
+templates = ["foo.c.jinja", "foo.h.jinja"]
 
+generated = env.Yasha(templates)
+env.Depends(generated, "foo.toml")
+
+sources += generated
 env.Program("a.out", sources)
 env.Decider("timestamp-newer") # Added due to unit testing

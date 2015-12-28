@@ -312,6 +312,9 @@ class Register(SvdElement):
         replicates = []
         for increment, index in enumerate(self.dimIndex):
             r = self.copy()
+            r.fields = [f.copy() for f in r.fields]
+            for f in r.fields:
+                f.parent = r
             r.name = r.name.replace("%s", str(index))
             r.addressOffset += increment * r.dimIncrement
             r.dim = r.dimIndex = r.dimIncrement = None

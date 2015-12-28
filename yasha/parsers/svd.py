@@ -83,14 +83,16 @@ class SvdElement():
     type = "svd_element"
     cast_to_integer = []
 
-    def __init__(self, element=None, defaults={}):
+    def __init__(self, element=None, defaults={}, parent=None):
         self.init()
         if element is not None:
             self.from_element(element, defaults)
+        if parent:
+            self.parent = parent
 
     def __repr__(self):
         from pprint import pformat
-        return pformat(vars(self), width=72, indent=4)
+        return pformat(self.to_dict())
 
     def init(self):
         """Define object variables within this method"""
@@ -227,9 +229,9 @@ class Peripheral(SvdElement):
         try: # Because registers may be None
             for r in element.find("registers"):
                 if r.tag == "cluster":
-                    self.registers.append(Cluster(r, self))
+                    self.registers.append(Cluster(r, self, parent=self))
                 elif r.tag == "register":
-                    r = Register(r, self)
+                    r = Register(r, self, parent=self)
                     self.registers.extend(r.to_array())
         except: pass
 
@@ -284,7 +286,7 @@ class Register(SvdElement):
 
         try: # Because fields may be None
             for e in element.find("fields"):
-                field = Field(e, self)
+                field = Field(e, self, parent=self)
                 self.fields.append(field)
         except: pass
 
@@ -345,9 +347,9 @@ class Cluster(SvdElement):
         try:
             for e in element.findall("*"):
                 if e.tag == "cluster": # Cluster may include yet another cluster
-                    self.registers.append(Cluster(e, defaults))
+                    self.registers.append(Cluster(e, defaults, parent=self))
                 elif e.tag == "register":
-                    r = Register(e, defaults)
+                    r = Register(e, defaults, parent=self)
                     self.registers.extend(r.to_array())
         except: pass
 
@@ -400,7 +402,7 @@ class Field(SvdElement):
                 except:
                     usage = "read-write"
                 for e in e.findall("enumeratedValue"):
-                    enum = EnumeratedValue(e, {})
+                    enum = EnumeratedValue(e, {}, parent=self)
                     self.enumeratedValues[usage].append(enum)
         except: pass
 

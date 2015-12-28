@@ -358,9 +358,9 @@ class Field(SvdElement):
     type = "field"
     cast_to_integer = ["bitOffset", "bitWidth", "lsb", "msb"]
     props = [
-        "derivedFrom", "name", "description", "bitOffset", "bitWidth", "lsb",
-        "msb", "bitRange", "access", "modifiedWriteValues", "writeConstraint",
-        "readAction"]
+        "enumeratedValues", "derivedFrom", "name", "description", "bitOffset",
+        "bitWidth", "lsb", "msb", "bitRange", "access", "modifiedWriteValues",
+        "writeConstraint", "readAction"]
 
     def init(self):
         self.enumeratedValues = {

@@ -79,7 +79,7 @@ class SvdFile():
             p.inherit_from(base)
 
 
-class SvdElement():
+class SvdElement(object):
     type = "svd_element"
     cast_to_integer = []
 

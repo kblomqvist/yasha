@@ -239,7 +239,7 @@ endif
 
 #### SConstruct (SCons)
 
-Important! Template dependencies, like variable file, need to be explicitely defined using `env.Depends()`. This will hopefully be changed when I figure out how.
+Important! Template dependencies, like variable file, need to be explicitly defined using `env.Depends()`. This will hopefully be changed when I figure out how.
 
 ```python
 import os

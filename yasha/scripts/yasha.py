@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 import os
 import click
-from ..parsers import Parser, TomlParser, YamlParser, CmsisSvdParser
+from ..parsers import *
 
 def possible_variables_filepaths(template):
     paths = [os.path.dirname(template)]
@@ -142,7 +142,7 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
         "jinja_tests": [],
         "jinja_filters": [],
         "jinja_extensions": [],
-        "variable_parsers": [TomlParser(), YamlParser(), CmsisSvdParser()],
+        "variable_parsers": [TomlParser(), YamlParser(), SvdParser()],
     }
 
     if not extensions and not no_extensions:

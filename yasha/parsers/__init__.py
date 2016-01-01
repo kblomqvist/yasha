@@ -23,38 +23,9 @@ THE SOFTWARE.
 
 """
 
-class Parser():
-    file_extension = []
-    def parse(self, file):
-        return {}
+from .parser import Parser
+from .svd import SvdParser
+from .toml import TomlParser
+from .yaml import YamlParser
 
-class TomlParser(Parser):
-    file_extension = [".toml"]
-    def parse(self, file):
-        import pytoml as toml
-        return toml.load(file)
-
-class YamlParser(Parser):
-    file_extension = [".yaml", ".yml"]
-    def parse(self, file):
-        import yaml
-        return yaml.load(file)
-
-class CmsisSvdParser(Parser):
-    """
-    CMSIS System View Description format (CMSIS-SVD)
-    http://www.keil.com/pack/doc/CMSIS/SVD/html/index.html
-    """
-    file_extension = [".svd"]
-
-    def parse(self, file):
-        from . import svd
-        f = svd.File(file)
-        f.parse()
-
-        vars = {
-            "cpu": f.cpu,
-            "device": f.device,
-            "peripherals": [f.peripherals[name] for name in f.peripherals_order],
-        }
-        return vars
+__all__ = ["Parser", "SvdParser", "TomlParser", "YamlParser"]

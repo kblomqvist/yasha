@@ -23,6 +23,7 @@ THE SOFTWARE.
 
 """
 
-from . parsers import *
-
-__version__ = "1.4"
+class Parser():
+    file_extension = []
+    def parse(self, file):
+        return {}

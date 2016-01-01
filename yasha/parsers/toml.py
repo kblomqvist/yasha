@@ -23,6 +23,10 @@ THE SOFTWARE.
 
 """
 
-from . parsers import *
+import pytoml as toml
+from . import parser
 
-__version__ = "1.4"
+class TomlParser(parser.Parser):
+    file_extension = [".toml"]
+    def parse(self, file):
+        return toml.load(file)

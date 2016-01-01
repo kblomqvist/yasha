@@ -23,9 +23,28 @@ THE SOFTWARE.
 """
 
 import xml.etree.ElementTree as ET
+from . import parser
 
+class SvdParser(parser.Parser):
+    """
+    CMSIS System View Description format (CMSIS-SVD)
+    http://www.keil.com/pack/doc/CMSIS/SVD/html/index.html
+    """
+    file_extension = [".svd"]
 
-class File():
+    def parse(self, file):
+
+        f = SvdFile(file)
+        f.parse()
+
+        vars = {
+            "cpu": f.cpu,
+            "device": f.device,
+            "peripherals": [f.peripherals[name] for name in f.peripherals_order],
+        }
+        return vars
+
+class SvdFile():
     def __init__(self, file):
         if type(file) is str:
             self.root = ET.fromstring(file)

@@ -131,8 +131,8 @@ def test_custom_xmlparser(tmpdir):
     """
 
     extensions = """
-from yasha.parsers import Parser
-class XmlParser(Parser):
+import yasha
+class XmlParser(yasha.Parser):
     file_extension = [".xml"]
 
     def parse(self, file):

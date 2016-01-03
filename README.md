@@ -1,4 +1,6 @@
 # Yasha
+
+[![Join the chat at https://gitter.im/kblomqvist/yasha](https://badges.gitter.im/kblomqvist/yasha.svg)](https://gitter.im/kblomqvist/yasha?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/kblomqvist/yasha.svg?branch=master)](https://travis-ci.org/kblomqvist/yasha)
 [![Number of downloads during the last month](https://img.shields.io/pypi/dm/yasha.svg)]( https://pypi.python.org/pypi/yasha/)
 ![MIT license](https://img.shields.io/pypi/l/yasha.svg)

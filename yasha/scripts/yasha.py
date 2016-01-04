@@ -23,7 +23,7 @@ THE SOFTWARE.
 
 """
 
-import os
+import os, sys
 import click
 from ..parsers import *
 
@@ -187,10 +187,17 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
             line = line.rstrip() + os.linesep
             if line == os.linesep and line == prevline:
                 continue
-            output.write(line)
+            if sys.version_info[0] < 3:
+                output.write(line.encode("utf-8"))
+            else:
+                output.write(line)
             prevline = line
     else:
-        output.write(t.render(vardict))
+        if sys.version_info[0] < 3:
+            output.write(t.render(vardict).encode("utf-8"))
+        else:
+            output.write(t.render(vardict))
+
 
     if md and not output.name == "<stdout>":
         deps = os.path.relpath(output.name) + ": " + template.name + " "

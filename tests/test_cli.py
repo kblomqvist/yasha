@@ -22,9 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import sys
 import pytest
 import subprocess
-from os import path, chdir, utime
+from os import path, chdir
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
@@ -201,11 +202,9 @@ def test_make():
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
         assert not path.isfile("src/" + f)
 
+@pytest.mark.skipif(sys.version_info[0] > 2,
+    reason="requires python2")
 def test_scons():
-    import sys
-    if sys.version_info[0] == 3:
-        return
-
     chdir(SCRIPT_PATH)
     chdir("yasha_for_c")
 

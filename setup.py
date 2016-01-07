@@ -1,5 +1,11 @@
-from yasha.version import __version__
-from setuptools import setup, find_packages
+import re, ast
+from setuptools import setup
+
+_version_re = re.compile(r'__version__\s+=\s+(.*)')
+
+with open('yasha/__init__.py', 'rb') as f:
+    __version__ = str(ast.literal_eval(_version_re.search(
+        f.read().decode('utf-8')).group(1)))
 
 setup(
     name="yasha",
@@ -9,7 +15,7 @@ setup(
     description="A command-line tool to render Jinja templates",
     keywords=["jinja", "code generator"],
     license="MIT",
-    packages=find_packages(),
+    packages=['yasha'],
     include_package_data=True,
     install_requires=[
         "Click",

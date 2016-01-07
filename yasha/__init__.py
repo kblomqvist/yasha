@@ -24,5 +24,5 @@ THE SOFTWARE.
 """
 
 from .parsers import *
-from .version import __version__
 
+__version__ = "1.4.dev"

@@ -25,4 +25,4 @@ THE SOFTWARE.
 
 from . parsers import *
 
-__version__ = "1.4"
+__version__ = "1.4.dev"

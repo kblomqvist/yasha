@@ -1,10 +1,11 @@
+from yasha import __version__
 from setuptools import setup, find_packages
 
 setup(
     name="yasha",
     author="Kim Blomqvist",
     author_email="kblomqvist@iki.fi",
-    version="1.3",
+    version=__version__,
     description="A command-line tool to render Jinja templates",
     keywords=["jinja", "code generator"],
     license="MIT",
@@ -21,12 +22,12 @@ setup(
         yasha=yasha.scripts.yasha:cli
     ''',
     classifiers=[
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.4",
         "Topic :: Software Development :: Code Generators",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",
     ],
     url="https://github.com/kblomqvist/yasha",
-    download_url="https://github.com/kblomqvist/yasha/tarball/1.3",
+    download_url="https://github.com/kblomqvist/yasha/tarball/" + __version__,
 )

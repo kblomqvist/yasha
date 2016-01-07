@@ -1,7 +1,5 @@
-#??? from yasha import __version__
+from yasha.version import __version__
 from setuptools import setup, find_packages
-
-__version__ = "1.4.dev"
 
 setup(
     name="yasha",

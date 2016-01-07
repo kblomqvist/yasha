@@ -5,3 +5,5 @@ dist/
 *.pyc
 tests/yasha_for_c/build
 tests/yasha_for_c/**/.sconsign.dblite
+tests/fixtures/nrf51.rs
+tests/fixtures/nrf51.rs.j2extc

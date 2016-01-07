@@ -33,7 +33,6 @@ class SvdParser(parser.Parser):
     file_extension = [".svd"]
 
     def parse(self, file):
-
         f = SvdFile(file)
         f.parse()
 

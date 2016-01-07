@@ -8,3 +8,5 @@ install:
 
 script:
   - py.test -v tests
+  - yasha tests/fixtures/nrf51.rs.jinja
+  - cmp -s tests/fixtures/nrf51.rs tests/fixtures/nrf51.rs.expected

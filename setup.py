@@ -1,5 +1,5 @@
 import re, ast
-from setuptools import setup
+from setuptools import setup, find_packages
 
 _version_re = re.compile(r'__version__\s+=\s+(.*)')
 
@@ -15,7 +15,7 @@ setup(
     description="A command-line tool to render Jinja templates",
     keywords=["jinja", "code generator"],
     license="MIT",
-    packages=['yasha'],
+    packages=find_packages(),
     include_package_data=True,
     install_requires=[
         "Click",

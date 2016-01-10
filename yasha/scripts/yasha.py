@@ -74,14 +74,26 @@ def parse_variables(file, parsers):
     return {}
 
 def load_extensions(file):
+    def error_handler(e):
+        click.echo("Cannot load extensions!", err=True)
+        click.echo("- {}".format(e), err=True)
+        raise click.Abort()
+
+    try:
+        from importlib.machinery import SourceFileLoader
+        module = SourceFileLoader("extensions", file.name).load_module()
+    except SyntaxError as e:
+        error_handler(e)
+    except ImportError:
+        pass # fallback to Python2
+
     try:
         import imp
         desc = (".py", "rb", imp.PY_SOURCE)
         module = imp.load_module("extensions", file, file.name, desc)
     except (ImportError, SyntaxError) as e:
-        click.echo("Cannot load extensions!", err=True)
-        click.echo("- {}".format(e), err=True)
-        raise click.Abort()
+        error_handler(e)
+
     return module
 
 def parse_extensions(extmodule, extdict):

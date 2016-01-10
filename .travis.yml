@@ -11,4 +11,4 @@ script:
   - py.test -v tests
   - yasha tests/fixtures/nrf51.rs.jinja
   - cmp -s tests/fixtures/nrf51.rs tests/fixtures/nrf51.rs.expected
-  - test -f tests/fixtures/nrf51.rs.j2extc # issue 4
+  - test -f fixtures/nrf51.rs.j2extc || test -d fixtures/__pycache__ # issue 4

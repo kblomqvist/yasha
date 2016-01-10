@@ -174,6 +174,25 @@ class XmlParser(yasha.Parser):
     address = "Bar Valley"
     """
 
+def test_broken_extensions(tmpdir):
+    tmpdir.chdir()
+
+    extensions = """def foo()
+    return "foo"
+    """
+
+    tpl = tmpdir.join("foo.jinja")
+    tpl.write("")
+
+    ext = tmpdir.join("foo.j2ext")
+    ext.write(extensions)
+
+    with pytest.raises(subprocess.CalledProcessError) as e:
+        cmd = ["yasha", "foo.jinja"]
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        assert e.returncode == 1
+        assert b"invalid syntax (foo.j2ext, line 1)" in e.output
+
 def test_make():
     chdir(SCRIPT_PATH)
     chdir("yasha_for_c")

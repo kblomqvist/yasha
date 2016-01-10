@@ -74,14 +74,15 @@ def parse_variables(file, parsers):
     return {}
 
 def load_extensions(file):
-    if file:
+    try:
         import imp
-        pathname = os.path.basename(file.name)
-        name = os.path.splitext(pathname)[0]
-        name = name.replace(".", "_")
         desc = (".py", "rb", imp.PY_SOURCE)
-        return imp.load_module(name, file, pathname, desc)
-    return None
+        module = imp.load_module("extensions", file, file.name, desc)
+    except (ImportError, SyntaxError) as e:
+        click.echo("Cannot load extensions!", err=True)
+        click.echo("- {}".format(e), err=True)
+        raise click.Abort()
+    return module
 
 def parse_extensions(extmodule, extdict):
     from jinja2.ext import Extension

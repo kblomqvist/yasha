@@ -22,12 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import sys
 import pytest
-import subprocess
 from os import path, chdir
-
-SCRIPT_PATH = path.dirname(path.realpath(__file__))
+from subprocess import call, check_output
 
 @pytest.fixture(params=["toml", "yaml"])
 def tmplvar(request):
@@ -84,7 +81,7 @@ def test_template_in_subdir(tmpdir, tmplvar):
     v0 = tmpdir.join(varfile[0])
     v0.write(tmplvar["content"].format(0))
 
-    errno = subprocess.call(["yasha", "sub/foo.c.jinja"])
+    errno = call(["yasha", "sub/foo.c.jinja"])
     assert errno == 0
     assert path.isfile("sub/foo.c")
 
@@ -94,19 +91,19 @@ def test_template_in_subdir(tmpdir, tmplvar):
     v1 = tmpdir.join(varfile[1])
     v1.write(tmplvar["content"].format(1))
 
-    subprocess.call(["yasha", "sub/foo.c.jinja"])
+    call(["yasha", "sub/foo.c.jinja"])
     assert o.read() == "int x = 1;"
 
     v2 = tmpdir.join(varfile[2])
     v2.write(tmplvar["content"].format(2))
 
-    subprocess.call(["yasha", "sub/foo.c.jinja"])
+    call(["yasha", "sub/foo.c.jinja"])
     assert o.read() == "int x = 2;"
 
-    subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", varfile[1]])
+    call(["yasha", "sub/foo.c.jinja", "--variables", varfile[1]])
     assert o.read() == "int x = 1;"
 
-    subprocess.call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
+    call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
     assert o.read() == "int x = 0;"
 
 def test_custom_xmlparser(tmpdir):
@@ -160,7 +157,7 @@ class XmlParser(yasha.Parser):
     file = tmpdir.join("foo.j2ext")
     file.write(extensions)
 
-    errno = subprocess.call(["yasha", "foo.toml.jinja"])
+    errno = call(["yasha", "foo.toml.jinja"])
     assert errno == 0
     assert path.isfile("foo.toml")
 
@@ -175,6 +172,7 @@ class XmlParser(yasha.Parser):
     """
 
 def test_broken_extensions(tmpdir):
+    from subprocess import CalledProcessError, STDOUT
     tmpdir.chdir()
 
     extensions = """def foo()
@@ -187,71 +185,11 @@ def test_broken_extensions(tmpdir):
     ext = tmpdir.join("foo.j2ext")
     ext.write(extensions)
 
-    with pytest.raises(subprocess.CalledProcessError) as e:
+    with pytest.raises(CalledProcessError) as e:
         cmd = ["yasha", "foo.jinja"]
-        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        check_output(cmd, stderr=STDOUT)
     assert e.value.returncode == 1
     assert b"Invalid syntax (foo.j2ext, line 1)" in e.value.output
-
-def test_make():
-    chdir(SCRIPT_PATH)
-    chdir("yasha_for_c")
-
-    # First build
-    out = subprocess.check_output(["make"])
-    assert not b"is up to date" in out
-    assert path.isfile("build/a.out")
-
-    # Check program output
-    out = subprocess.check_output(["./build/a.out"])
-    assert b"foo has 3 chars ...\n" == out
-
-    # Second build shouldn't do anything
-    out = subprocess.check_output(["make"])
-    assert b"is up to date" in out
-
-    # Test template dependencies
-    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
-        subprocess.call(["touch", "src/" + dep])
-        out = subprocess.check_output(["make"])
-        assert not b"is up to date" in out
-
-    # Remember to clean the build
-    subprocess.call(["make", "clean"])
-    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile("src/" + f)
-
-@pytest.mark.skipif(sys.version_info[0] > 2,
-    reason="requires python2")
-def test_scons():
-    chdir(SCRIPT_PATH)
-    chdir("yasha_for_c")
-
-    # First build
-    out = subprocess.check_output(["scons"])
-    assert not b"is up to date" in out
-    assert path.isfile("build/a.out")
-
-    # Check program output
-    out = subprocess.check_output(["./build/a.out"])
-    assert b"foo has 3 chars ...\n" == out
-
-    # Second build shouldn't do anything
-    out = subprocess.check_output(["scons"])
-    assert b"is up to date" in out
-
-# TODO: Fix race condition. Every now and then fails. Though,
-# subprocess.call() shouldn't return before finished.
-
-#    for dep in ["foo.toml"]: #, "foo.h.jinja", "foo.c.jinja"]:
-#        subprocess.call(["touch", "src/" + dep])
-#        out = subprocess.check_output(["scons"])
-#        assert not b"is up to date" in out
-
-    # Remember to clean the build
-    subprocess.call(["scons", "-c"])
-    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile("build/"+f)
 
 def test_trim(tmpdir):
     template = """
@@ -270,7 +208,7 @@ def test_trim(tmpdir):
     file = tmpdir.join("foo.toml.jinja")
     file.write(template)
 
-    errno = subprocess.call(["yasha", "foo.toml.jinja", "--trim"])
+    errno = call(["yasha", "foo.toml.jinja", "--trim"])
     assert errno == 0
     assert path.isfile("foo.toml")
 

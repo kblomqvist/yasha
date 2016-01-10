@@ -190,8 +190,8 @@ def test_broken_extensions(tmpdir):
     with pytest.raises(subprocess.CalledProcessError) as e:
         cmd = ["yasha", "foo.jinja"]
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-        assert e.returncode == 1
-        assert b"invalid syntax (foo.j2ext, line 1)" in e.output
+    assert e.value.returncode == 1
+    assert b"Invalid syntax (foo.j2ext, line 1)" in e.value.output
 
 def test_make():
     chdir(SCRIPT_PATH)

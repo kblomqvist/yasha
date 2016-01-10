@@ -75,8 +75,10 @@ def parse_variables(file, parsers):
 
 def load_extensions(file):
     def error_handler(e):
-        click.echo("Cannot load extensions!", err=True)
-        click.echo("- {}".format(e), err=True)
+        msg = e.msg[0].upper() + e.msg[1:]
+        filename = os.path.relpath(e.filename)
+        click.echo("Error: Cannot load extensions", nl=False, err=True)
+        click.echo(": {} ({}, line {})".format(msg, filename, e.lineno), err=True)
         raise click.Abort()
 
     try:
@@ -91,7 +93,7 @@ def load_extensions(file):
         import imp
         desc = (".py", "rb", imp.PY_SOURCE)
         module = imp.load_module("extensions", file, file.name, desc)
-    except (ImportError, SyntaxError) as e:
+    except SyntaxError as e:
         error_handler(e)
 
     return module

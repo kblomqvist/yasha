@@ -26,44 +26,13 @@ THE SOFTWARE.
 import os, sys
 import click
 from ..parsers import *
-
-def possible_variables_filepaths(template):
-    paths = [os.path.dirname(template)]
-    src_path = os.path.abspath(template)
-    for _ in range(src_path.count(os.path.sep)):
-        paths.append(os.path.join(paths[-1], ".."))
-    return paths
-
-def possible_variables_filenames(template):
-    files = []
-    src_name, src_extension = os.path.splitext(template)
-    src_name = os.path.basename(src_name)
-    src_name = src_name.split(".")
-    for i, _ in enumerate(src_name):
-        files.insert(0, ".".join(src_name[0:i+1]))
-    return files
+from .. import yasha
 
 def find_variables(template, filext):
-    varpath = None
-    filepaths = possible_variables_filepaths(template)
-    filenames = possible_variables_filenames(template)
-
-    for path in filepaths:
-        if varpath:
-            break
-        for variables_name in filenames:
-            if varpath:
-                break
-            for ext in filext:
-                test = os.path.join(path, variables_name + ext)
-                if os.path.isfile(test):
-                    varpath = os.path.abspath(test)
-                    break
-
-    return varpath
+    return yasha.find_dependencies(template, filext)
 
 def find_extensions(template):
-    return find_variables(template, [".j2ext", ".jinja-ext"])
+    return yasha.find_dependencies(template, [".j2ext", ".jinja-ext"])
 
 def parse_variables(file, parsers):
     if file:

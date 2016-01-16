@@ -6,16 +6,18 @@ env = Environment(
     BUILDERS = {"Yasha": yasha.scons.CBuilder()}
 )
 
+sources = ["build/main.c"]
+
 duplicate = 0 # See how the duplication affects to the file paths
 env.VariantDir("build", "src", duplicate=duplicate)
 
 if duplicate:
-    templates = ["build/foo.c.jinja", "build/foo.h.jinja"]
-    generated = env.Yasha(templates)
+    tmpl = ["build/foo.c.jinja", "build/foo.h.jinja"]
+    sources += env.Yasha(tmpl)
 
 else:
-    templates = ["src/foo.c.jinja", "src/foo.h.jinja"]
-    generated = env.Yasha(templates)
+    tmpl = ["src/foo.c.jinja", "src/foo.h.jinja"]
+    sources += env.Yasha(tmpl)
 
-env.Program("build/a.out", ["build/main.c"] + generated)
+env.Program("build/a.out", sources)
 env.Decider("timestamp-newer") # Added due to unit testing

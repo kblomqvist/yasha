@@ -29,21 +29,17 @@ from SCons.Builder import BuilderBase
 from SCons.Scanner import Scanner
 from SCons.Action import Action, CommandGeneratorAction
 
-def is_c_file(file):
+def is_c_file(file, include_headers=True):
     suffix = os.path.splitext(str(file))[1]
-    accept = [".c", ".cc", ".cpp", ".h", ".hh", ".hpp", ".s", ".S", ".asm"]
+    accept = [".c", ".cc", ".cpp", ".s", ".S", ".asm"]
+    if include_headers:
+        accept += [".h", ".hh", ".hpp"]
     return True if suffix in accept else False
 
 class CBuilderBase(BuilderBase):
     def __call__(self, *args, **kw):
-        """
-        I would like to remove .h, .hh and .hpp files but then
-        those aren't created at all. I'm confused cos I'm just
-        removing those files from the output list of __call__()
-        to avoid doing that extra step within SConstruct/Sconscript.
-        """
         sources = BuilderBase.__call__(self, *args, **kw)
-        return [x for x in sources if is_c_file(x)]
+        return [x for x in sources if is_c_file(x, include_headers=False)]
 
 def CBuilder(action="yasha $SOURCE -o $TARGET"):
     """

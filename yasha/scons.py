@@ -36,50 +36,46 @@ def is_c_file(file, include_headers=True):
         accept += [".h", ".hh", ".hpp"]
     return True if suffix in accept else False
 
+def scan(node, env, path):
+    """
+    TODO: Doesn't take custom parsers into account.
+    """
+    src = str(node.srcnode())
+    src_dir = os.path.dirname(src)
+    variant_dir = os.path.dirname(str(node))
+
+    variable_formats = []
+    for p in yasha.default_parsers():
+        variable_formats += p.file_extension
+
+    var = yasha.find_dependencies(src, variable_formats)
+    ext = yasha.find_dependencies(src, [".py", ".j2ext", ".jinja-ext"])
+
+    deps = [d for d in [var, ext] if d != None]
+    deps = [d.replace(src_dir, variant_dir) for d in deps]
+    return env.File(deps)
+
+def emit(target, source, env):
+    env.Clean(target[0], str(target[0]) + ".d")
+    return target, source
+
 class CBuilderBase(BuilderBase):
     def __call__(self, *args, **kw):
         sources = BuilderBase.__call__(self, *args, **kw)
         return [x for x in sources if is_c_file(x, include_headers=False)]
 
 def CBuilder(action="yasha $SOURCE -o $TARGET"):
-    """
-    SCons builder for C
-    """
-
-    def source_scan(node, env, path):
-        """
-        TODO: Doesn't take custom parsers into account.
-        """
-        src = str(node.srcnode())
-        src_dir = os.path.dirname(src)
-        variant_dir = os.path.dirname(str(node))
-
-        variable_formats = []
-        for p in yasha.default_parsers():
-            variable_formats += p.file_extension
-
-        var = yasha.find_dependencies(src, variable_formats)
-        ext = yasha.find_dependencies(src, [".py", ".j2ext", ".jinja-ext"])
-
-        deps = [d for d in [var, ext] if d != None]
-        deps = [d.replace(src_dir, variant_dir) for d in deps]
-        return env.File(deps)
-
-    def emit(target, source, env):
-        env.Clean(target[0], str(target[0]) + ".d")
-        return target, source
-
-    def gtor(source, target, env, for_signature):
-        cmd = ""
-        if is_c_file(target[0]):
-            cmd = action.replace("$SOURCE", str(source[0]))
-            cmd = cmd.replace("$TARGET", str(target[0]))
-        return cmd
-
     return CBuilderBase(
-        action = CommandGeneratorAction(gtor, {}),
-        #action = Action(action),
+        action = Action(action),
         emitter = emit,
-        source_scanner = Scanner(function=source_scan),
+        source_scanner = Scanner(function=scan),
+        single_source = True
+    )
+
+def Builder(action="yasha $SOURCE -o $TARGET"):
+    return BuilderBase(
+        action = Action(action),
+        emitter = emit,
+        source_scanner = Scanner(function=scan),
         single_source = True
     )

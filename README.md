@@ -133,7 +133,7 @@ There's also `--no-extensions` option flag operating in a similar manner with `-
 
 ## Custom template variables parser
 
-By default Yasha supports TOML and YAML files for template variables. However, it's possible to declare custom parser in `.j2ext` file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.parsers.Parser` are considered as a custom parser and will be loaded.
+If none of the built-in parsers fit your needs, it's possible to declare a custom parser in template extension file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.Parser` are considered as a custom parser and will be loaded.
 
 ```python
 import yasha
@@ -156,7 +156,9 @@ class XmlParser(yasha.Parser):
         return vars # Return value has to be dictionary
 ```
 
-If you need to post-process the parsed variables accomplished by the built-in TOML and YAML parsers, you can just declare new parsers to handle TOML and YAML files.
+### Variable pre-processing before template rendering
+
+If you need to process the parsed variables accomplished by a built-in parser, you can just declare a new parser to overwrite the built-in parser like this.
 
 ```python
 import yasha
@@ -165,12 +167,7 @@ def postprocess(vars):
     vars["foo"] = "bar" # foo should always be bar
     return vars
 
-class TomlParser(yasha.TomlParser):
-    def parse(self, file):
-        vars = yasha.TomlParser.parse(file)
-        return postprocess(vars)
-
-class YamlParser(yasha.YamlParser):
+class YamlParser(yasha.YamlParser): # This will overwrite the default parser
     def parse(self, file):
         vars = yasha.YamlParser.parse(file)
         return postprocess(vars)

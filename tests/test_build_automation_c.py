@@ -37,13 +37,13 @@ def test_make():
     assert not b"is up to date" in out
     assert path.isfile("build/a.out")
 
-    # Check program output
-    out = check_output(["./build/a.out"])
-    assert b"foo has 3 chars ...\n" == out
-
     # Second build shouldn't do anything
     out = check_output(["make"])
     assert b"is up to date" in out
+
+    # Check program output
+    out = check_output(["./build/a.out"])
+    assert b"foo has 3 chars ...\n" == out
 
     # Test template dependencies
     for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
@@ -51,7 +51,7 @@ def test_make():
         out = check_output(["make"])
         assert not b"is up to date" in out
 
-    # Remember to clean the build
+    # Clean the build
     call(["make", "clean"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
         assert not path.isfile("src/" + f)
@@ -67,23 +67,23 @@ def test_scons():
     assert not b"is up to date" in out
     assert path.isfile("build/a.out")
 
-    # Check program output
-    out = check_output(["./build/a.out"])
-    assert b"foo has 3 chars ...\n" == out
-
     # Second build shouldn't do anything
     out = check_output(["scons"])
     assert b"is up to date" in out
 
+    # Check program output
+    out = check_output(["./build/a.out"])
+    assert b"foo has 3 chars ...\n" == out
+
 # TODO: Fix race condition. Every now and then fails. Though,
 # call() shouldn't return before finished.
 
-#    for dep in ["foo.toml"]: #, "foo.h.jinja", "foo.c.jinja"]:
-#        call(["touch", "src/" + dep])
-#        out = check_output(["scons"])
-#        assert not b"is up to date" in out
+    for dep in []: #["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+        call(["touch", "src/" + dep])
+        out = check_output(["scons"])
+        assert not b"is up to date" in out
 
-    # Remember to clean the build
+    # Clean the build
     call(["scons", "-c"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
         assert not path.isfile("build/"+f)

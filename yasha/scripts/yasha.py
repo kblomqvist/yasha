@@ -32,7 +32,7 @@ def find_variables(template, filext):
     return yasha.find_dependencies(template, filext)
 
 def find_extensions(template):
-    return yasha.find_dependencies(template, [".j2ext", ".jinja-ext"])
+    return yasha.find_dependencies(template, [".py", ".j2ext", ".jinja-ext"])
 
 def parse_variables(file, parsers):
     if file:

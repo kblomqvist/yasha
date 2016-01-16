@@ -79,18 +79,20 @@ class SvdFile():
             p.inherit_from(base)
 
 
-class SvdElement():
+class SvdElement(object):
     type = "svd_element"
     cast_to_integer = []
 
-    def __init__(self, element=None, defaults={}):
+    def __init__(self, element=None, defaults={}, parent=None):
         self.init()
         if element is not None:
             self.from_element(element, defaults)
+        if parent:
+            self.parent = parent
 
     def __repr__(self):
         from pprint import pformat
-        return pformat(vars(self), width=72, indent=4)
+        return pformat(self.to_dict())
 
     def init(self):
         """Define object variables within this method"""
@@ -135,10 +137,23 @@ class SvdElement():
                 value = getattr(element, key)
                 setattr(self, key, value)
 
+    def to_dict(self):
+        d = {}
+        for k in self.props:
+            v = getattr(self, k)
+            if type(v) == list:
+                v = [i.to_dict() for i in v]
+            d[k] = v
+        return d
+
 
 class Device(SvdElement):
     type = "device"
     cast_to_integer = ["size"]
+    props = [
+        "name", "version", "description", "addressUnitBits", "width", "size",
+        "access", "resetValue", "resetMask", "vendor", "vendorID", "series",
+        "licenseText", "headerSystemFilename", "headerDefinitionsPrefix"]
 
     def init(self):
         self.name = None
@@ -160,6 +175,10 @@ class Device(SvdElement):
 
 class Cpu(SvdElement):
     type = "cpu"
+    props = [
+        "name", "revision", "endian", "mpuPresent", "fpuPresent", "fpuDP",
+        "icachePresent", "dcachePresent", "itcmPresent", "dtcmPresent",
+        "vtorPresent", "nvicPrioBits", "vendorSystickConfig"]
 
     def init(self):
         self.name = None
@@ -180,6 +199,11 @@ class Cpu(SvdElement):
 class Peripheral(SvdElement):
     type = "peripheral"
     cast_to_integer = ["size", "baseAddress"]
+    props = [
+        "registers", "interrupts", "derivedFrom", "name", "version",
+        "description", "groupName", "prependToName", "appendToName",
+        "disableCondition", "baseAddress", "size", "access", "resetValue",
+        "resetMask", "alternatePeripheral"]
 
     def init(self):
         self.registers = []
@@ -205,9 +229,9 @@ class Peripheral(SvdElement):
         try: # Because registers may be None
             for r in element.find("registers"):
                 if r.tag == "cluster":
-                    self.registers.append(Cluster(r, self))
+                    self.registers.append(Cluster(r, self, parent=self))
                 elif r.tag == "register":
-                    r = Register(r, self)
+                    r = Register(r, self, parent=self)
                     self.registers.extend(r.to_array())
         except: pass
 
@@ -220,6 +244,11 @@ class Peripheral(SvdElement):
 class Register(SvdElement):
     type = "register"
     cast_to_integer = ["size", "addressOffset", "dim", "dimIncrement", "resetValue", "resetMask"]
+    props = [
+        "fields", "derivedFrom", "dim", "dimIncrement", "dimIndex", "name",
+        "displayName", "description", "alternateGroup", "addressOffset", "size",
+        "access", "resetValue", "resetMask", "modifiedWriteValues",
+        "readAction", "alternateRegister", "dataType"]
 
     def init(self):
         self.fields = []
@@ -257,7 +286,7 @@ class Register(SvdElement):
 
         try: # Because fields may be None
             for e in element.find("fields"):
-                field = Field(e, self)
+                field = Field(e, self, parent=self)
                 self.fields.append(field)
         except: pass
 
@@ -283,6 +312,9 @@ class Register(SvdElement):
         replicates = []
         for increment, index in enumerate(self.dimIndex):
             r = self.copy()
+            r.fields = [f.copy() for f in r.fields]
+            for f in r.fields:
+                f.parent = r
             r.name = r.name.replace("%s", str(index))
             r.addressOffset += increment * r.dimIncrement
             r.dim = r.dimIndex = r.dimIncrement = None
@@ -293,6 +325,9 @@ class Register(SvdElement):
 class Cluster(SvdElement):
     type = "cluster"
     cast_to_integer = ["addressOffset", "dim", "dimIncrement"]
+    props = [
+        "registers", "derivedFrom", "dim", "dimIncrement", "dimIndex", "name",
+        "description", "alternateCluster", "headerStructName", "addressOffset"]
 
     def init(self):
         self.registers = []
@@ -315,9 +350,9 @@ class Cluster(SvdElement):
         try:
             for e in element.findall("*"):
                 if e.tag == "cluster": # Cluster may include yet another cluster
-                    self.registers.append(Cluster(e, defaults))
+                    self.registers.append(Cluster(e, defaults, parent=self))
                 elif e.tag == "register":
-                    r = Register(e, defaults)
+                    r = Register(e, defaults, parent=self)
                     self.registers.extend(r.to_array())
         except: pass
 
@@ -325,6 +360,10 @@ class Cluster(SvdElement):
 class Field(SvdElement):
     type = "field"
     cast_to_integer = ["bitOffset", "bitWidth", "lsb", "msb"]
+    props = [
+        "enumeratedValues", "derivedFrom", "name", "description", "bitOffset",
+        "bitWidth", "lsb", "msb", "bitRange", "access", "modifiedWriteValues",
+        "writeConstraint", "readAction"]
 
     def init(self):
         self.enumeratedValues = {
@@ -366,7 +405,7 @@ class Field(SvdElement):
                 except:
                     usage = "read-write"
                 for e in e.findall("enumeratedValue"):
-                    enum = EnumeratedValue(e, {})
+                    enum = EnumeratedValue(e, {}, parent=self)
                     self.enumeratedValues[usage].append(enum)
         except: pass
 
@@ -374,6 +413,7 @@ class Field(SvdElement):
 class EnumeratedValue(SvdElement):
     type = "enumeratedValue"
     cast_to_integer = ["value"]
+    props = ["derivedFrom", "name", "description", "value", "isDefault"]
 
     def init(self):
         self.derivedFrom = None
@@ -386,6 +426,7 @@ class EnumeratedValue(SvdElement):
 class Interrupt(SvdElement):
     type = "interrupt"
     cast_to_integer = ["value"]
+    props = ["name", "value"]
 
     def init(self):
         self.name = None

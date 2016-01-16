@@ -1,6 +1,7 @@
 __pycache__/
 yasha.egg-info/
 dist/
+build/
 
 *.pyc
 tests/yasha_for_c/build

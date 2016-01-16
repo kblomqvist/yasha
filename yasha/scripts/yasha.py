@@ -78,6 +78,8 @@ def parse_extensions(extmodule, extdict):
                 extdict["jinja_tests"].append(x)
             elif x.__name__.startswith("filter_"):
                 extdict["jinja_filters"].append(x)
+            elif x.__name__.startswith("preprocess_"):
+                extdict["variable_preprocessors"].append(x)
         elif inspect.isclass(x):
             if issubclass(x, Extension):
                 extdict["jinja_extensions"].append(x)
@@ -127,6 +129,7 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
         "jinja_filters": [],
         "jinja_extensions": [],
         "variable_parsers": [TomlParser(), YamlParser(), SvdParser()],
+        "variable_preprocessors": [],
     }
 
     if not extensions and not no_extensions:
@@ -144,6 +147,9 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
 
     if variables and not no_variables:
         vardict = parse_variables(variables, extdict["variable_parsers"])
+
+    for preprocessor in extdict["variable_preprocessors"]:
+        vardict = preprocessor(vardict)
 
     jinja = load_jinja(t_dirname, extdict)
 

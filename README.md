@@ -108,9 +108,7 @@ def test_even(number):
     return number % 2 == 0
 ```
 
-Note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
-
-In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. Meaning that all classes derived from `jinja2.ext.Extension` are loaded and available within the template.
+Note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`. In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. Meaning that all classes derived from `jinja2.ext.Extension` are loaded and available within the template.
 
 And as you might guess, instead of relying on the automatic extension file look up, the file can be given explicitly as well.
 
@@ -147,7 +145,7 @@ class XmlParser(yasha.Parser):
 
 ### Variable pre-processing before template rendering
 
-If you need to process the parsed variables accomplished by a built-in parser, you can just declare a new parser to overwrite the built-in parser like this.
+If you need to pre-process template variables before those are passed to the template, you can do that with custom parser which overwrites the default one:
 
 ```python
 import yasha

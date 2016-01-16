@@ -23,6 +23,6 @@ THE SOFTWARE.
 
 """
 
-from .parsers import *
+from .yasha import *
 
 __version__ = "1.5dev"

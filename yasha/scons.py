@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+from . import yasha
+
 import os
 from SCons.Builder import BuilderBase
 from SCons.Scanner import Scanner
@@ -33,40 +35,38 @@ def is_c_file(file):
     return True if suffix in accept else False
 
 class CBuilderBase(BuilderBase):
-    def _execute(self, env, target, source, ow={}, exec_kw={}):
+    def __call__(self, *args, **kw):
         """
-        Override _execute() to remove C header files from the sources list
+        I would like to remove .h, .hh and .hpp files but then
+        those aren't created at all. I'm confused cos I'm just
+        removing those files from the output list of __call__()
+        to avoid doing that extra step within SConstruct/Sconscript.
         """
-        sources = BuilderBase._execute(self, env, target,source, ow, exec_kw)
+        sources = BuilderBase.__call__(self, *args, **kw)
         return [x for x in sources if is_c_file(x)]
 
-def CBuilder(action="yasha -MD $SOURCE -o $TARGET"):
+def CBuilder(action="yasha $SOURCE -o $TARGET"):
     """
-    Yasha SCons builder for C
+    SCons builder for C
     """
-
-    def target_scan(node, env, path):
-        """No used. Most likely will be removed."""
-        try: # Resolve template dependencies from the generated .d file
-            with open(str(node) + ".d") as f:
-                # IMPORTANT! Don't duplicate template dependency, thus [2:]
-                deps = f.readline().split()[2:]
-                return env.File(deps)
-        except:
-            return []
 
     def source_scan(node, env, path):
         """
-        TODO: Doesn't take custom parses into account.
+        TODO: Doesn't take custom parsers into account.
         """
-        deps = []
-        file, extension = os.path.splitext(str(node))
-        while extension:
-            for suffix in [".toml", ".yml", ".yaml", ".j2ext", ".jinja-ext"]:
-                dep = file + suffix
-                if os.path.isfile(dep):
-                    deps.append(dep)
-            file, extension = os.path.splitext(file)
+        src = str(node.srcnode())
+        src_dir = os.path.dirname(src)
+        variant_dir = os.path.dirname(str(node))
+
+        variable_formats = []
+        for p in yasha.default_parsers():
+            variable_formats += p.file_extension
+
+        var = yasha.find_dependencies(src, variable_formats)
+        ext = yasha.find_dependencies(src, [".py", ".j2ext", ".jinja-ext"])
+
+        deps = [d for d in [var, ext] if d != None]
+        deps = [d.replace(src_dir, variant_dir) for d in deps]
         return env.File(deps)
 
     def emit(target, source, env):
@@ -84,7 +84,6 @@ def CBuilder(action="yasha -MD $SOURCE -o $TARGET"):
         action = CommandGeneratorAction(gtor, {}),
         #action = Action(action),
         emitter = emit,
-        #target_scanner = Scanner(function=target_scan),
-        #source_scanner = Scanner(function=source_scan),
+        source_scanner = Scanner(function=source_scan),
         single_source = True
     )

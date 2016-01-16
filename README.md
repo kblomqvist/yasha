@@ -223,8 +223,6 @@ endif
 
 #### SConstruct (SCons)
 
-Important! Template dependencies, like variable file, need to be explicitly defined using `env.Depends()`. This will hopefully be changed when I figure out how.
-
 ```python
 import os
 import yasha.scons
@@ -235,12 +233,7 @@ env = Environment(
 )
 
 sources = ["main.c"]
-templates = ["foo.c.jinja", "foo.h.jinja"]
-
-generated = env.Yasha(templates)
-env.Depends(generated, "foo.toml") # Shared variables
-
-sources += generated
+sources += env.Yasha(["foo.c.jinja", "foo.h.jinja"])
 env.Program("a.out", sources)
 ```
 
@@ -258,18 +251,13 @@ env = Environment(
 duplicate = 0 # See how the duplication affects to the file paths
 env.VariantDir("build", "src", duplicate=duplicate)
 
-sources = ["build/main.c"]
-
 if duplicate:
     templates = ["build/foo.c.jinja", "build/foo.h.jinja"]
     generated = env.Yasha(templates)
-    env.Depends(generated, "build/foo.toml")
 
 else:
     templates = ["src/foo.c.jinja", "src/foo.h.jinja"]
     generated = env.Yasha(templates)
-    env.Depends(generated, "src/foo.toml")
 
-sources += generated
-env.Program("build/a.out", sources)
+env.Program("build/a.out", ["build/main.c"] + generated)
 ```

@@ -145,7 +145,7 @@ class XmlParser(yasha.Parser):
 
 ### Variable pre-processing before template rendering
 
-If you need to pre-process template variables before those are passed to the template, you can do that with custom parser which overwrites the default one:
+If you need to pre-process template variables before those are passed to the template, you can do that with custom parser which overwrites the default parser:
 
 ```python
 import yasha
@@ -222,6 +222,8 @@ endif
 ```
 
 #### SConstruct (SCons)
+
+Below is shown a simple example how to use Yasha with [SCons](http://scons.org/) for C files. There are too different kind of builders available in `yasha.scons`, Builder and CBuilder. The difference is that CBuilder doesn't include generated C header files into its return list so you can append this directly with your sources list.
 
 ```python
 import os

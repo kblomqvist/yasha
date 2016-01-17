@@ -85,17 +85,7 @@ $ yasha include/foo.h.jinja
 $ yasha source/foo.c.jinja
 ```
 
-the variables defined in `foo.yaml` are used within both templates. For your convenience here is the file listing after the above two yasha calls:
-
-```
-include/
-  foo.h
-  foo.h.jinja
-source/
-  foo.c
-  foo.c.jinja
-foo.yaml
-```
+the variables defined in `foo.yaml` are used within both templates.
 
 ## Template extensions (extension file)
 

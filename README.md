@@ -94,11 +94,11 @@ source/
 foo.toml
 ```
 
-## Extensions
+## Template extensions (extension file)
 
-Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the variables file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.py` file. `.j2ext` and `.jinja-ext` file extensions work too.
+Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the variable file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.py` file for extensions. In case you are generating python code you may like to use `.j2ext` or `.jinja-ext` file suffix for your template extension file instead of `.py`.
 
-Here is an example of the `foo.py` file containing a filter and a test.
+Here is an example of the extension file containing a filter and a test:
 
 ```python
 def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
@@ -145,7 +145,7 @@ class XmlParser(yasha.Parser):
 
 ### Variable pre-processing before template rendering
 
-If you need to pre-process template variables before those are passed to the template, you can do that with custom parser which overwrites the default parser:
+If you need to pre-process template variables before those are passed into the template, you can do that within an extension file by declaring a custom parser which overwrites the default parser:
 
 ```python
 import yasha

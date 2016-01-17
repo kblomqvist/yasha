@@ -12,32 +12,6 @@ $ yasha foo.jinja
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
-Template variables can be defined in a separate template variables file. For example, [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) are supported. If the variable file is not given explicitly, Yasha will look for it. Thus the above example tries to find `foo.toml`, `foo.yaml` or `foo.yml` from the same folder with the template itself. If the file is not found, subfolders will be checked until the current working directory is reached.
-
-The file containing the template variables can be given explicitly too:
-
-```
-$ yasha foo.jinja --variables foo.toml
-```
-
-Or via environment variable:
-
-```
-$ export YASHA_VARIABLES=$HOME/foo.toml
-$ yasha foo.jinja
-```
-
-In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
-
-```
-$ yasha foo.jinja --no-variables
-```
-
-#### Default variable parsers
-
-- `.svd` files are parsed as CMSIS-SVD
-- `.toml` files are parsed as TOML
-- `.yaml` and `.yml` files are parsed as YAML
 
 ## Installation
 
@@ -54,7 +28,36 @@ git clone https://github.com/kblomqvist/yasha
 pip install -e yasha
 ```
 
-## Template variables sharing
+## Template variables (variable file)
+
+Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not given explicitly, Yasha will look for it. Thus the above example call, `yasha foo.jinja`, tries to find `foo.yaml` or `foo.yml` from the same folder with the template itself. If the file is not found, subfolders will be checked until the current working directory is reached.
+
+The file containing the template variables can be given explicitly too:
+
+```
+$ yasha foo.jinja --variables foo.yaml
+```
+
+Or via environment variable:
+
+```
+$ export YASHA_VARIABLES=$HOME/foo.yaml
+$ yasha foo.jinja
+```
+
+In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
+
+```
+$ yasha foo.jinja --no-variables
+```
+
+#### Default variable parsers
+
+- `.svd` files are parsed as CMSIS-SVD
+- `.toml` files are parsed as TOML
+- `.yaml` and `.yml` files are parsed as YAML
+
+### Variable file sharing
 
 Imagine that you would be writing C code and have the following two templates in two different folders
 
@@ -65,14 +68,14 @@ source/
   foo.c.jinja
 ```
 
-and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.toml` and `foo.c.toml` files you can make one `foo.toml` like this:
+and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` files you can make one `foo.yaml` like this:
 
 ```
 include/
   foo.h.jinja
 source/
   foo.c.jinja
-foo.toml
+foo.yaml
 ```
 
 Now when you call
@@ -82,7 +85,7 @@ $ yasha include/foo.h.jinja
 $ yasha source/foo.c.jinja
 ```
 
-the variables defined in `foo.toml` are used within both templates. For your convenience here is the file listing after the above two yasha calls:
+the variables defined in `foo.yaml` are used within both templates. For your convenience here is the file listing after the above two yasha calls:
 
 ```
 include/
@@ -91,7 +94,7 @@ include/
 source/
   foo.c
   foo.c.jinja
-foo.toml
+foo.yaml
 ```
 
 ## Template extensions (extension file)

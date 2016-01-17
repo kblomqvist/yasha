@@ -51,12 +51,6 @@ In case the variables shouldn't be used in spite of the file existence use ``--n
 $ yasha foo.jinja --no-variables
 ```
 
-#### Default variable parsers
-
-- `.svd` files are parsed as CMSIS-SVD
-- `.toml` files are parsed as TOML
-- `.yaml` and `.yml` files are parsed as YAML
-
 ### Variable file sharing
 
 Imagine that you would be writing C code and have the following two templates in two different folders
@@ -86,6 +80,12 @@ $ yasha source/foo.c.jinja
 ```
 
 the variables defined in `foo.yaml` are used within both templates.
+
+### Built-in default variable parsers
+
+- `.svd` files are parsed as CMSIS-SVD
+- `.toml` files are parsed as TOML
+- `.yaml` and `.yml` files are parsed as YAML
 
 ## Template extensions (extension file)
 

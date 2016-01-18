@@ -7,7 +7,6 @@ file(GLOB TEMPLATES "src/*.jinja")
 foreach(input ${TEMPLATES})
 	string(REGEX REPLACE "\\.[^.]*$" "" output ${input})
 	list(APPEND SOURCES ${output})
-	message(STATUS ${SOURCES})
 	add_custom_command(
 		OUTPUT ${output}
 		COMMAND yasha ${input} -o ${output}

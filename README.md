@@ -153,12 +153,32 @@ class YamlParser(yasha.YamlParser): # This will overwrite the default parser
         return postprocess(vars)
 ```
 
-## Utilizing Yasha for C
+## Utilizing Yasha for C (build automation examples)
 
-#### Makefile (GNU Make)
+### CMakeList.txt (CMake)
 
-The below Makefile can work with or without separate build directory.
-It can be given as part of EXECUTABLE name.
+```CMake
+# Note! Template extension file dependencies not resolved.
+
+cmake_minimum_required(VERSION 3.0.2)
+project(yasha)
+
+file(GLOB SOURCES "src/*.c")
+file(GLOB TEMPLATES "src/*.jinja")
+
+foreach(input ${TEMPLATES})
+    string(REGEX REPLACE "\\.[^.]*$" "" output ${input})
+    list(APPEND SOURCES ${output})
+    add_custom_command(
+        OUTPUT ${output}
+        COMMAND yasha ${input} -o ${output}
+    )
+endforeach()
+
+add_executable(a.out ${SOURCES})
+```
+
+### Makefile (GNU Make)
 
 ```Makefile
 # User variables
@@ -216,30 +236,7 @@ endif
 .phony : clean
 ```
 
-#### CMakeList.txt (CMake)
-
-```CMake
-cmake_minimum_required(VERSION 3.0.2)
-project(yasha)
-
-file(GLOB SOURCES "src/*.c")
-file(GLOB TEMPLATES "src/*.jinja")
-
-foreach(input ${TEMPLATES})
-    string(REGEX REPLACE "\\.[^.]*$" "" output ${input})
-    list(APPEND SOURCES ${output})
-    add_custom_command(
-        OUTPUT ${output}
-        COMMAND yasha ${input} -o ${output}
-    )
-endforeach()
-
-add_executable(a.out ${SOURCES})
-```
-
-Note! Template extension file dependencies aren't resolved in CMake example.
-
-#### SConstruct (SCons)
+### SConstruct (SCons)
 
 Below is shown a simple example how to use Yasha with [SCons](http://scons.org/) for C files. There are too different kind of builders available in `yasha.scons`, Builder and CBuilder. The difference is that CBuilder doesn't include generated C header files into its return list so you can append this directly with your sources list.
 

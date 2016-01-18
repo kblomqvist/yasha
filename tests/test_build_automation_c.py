@@ -33,12 +33,12 @@ def test_make():
     chdir("yasha_for_c")
 
     # First build
-    out = check_output(["make"])
+    out = check_output(["make", "--file=Makefile.mk"])
     assert not b"is up to date" in out
     assert path.isfile("build/a.out")
 
     # Second build shouldn't do anything
-    out = check_output(["make"])
+    out = check_output(["make", "--file=Makefile.mk"])
     assert b"is up to date" in out
 
     # Check program output
@@ -48,11 +48,11 @@ def test_make():
     # Test template dependencies
     for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
         call(["touch", "src/" + dep])
-        out = check_output(["make"])
+        out = check_output(["make", "--file=Makefile.mk"])
         assert not b"is up to date" in out
 
     # Clean the build
-    call(["make", "clean"])
+    call(["make", "--file=Makefile.mk", "clean"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
         assert not path.isfile("src/" + f)
 

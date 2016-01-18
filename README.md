@@ -155,7 +155,7 @@ class YamlParser(yasha.YamlParser): # This will overwrite the default parser
 
 ## Utilizing Yasha for C
 
-#### Makefile
+#### Makefile (GNU Make)
 
 The below Makefile can work with or without separate build directory.
 It can be given as part of EXECUTABLE name.
@@ -215,6 +215,29 @@ endif
 
 .phony : clean
 ```
+
+#### CMakeList.txt (CMake)
+
+```CMake
+cmake_minimum_required(VERSION 3.0.2)
+project(yasha)
+
+file(GLOB SOURCES "src/*.c")
+file(GLOB TEMPLATES "src/*.jinja")
+
+foreach(input ${TEMPLATES})
+    string(REGEX REPLACE "\\.[^.]*$" "" output ${input})
+    list(APPEND SOURCES ${output})
+    add_custom_command(
+        OUTPUT ${output}
+        COMMAND yasha ${input} -o ${output}
+    )
+endforeach()
+
+add_executable(a.out ${SOURCES})
+```
+
+Note! Template extension file dependencies aren't resolved in CMake example.
 
 #### SConstruct (SCons)
 

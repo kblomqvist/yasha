@@ -190,7 +190,8 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
 
 
     if md and not output.name == "<stdout>":
-        deps = os.path.relpath(output.name) + ": " + template.name + " "
+        deps = os.path.relpath(output.name) + ": "
+        deps += os.path.relpath(template.name) + " "
         if variables:
             deps += os.path.relpath(variables.name) + " "
         if extensions:

@@ -153,7 +153,7 @@ class YamlParser(yasha.YamlParser): # This will overwrite the default parser
         return postprocess(vars)
 ```
 
-## Utilizing Yasha for C (build automation examples)
+## Build automation examples for C
 
 ### CMakeList.txt (CMake)
 

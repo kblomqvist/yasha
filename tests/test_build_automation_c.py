@@ -27,11 +27,9 @@ from os import path, chdir, mkdir
 from subprocess import call, check_output
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
+chdir(SCRIPT_PATH + "/fixtures/c_project")
 
 def test_make():
-    chdir(SCRIPT_PATH)
-    chdir("yasha_for_c")
-
     # First build
     out = check_output(["make"])
     assert not b"is up to date" in out
@@ -57,8 +55,6 @@ def test_make():
         assert not path.isfile("src/" + f)
 
 def test_cmake():
-    chdir(SCRIPT_PATH)
-    chdir("yasha_for_c")
     mkdir("build")
     chdir("build")
 
@@ -93,9 +89,6 @@ def test_cmake():
 @pytest.mark.skipif(sys.version_info[0] > 2,
     reason="requires python2")
 def test_scons():
-    chdir(SCRIPT_PATH)
-    chdir("yasha_for_c")
-
     # First build
     out = check_output(["scons"])
     assert not b"is up to date" in out
@@ -123,4 +116,3 @@ def test_scons():
         assert not path.isfile("build/"+f)
 
     call(["rm", "-rf", "build"])
-    

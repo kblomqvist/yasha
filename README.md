@@ -56,19 +56,15 @@ $ yasha foo.jinja --no-variables
 Imagine that you would be writing C code and have the following two templates in two different folders
 
 ```
-include/
-  foo.h.jinja
-source/
-  foo.c.jinja
+include/foo.h.jinja
+source/foo.c.jinja
 ```
 
 and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` files you can make one `foo.yaml` like this:
 
 ```
-include/
-  foo.h.jinja
-source/
-  foo.c.jinja
+include/foo.h.jinja
+source/foo.c.jinja
 foo.yaml
 ```
 
@@ -81,7 +77,7 @@ $ yasha source/foo.c.jinja
 
 the variables defined in `foo.yaml` are used within both templates.
 
-### Built-in default variable parsers
+### Built-in default variable file parsers
 
 - `.svd` files are parsed as CMSIS-SVD
 - `.toml` files are parsed as TOML
@@ -111,7 +107,7 @@ $ yasha foo.jinja --extensions foo.py
 
 There's also `--no-extensions` option flag operating in a similar manner with `--no-variables`. It's also worth mentioning that the file sharing works for the extensions file as it works for the variables and that the environment variable name for the extensions is YASHA_EXTENSIONS.
 
-### Custom variable parser
+### Custom variable file parser
 
 If none of the built-in parsers fit into your needs, it's possible to declare a your own parser within the extension file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.Parser` are considered as a custom parser and will be loaded.
 

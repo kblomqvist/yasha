@@ -61,12 +61,12 @@ def test_cmake():
     # First build
     call(["cmake", ".."])
     out = check_output(["make"])
-    assert not b"is up to date" in out
+    assert b"Linking C executable" in out
     assert path.isfile("a.out")
 
     # Second build shouldn't do anything
     out = check_output(["make"])
-    assert b"[100%] Built target a.out\n" == out
+    assert not b"Linking C executable" in out
 
     # Check program output
     out = check_output(["./a.out"])
@@ -76,7 +76,7 @@ def test_cmake():
     for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
         call(["touch", "../src/" + dep])
         out = check_output(["make"])
-        assert not b"is up to date" in out
+        assert b"Linking C executable" in out
 
     # Clean the build
     call(["make", "clean"])
@@ -113,6 +113,6 @@ def test_scons():
     # Clean the build
     call(["scons", "-c"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile("build/"+f)
+        assert not path.isfile("build/" + f)
 
     call(["rm", "-rf", "build"])

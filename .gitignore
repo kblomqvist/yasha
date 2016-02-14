@@ -4,7 +4,11 @@ dist/
 build/
 
 *.pyc
-tests/yasha_for_c/build
-tests/yasha_for_c/**/.sconsign.dblite
+tests/**/build/
+tests/**/CMakeFiles/
+tests/**/.sconsign.dblite
+tests/**/Makefile
+tests/**/CMakeCache.txt
+tests/**/*.cmake
 tests/fixtures/nrf51.rs
 tests/fixtures/nrf51.rs.j2extc

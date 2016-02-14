@@ -48,6 +48,8 @@ def find_dependencies(template, format=[".yml", ".yaml"], start=os.curdir):
 
         if os.path.normpath(path) == start:
             break
+        if os.path.normpath(path) == "/":
+            break
         path = os.path.join(path, "..")
 
     return None

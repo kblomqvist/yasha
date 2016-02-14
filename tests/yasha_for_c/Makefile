@@ -9,11 +9,13 @@ SOURCES += $(filter %.c, $(basename $(TEMPLATES)))
 # Resolve build dir from executable
 BUILDDIR = $(dir $(EXECUTABLE))
 
-# Resolve object files along with the .d files which lists what files
-# the object and template file depends on
-OBJECTS     = $(addprefix $(BUILDDIR), $(SOURCES:.c=.o))
+# Resolve object files
+OBJECTS = $(addprefix $(BUILDDIR), $(SOURCES:.c=.o))
+
+# Resolve .d files which list what files the object
+# and template files depend on
 OBJECTS_D   = $(OBJECTS:.o=.d)
-TEMPLATES_D = $(TEMPLATES:.jinja=.d)
+TEMPLATES_D = $(addsuffix .d,$(basename $(TEMPLATES)))
 
 $(EXECUTABLE) : $(OBJECTS)
 	$(CC) $^ -o $@

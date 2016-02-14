@@ -153,12 +153,34 @@ class YamlParser(yasha.YamlParser): # This will overwrite the default parser
         return postprocess(vars)
 ```
 
-## Utilizing Yasha for C
+## Build automation examples for C
 
-#### Makefile
+### CMakeList.txt (CMake)
 
-The below Makefile can work with or without separate build directory.
-It can be given as part of EXECUTABLE name.
+```CMake
+cmake_minimum_required(VERSION 2.8.7)
+project(yasha)
+
+file(GLOB sources "src/*.c")
+file(GLOB templates "src/*.jinja")
+
+foreach(tmpl ${templates})
+    execute_process(COMMAND yasha ${tmpl} -M OUTPUT_VARIABLE deps)
+    string(REGEX REPLACE "^.*: " "" deps ${deps})
+    string(REPLACE " " ";" deps ${deps})
+    string(REGEX REPLACE "\\.[^.]*$" "" output ${tmpl})
+    add_custom_command(
+        OUTPUT ${output}
+        COMMAND yasha ${tmpl} -o ${output}
+        DEPENDS ${deps}
+    )
+    list(APPEND sources ${output})
+endforeach()
+
+add_executable(a.out ${sources})
+```
+
+### Makefile (GNU Make)
 
 ```Makefile
 # User variables
@@ -172,11 +194,13 @@ SOURCES += $(filter %.c, $(basename $(TEMPLATES)))
 # Resolve build dir from executable
 BUILDDIR = $(dir $(EXECUTABLE))
 
-# Resolve object files along with the .d files which lists what files
-# the object and template file depends on
-OBJECTS     = $(addprefix $(BUILDDIR), $(SOURCES:.c=.o))
+# Resolve object files
+OBJECTS = $(addprefix $(BUILDDIR), $(SOURCES:.c=.o))
+
+# Resolve .d files which list what files the object
+# and template files depend on
 OBJECTS_D   = $(OBJECTS:.o=.d)
-TEMPLATES_D = $(TEMPLATES:.jinja=.d)
+TEMPLATES_D = $(addsuffix .d,$(basename $(TEMPLATES)))
 
 $(EXECUTABLE) : $(OBJECTS)
     $(CC) $^ -o $@
@@ -214,7 +238,7 @@ endif
 .phony : clean
 ```
 
-#### SConstruct (SCons)
+### SConstruct (SCons)
 
 Below is shown a simple example how to use Yasha with [SCons](http://scons.org/) for C files. There are too different kind of builders available in `yasha.scons`, Builder and CBuilder. The difference is that CBuilder doesn't include generated C header files into its return list so you can append this directly with your sources list.
 

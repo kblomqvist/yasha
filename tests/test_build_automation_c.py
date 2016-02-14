@@ -33,12 +33,12 @@ def test_make():
     chdir("yasha_for_c")
 
     # First build
-    out = check_output(["make", "--file=Makefile.mk"])
+    out = check_output(["make"])
     assert not b"is up to date" in out
     assert path.isfile("build/a.out")
 
     # Second build shouldn't do anything
-    out = check_output(["make", "--file=Makefile.mk"])
+    out = check_output(["make"])
     assert b"is up to date" in out
 
     # Check program output
@@ -48,13 +48,42 @@ def test_make():
     # Test template dependencies
     for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
         call(["touch", "src/" + dep])
-        out = check_output(["make", "--file=Makefile.mk"])
+        out = check_output(["make"])
         assert not b"is up to date" in out
 
     # Clean the build
-    call(["make", "--file=Makefile.mk", "clean"])
+    call(["make", "clean"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
         assert not path.isfile("src/" + f)
+
+def test_cmake():
+    chdir(SCRIPT_PATH)
+    chdir("yasha_for_c/src")
+
+    # First build
+    call(["cmake", "."])
+    out = check_output(["make"])
+    assert not b"is up to date" in out
+    assert path.isfile("a.out")
+
+    # Second build shouldn't do anything
+    out = check_output(["make"])
+    assert b"[100%] Built target a.out\n" == out
+
+    # Check program output
+    out = check_output(["./a.out"])
+    assert b"foo has 3 chars ...\n" == out
+
+    # Test template dependencies
+    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+        call(["touch", dep])
+        out = check_output(["make"])
+        assert not b"is up to date" in out
+
+    # Clean the build
+    call(["make", "clean"])
+    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
+        assert not path.isfile(f)
 
 @pytest.mark.skipif(sys.version_info[0] > 2,
     reason="requires python2")

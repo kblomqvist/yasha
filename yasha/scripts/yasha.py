@@ -109,8 +109,9 @@ def load_jinja(searchpath, extdict):
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
 @click.option("--no-extensions", is_flag=True, help="Omit Jinja extensions.")
 @click.option("--trim", is_flag=True, help="Strips extra whitespace. Spares the single empty lines, though.")
-@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside rendering. Not active with stdin.")
-def cli(template, output, variables, extensions, no_variables, no_extensions, trim, md):
+@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside rendering.")
+@click.option("-M", is_flag=True, help="Outputs Makefile compatible .d file. Doesn't render the template.")
+def cli(template, output, variables, extensions, no_variables, no_extensions, trim, md, m):
     """This script reads the given Jinja template and renders its content
     into new file, which name is derived from the given template name. For
     example the rendered foo.c.jinja template will be written into foo.c if
@@ -148,6 +149,27 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
     if variables and not no_variables:
         vardict = parse_variables(variables, extdict["variable_parsers"])
 
+    if not output:
+        if template.name == "<stdin>":
+            output = click.open_file("-", "wt")
+        else:
+            output = os.path.splitext(t_realpath)[0]
+            output = click.open_file(output, "wt", lazy=True)
+
+    if m or md:
+        deps = os.path.relpath(output.name) + ": "
+        deps += os.path.relpath(template.name)
+        if variables:
+            deps += " " + os.path.relpath(variables.name)
+        if extensions:
+            deps += " " + os.path.relpath(extensions.name)
+        if m:
+            click.echo(deps)
+            return # Template won't be rendered
+        if md:
+            output_d = click.open_file(output.name + ".d", "wt")
+            output_d.write(deps)
+
     for preprocessor in extdict["variable_preprocessors"]:
         vardict = preprocessor(vardict)
 
@@ -163,13 +185,6 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
         t = jinja.from_string(template_string)
     else:
         t = jinja.get_template(t_basename)
-
-    if not output:
-        if template.name == "<stdin>":
-            output = click.open_file("-", "wt")
-        else:
-            o_realpath = os.path.splitext(t_realpath)[0]
-            output = click.open_file(o_realpath, "wt")
 
     if trim:
         prevline = os.linesep
@@ -187,15 +202,3 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
             output.write(t.render(vardict).encode("utf-8"))
         else:
             output.write(t.render(vardict))
-
-
-    if md and not output.name == "<stdout>":
-        deps = os.path.relpath(output.name) + ": "
-        deps += os.path.relpath(template.name) + " "
-        if variables:
-            deps += os.path.relpath(variables.name) + " "
-        if extensions:
-            deps += os.path.relpath(extensions.name)
-        deps += os.linesep
-        output_d = click.open_file(output.name + ".d", "wt")
-        output_d.write(deps)

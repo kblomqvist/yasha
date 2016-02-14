@@ -158,24 +158,26 @@ class YamlParser(yasha.YamlParser): # This will overwrite the default parser
 ### CMakeList.txt (CMake)
 
 ```CMake
-# Note! Template extension file dependencies not resolved.
-
 cmake_minimum_required(VERSION 3.0.2)
 project(yasha)
 
-file(GLOB SOURCES "src/*.c")
-file(GLOB TEMPLATES "src/*.jinja")
+file(GLOB sources "src/*.c")
+file(GLOB templates "src/*.jinja")
 
-foreach(input ${TEMPLATES})
-    string(REGEX REPLACE "\\.[^.]*$" "" output ${input})
-    list(APPEND SOURCES ${output})
+foreach(tmpl ${templates})
+    execute_process(COMMAND yasha ${tmpl} -M OUTPUT_VARIABLE deps)
+    string(REGEX REPLACE "^.*: " "" deps ${deps})
+    string(REPLACE " " ";" deps ${deps})
+    string(REGEX REPLACE "\\.[^.]*$" "" output ${tmpl})
     add_custom_command(
         OUTPUT ${output}
-        COMMAND yasha ${input} -o ${output}
+        COMMAND yasha ${tmpl} -o ${output}
+        DEPENDS ${deps}
     )
+    list(APPEND sources ${output})
 endforeach()
 
-add_executable(a.out ${SOURCES})
+add_executable(a.out ${sources})
 ```
 
 ### Makefile (GNU Make)

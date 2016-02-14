@@ -6,8 +6,8 @@
 
 Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. The following command-line call
 
-```
-$ yasha foo.jinja
+```bash
+yasha foo.jinja
 ```
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
@@ -17,13 +17,13 @@ will render `foo.jinja` template into a new file named as `foo`. See how the cre
 
 As a regular user:
 
-```
+```bash
 pip install yasha
 ```
 
 As a developer (for the latest development version):
 
-```
+```bash
 git clone https://github.com/kblomqvist/yasha
 pip install -e yasha
 ```
@@ -34,21 +34,21 @@ Template variables can be defined in a separate template variable file. For exam
 
 The file containing the template variables can be given explicitly too:
 
-```
-$ yasha foo.jinja --variables foo.yaml
+```bash
+yasha foo.jinja --variables foo.yaml
 ```
 
 Or via environment variable:
 
-```
-$ export YASHA_VARIABLES=$HOME/foo.yaml
-$ yasha foo.jinja
+```bash
+export YASHA_VARIABLES=$HOME/foo.yaml
+yasha foo.jinja
 ```
 
 In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
 
-```
-$ yasha foo.jinja --no-variables
+```bash
+yasha foo.jinja --no-variables
 ```
 
 ### Variable file sharing
@@ -56,36 +56,32 @@ $ yasha foo.jinja --no-variables
 Imagine that you would be writing C code and have the following two templates in two different folders
 
 ```
-include/
-  foo.h.jinja
-source/
-  foo.c.jinja
+include/foo.h.jinja
+source/foo.c.jinja
 ```
 
 and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` files you can make one `foo.yaml` like this:
 
 ```
-include/
-  foo.h.jinja
-source/
-  foo.c.jinja
+include/foo.h.jinja
+source/foo.c.jinja
 foo.yaml
 ```
 
 Now when you call
 
-```
-$ yasha include/foo.h.jinja
-$ yasha source/foo.c.jinja
+```bash
+yasha include/foo.h.jinja
+yasha source/foo.c.jinja
 ```
 
 the variables defined in `foo.yaml` are used within both templates.
 
-### Built-in default variable parsers
+### Built-in variable file parsers
 
-- `.svd` files are parsed as CMSIS-SVD
-- `.toml` files are parsed as TOML
-- `.yaml` and `.yml` files are parsed as YAML
+- `.svd` files are parsed as [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html)
+- `.toml` files are parsed as [TOML](https://github.com/toml-lang/toml)
+- `.yaml` and `.yml` files are parsed as [YAML](http://www.yaml.org/start.html)
 
 ## Template extensions (extension file)
 
@@ -105,13 +101,13 @@ Note that the functions intended to work as a filter have to be prefixed by `fil
 
 And as you might guess, instead of relying on the automatic extension file look up, the file can be given explicitly as well.
 
-```
-$ yasha foo.jinja --extensions foo.py
+```bash
+yasha foo.jinja --extensions foo.py
 ```
 
 There's also `--no-extensions` option flag operating in a similar manner with `--no-variables`. It's also worth mentioning that the file sharing works for the extensions file as it works for the variables and that the environment variable name for the extensions is YASHA_EXTENSIONS.
 
-### Custom variable parser
+### Custom variable file parser
 
 If none of the built-in parsers fit into your needs, it's possible to declare a your own parser within the extension file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.Parser` are considered as a custom parser and will be loaded.
 
@@ -165,10 +161,14 @@ file(GLOB sources "src/*.c")
 file(GLOB templates "src/*.jinja")
 
 foreach(tmpl ${templates})
-    execute_process(COMMAND yasha ${tmpl} -M OUTPUT_VARIABLE deps)
+    string(REGEX REPLACE "\\.[^.]*$" "" output ${tmpl})
+    execute_process(
+        COMMAND yasha ${tmpl} -M
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE deps
+    )
     string(REGEX REPLACE "^.*: " "" deps ${deps})
     string(REPLACE " " ";" deps ${deps})
-    string(REGEX REPLACE "\\.[^.]*$" "" output ${tmpl})
     add_custom_command(
         OUTPUT ${output}
         COMMAND yasha ${tmpl} -o ${output}
@@ -178,6 +178,14 @@ foreach(tmpl ${templates})
 endforeach()
 
 add_executable(a.out ${sources})
+```
+
+How to use:
+
+```Bash
+mkdir build && cd $_
+cmake ..
+make
 ```
 
 ### Makefile (GNU Make)

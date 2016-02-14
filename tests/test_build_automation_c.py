@@ -23,15 +23,13 @@ THE SOFTWARE.
 """
 
 import pytest, sys
-from os import path, chdir
+from os import path, chdir, mkdir
 from subprocess import call, check_output
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
+chdir(SCRIPT_PATH + "/fixtures/c_project")
 
 def test_make():
-    chdir(SCRIPT_PATH)
-    chdir("yasha_for_c")
-
     # First build
     out = check_output(["make"])
     assert not b"is up to date" in out
@@ -57,18 +55,18 @@ def test_make():
         assert not path.isfile("src/" + f)
 
 def test_cmake():
-    chdir(SCRIPT_PATH)
-    chdir("yasha_for_c/src")
+    mkdir("build")
+    chdir("build")
 
     # First build
-    call(["cmake", "."])
+    call(["cmake", ".."])
     out = check_output(["make"])
-    assert not b"is up to date" in out
+    assert b"Linking C executable" in out
     assert path.isfile("a.out")
 
     # Second build shouldn't do anything
     out = check_output(["make"])
-    assert b"[100%] Built target a.out\n" == out
+    assert not b"Linking C executable" in out
 
     # Check program output
     out = check_output(["./a.out"])
@@ -76,21 +74,21 @@ def test_cmake():
 
     # Test template dependencies
     for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
-        call(["touch", dep])
+        call(["touch", "../src/" + dep])
         out = check_output(["make"])
-        assert not b"is up to date" in out
+        assert b"Linking C executable" in out
 
     # Clean the build
     call(["make", "clean"])
-    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile(f)
+    for f in ["foo.c", "foo.h"]:
+        assert not path.isfile("../src/" + f)
+
+    chdir("..")
+    call(["rm", "-rf", "build"])
 
 @pytest.mark.skipif(sys.version_info[0] > 2,
     reason="requires python2")
 def test_scons():
-    chdir(SCRIPT_PATH)
-    chdir("yasha_for_c")
-
     # First build
     out = check_output(["scons"])
     assert not b"is up to date" in out
@@ -115,4 +113,6 @@ def test_scons():
     # Clean the build
     call(["scons", "-c"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile("build/"+f)
+        assert not path.isfile("build/" + f)
+
+    call(["rm", "-rf", "build"])

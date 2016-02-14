@@ -158,7 +158,7 @@ class YamlParser(yasha.YamlParser): # This will overwrite the default parser
 ### CMakeList.txt (CMake)
 
 ```CMake
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 2.8.7)
 project(yasha)
 
 file(GLOB sources "src/*.c")

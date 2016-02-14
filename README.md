@@ -77,11 +77,11 @@ $ yasha source/foo.c.jinja
 
 the variables defined in `foo.yaml` are used within both templates.
 
-### Built-in default variable file parsers
+### Built-in variable file parsers
 
-- `.svd` files are parsed as CMSIS-SVD
-- `.toml` files are parsed as TOML
-- `.yaml` and `.yml` files are parsed as YAML
+- `.svd` files are parsed as [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html)
+- `.toml` files are parsed as [TOML](https://github.com/toml-lang/toml)
+- `.yaml` and `.yml` files are parsed as [YAML](http://www.yaml.org/start.html)
 
 ## Template extensions (extension file)
 

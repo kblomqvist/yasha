@@ -103,19 +103,20 @@ def load_jinja(searchpath, extdict):
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("template", type=click.File("rb"))
-@click.option("--output", "-o", type=click.File("wt"), help="Explicit output file.")
-@click.option("--variables", "-v", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Explicit template variables file.")
-@click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Explicit custom Jinja extensions file.")
+@click.option("--output", "-o", type=click.File("wt"), help="Place a rendered tempalate into FILENAME.")
+@click.option("--variables", "-v", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Read template variables from FILENAME.")
+@click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Read template extensions from FILENAME.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
-@click.option("--no-extensions", is_flag=True, help="Omit Jinja extensions.")
+@click.option("--no-extensions", is_flag=True, help="Omit template extensions.")
 @click.option("--trim", is_flag=True, help="Strips extra whitespace. Spares the single empty lines, though.")
-@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside rendering.")
-@click.option("-M", is_flag=True, help="Outputs Makefile compatible .d file. Doesn't render the template.")
+@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
+@click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 def cli(template, output, variables, extensions, no_variables, no_extensions, trim, md, m):
-    """This script reads the given Jinja template and renders its content
-    into new file, which name is derived from the given template name. For
-    example the rendered foo.c.jinja template will be written into foo.c if
-    not explicitly specified."""
+    """This script reads a given Jinja template and renders its content
+    into new file, which name is derived from the given template name.
+
+    For example, a template file "foo.c.jinja" will be written into "foo.c" if
+    the output file is not explicitly specified."""
 
     t_realpath = os.path.realpath(template.name)
     t_basename = os.path.basename(t_realpath)

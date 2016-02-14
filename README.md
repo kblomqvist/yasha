@@ -6,8 +6,8 @@
 
 Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. The following command-line call
 
-```
-$ yasha foo.jinja
+```bash
+yasha foo.jinja
 ```
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
@@ -17,13 +17,13 @@ will render `foo.jinja` template into a new file named as `foo`. See how the cre
 
 As a regular user:
 
-```
+```bash
 pip install yasha
 ```
 
 As a developer (for the latest development version):
 
-```
+```bash
 git clone https://github.com/kblomqvist/yasha
 pip install -e yasha
 ```
@@ -34,21 +34,21 @@ Template variables can be defined in a separate template variable file. For exam
 
 The file containing the template variables can be given explicitly too:
 
-```
-$ yasha foo.jinja --variables foo.yaml
+```bash
+yasha foo.jinja --variables foo.yaml
 ```
 
 Or via environment variable:
 
-```
-$ export YASHA_VARIABLES=$HOME/foo.yaml
-$ yasha foo.jinja
+```bash
+export YASHA_VARIABLES=$HOME/foo.yaml
+yasha foo.jinja
 ```
 
 In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
 
-```
-$ yasha foo.jinja --no-variables
+```bash
+yasha foo.jinja --no-variables
 ```
 
 ### Variable file sharing
@@ -70,9 +70,9 @@ foo.yaml
 
 Now when you call
 
-```
-$ yasha include/foo.h.jinja
-$ yasha source/foo.c.jinja
+```bash
+yasha include/foo.h.jinja
+yasha source/foo.c.jinja
 ```
 
 the variables defined in `foo.yaml` are used within both templates.
@@ -101,8 +101,8 @@ Note that the functions intended to work as a filter have to be prefixed by `fil
 
 And as you might guess, instead of relying on the automatic extension file look up, the file can be given explicitly as well.
 
-```
-$ yasha foo.jinja --extensions foo.py
+```bash
+yasha foo.jinja --extensions foo.py
 ```
 
 There's also `--no-extensions` option flag operating in a similar manner with `--no-variables`. It's also worth mentioning that the file sharing works for the extensions file as it works for the variables and that the environment variable name for the extensions is YASHA_EXTENSIONS.
@@ -161,10 +161,14 @@ file(GLOB sources "src/*.c")
 file(GLOB templates "src/*.jinja")
 
 foreach(tmpl ${templates})
-    execute_process(COMMAND yasha ${tmpl} -M OUTPUT_VARIABLE deps)
+    string(REGEX REPLACE "\\.[^.]*$" "" output ${tmpl})
+    execute_process(
+        COMMAND yasha ${tmpl} -M
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE deps
+    )
     string(REGEX REPLACE "^.*: " "" deps ${deps})
     string(REPLACE " " ";" deps ${deps})
-    string(REGEX REPLACE "\\.[^.]*$" "" output ${tmpl})
     add_custom_command(
         OUTPUT ${output}
         COMMAND yasha ${tmpl} -o ${output}
@@ -174,6 +178,14 @@ foreach(tmpl ${templates})
 endforeach()
 
 add_executable(a.out ${sources})
+```
+
+How to use:
+
+```Bash
+mkdir build && cd $_
+cmake ..
+make
 ```
 
 ### Makefile (GNU Make)

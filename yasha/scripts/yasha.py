@@ -193,11 +193,17 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
     # Finally render the template
     t_rendered = t.render(vardict)
 
+    # Add newline at the EOF if missing from template
+    if t_rendered[-1] != "\n":
+        t_rendered += os.linesep
+
     if trim:
-        prevline = os.linesep
+        prevline = None
         for line in t_rendered.splitlines():
             line = line.rstrip() + os.linesep
-            if line == os.linesep and line == prevline:
+            if line == os.linesep and prevline == line:
+                continue
+            if line == os.linesep and prevline == None:
                 continue
             output.write(line.encode("utf-8"))
             prevline = line

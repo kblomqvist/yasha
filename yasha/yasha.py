@@ -25,6 +25,8 @@ THE SOFTWARE.
 import os
 from .parsers import *
 
+__version__ = "dev"
+
 def find_dependencies(template, format=[".yml", ".yaml"], start=os.curdir):
     """
     Returns the first found template dependency file

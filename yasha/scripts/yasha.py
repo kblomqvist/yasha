@@ -101,6 +101,12 @@ def load_jinja(searchpath, extdict):
 
     return jinja
 
+def print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(yasha.__version__)
+    ctx.exit()
+
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("template", type=click.File("rb"))
 @click.option("--output", "-o", type=click.File("wt"), help="Place a rendered tempalate into FILENAME.")
@@ -111,11 +117,12 @@ def load_jinja(searchpath, extdict):
 @click.option("--trim", is_flag=True, help="Strips extra whitespace. Spares the single empty lines, though.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
+@click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
 def cli(template, output, variables, extensions, no_variables, no_extensions, trim, md, m):
-    """This script reads a given Jinja template and renders its content
-    into new file, which name is derived from the given template name.
+    """This script reads the given Jinja template and renders its content
+    into a new file, which name is derived from the given template name.
 
-    For example, a template file "foo.c.jinja" will be written into "foo.c" if
+    For example, a template called "foo.c.jinja" will be written into "foo.c" if
     the output file is not explicitly specified."""
 
     t_realpath = os.path.realpath(template.name)

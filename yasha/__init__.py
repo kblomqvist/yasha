@@ -24,5 +24,3 @@ THE SOFTWARE.
 """
 
 from .yasha import *
-
-__version__ = "dev"

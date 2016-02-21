@@ -23,7 +23,8 @@ THE SOFTWARE.
 
 """
 
-import os, sys
+import os
+from os import path
 import click
 from ..parsers import *
 from .. import yasha
@@ -36,7 +37,7 @@ def find_extensions(template):
 
 def parse_variables(file, parsers):
     if file:
-        filename, filext = os.path.splitext(file.name)
+        filename, filext = path.splitext(file.name)
         for parser in parsers:
             if filext in parser.file_extension:
                 return parser.parse(file)
@@ -45,7 +46,7 @@ def parse_variables(file, parsers):
 def load_extensions(file):
     def error_handler(e):
         msg = e.msg[0].upper() + e.msg[1:]
-        filename = os.path.relpath(e.filename)
+        filename = path.relpath(e.filename)
         click.echo("Error: Cannot load extensions", nl=False, err=True)
         click.echo(": {} ({}, line {})".format(msg, filename, e.lineno), err=True)
         raise click.Abort()
@@ -132,10 +133,6 @@ def cli(template, output, variables, extensions, include, no_variables, no_exten
     For example, a template called "foo.c.jinja" will be written into "foo.c" if
     the output file is not explicitly specified."""
 
-    t_realpath = os.path.realpath(template.name)
-    t_basename = os.path.basename(t_realpath)
-    t_dirname = os.path.dirname(t_realpath)
-
     vardict = {
 
     }
@@ -168,16 +165,16 @@ def cli(template, output, variables, extensions, include, no_variables, no_exten
         if template.name == "<stdin>":
             output = click.open_file("-", "wb")
         else:
-            output = os.path.splitext(t_realpath)[0]
+            output = path.splitext(template.name)[0]
             output = click.open_file(output, "wb", lazy=True)
 
     if m or md:
-        deps = os.path.relpath(output.name) + ": "
-        deps += os.path.relpath(template.name)
+        deps = path.relpath(output.name) + ": "
+        deps += path.relpath(template.name)
         if variables:
-            deps += " " + os.path.relpath(variables.name)
+            deps += " " + path.relpath(variables.name)
         if extensions:
-            deps += " " + os.path.relpath(extensions.name)
+            deps += " " + path.relpath(extensions.name)
         if m:
             click.echo(deps)
             return # Template won't be rendered
@@ -189,13 +186,15 @@ def cli(template, output, variables, extensions, include, no_variables, no_exten
     for preprocessor in extdict["variable_preprocessors"]:
         vardict = preprocessor(vardict)
 
-    jinja = load_jinja([t_dirname] + list(include), extdict)
+    # Time to load Jinja
+    include = [path.dirname(template.name)] + list(include)
+    jinja = load_jinja(include, extdict)
 
     if template.name == "<stdin>":
         stdin = template.read()
         t = jinja.from_string(stdin)
     else:
-        t = jinja.get_template(t_basename)
+        t = jinja.get_template(path.basename(template.name))
 
     # Finally render the template
     t_rendered = t.render(vardict)

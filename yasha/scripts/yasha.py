@@ -109,7 +109,7 @@ def print_version(ctx, param, value):
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("template", type=click.File("rb"))
-@click.option("--output", "-o", type=click.File("wt"), help="Place a rendered tempalate into FILENAME.")
+@click.option("--output", "-o", type=click.File("wb"), help="Place a rendered tempalate into FILENAME.")
 @click.option("--variables", "-v", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Read template variables from FILENAME.")
 @click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Read template extensions from FILENAME.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
@@ -159,10 +159,10 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
 
     if not output:
         if template.name == "<stdin>":
-            output = click.open_file("-", "wt")
+            output = click.open_file("-", "wb")
         else:
             output = os.path.splitext(t_realpath)[0]
-            output = click.open_file(output, "wt", lazy=True)
+            output = click.open_file(output, "wb", lazy=True)
 
     if m or md:
         deps = os.path.relpath(output.name) + ": "
@@ -175,8 +175,9 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
             click.echo(deps)
             return # Template won't be rendered
         if md:
-            output_d = click.open_file(output.name + ".d", "wt")
-            output_d.write(deps)
+            deps += os.linesep
+            output_d = click.open_file(output.name + ".d", "wb")
+            output_d.write(deps.encode("utf-8"))
 
     for preprocessor in extdict["variable_preprocessors"]:
         vardict = preprocessor(vardict)
@@ -189,24 +190,21 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
             chunk = template.read(1024)
             if not chunk:
                 break
-            template_string += chunk.decode("utf-8")
+            template_string += chunk
         t = jinja.from_string(template_string)
     else:
         t = jinja.get_template(t_basename)
 
+    # Finally render the template
+    t_rendered = t.render(vardict)
+
     if trim:
         prevline = os.linesep
-        for line in t.render(vardict).splitlines():
+        for line in t_rendered.splitlines():
             line = line.rstrip() + os.linesep
             if line == os.linesep and line == prevline:
                 continue
-            if sys.version_info[0] < 3:
-                output.write(line.encode("utf-8"))
-            else:
-                output.write(line)
+            output.write(line.encode("utf-8"))
             prevline = line
     else:
-        if sys.version_info[0] < 3:
-            output.write(t.render(vardict).encode("utf-8"))
-        else:
-            output.write(t.render(vardict))
+        output.write(t_rendered.encode("utf-8"))

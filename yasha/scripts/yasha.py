@@ -185,13 +185,8 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
     jinja = load_jinja(t_dirname, extdict)
 
     if template.name == "<stdin>":
-        template_string = ""
-        while True:
-            chunk = template.read(1024)
-            if not chunk:
-                break
-            template_string += chunk
-        t = jinja.from_string(template_string)
+        stdin = template.read()
+        t = jinja.from_string(stdin)
     else:
         t = jinja.get_template(t_basename)
 

@@ -168,8 +168,7 @@ class XmlParser(yasha.Parser):
     address = "Foo Valley"
     [[persons]]
     name = "Bar"
-    address = "Bar Valley"
-    \n"""
+    address = "Bar Valley"\n"""
 
 def test_broken_extensions(tmpdir):
     from subprocess import CalledProcessError, STDOUT
@@ -198,7 +197,8 @@ def test_trim(tmpdir):
     address = "Foo Valley"\n\n
     [[persons]]
     name = "Bar"  \t
-    address = "Bar Valley\""""
+    address = "Bar Valley"
+    """
 
     cwd = tmpdir.chdir()
 

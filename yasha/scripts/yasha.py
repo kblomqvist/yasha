@@ -101,6 +101,12 @@ def load_jinja(searchpath, extdict):
 
     return jinja
 
+def linesep(string):
+    n = string.find("\n")
+    if n < 1:
+        return "\n"
+    return "\r\n" if string[n-1] == "\r" else "\n"
+
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
@@ -194,16 +200,16 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
     t_rendered = t.render(vardict)
 
     # Add newline at the EOF if missing from template
-    if t_rendered[-1] != "\n":
-        t_rendered += os.linesep
+    t_linesep = linesep(t_rendered)
+    t_rendered = t_rendered.rstrip() + t_linesep
 
     if trim:
         prevline = None
         for line in t_rendered.splitlines():
-            line = line.rstrip() + os.linesep
-            if line == os.linesep and prevline == line:
+            line = line.rstrip() + t_linesep
+            if line == t_linesep and prevline == line:
                 continue
-            if line == os.linesep and prevline == None:
+            if line == t_linesep and prevline == None:
                 continue
             output.write(line.encode("utf-8"))
             prevline = line

@@ -118,13 +118,14 @@ def print_version(ctx, param, value):
 @click.option("--output", "-o", type=click.File("wb"), help="Place a rendered tempalate into FILENAME.")
 @click.option("--variables", "-v", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Read template variables from FILENAME.")
 @click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Read template extensions from FILENAME.")
+@click.option("--include", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for templates embedded within TEMPLATE.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
 @click.option("--no-extensions", is_flag=True, help="Omit template extensions.")
 @click.option("--trim", is_flag=True, help="Strips extra whitespace. Spares the single empty lines, though.")
-@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
+@click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(template, output, variables, extensions, no_variables, no_extensions, trim, md, m):
+def cli(template, output, variables, extensions, include, no_variables, no_extensions, trim, m, md):
     """This script reads the given Jinja template and renders its content
     into a new file, which name is derived from the given template name.
 
@@ -188,7 +189,7 @@ def cli(template, output, variables, extensions, no_variables, no_extensions, tr
     for preprocessor in extdict["variable_preprocessors"]:
         vardict = preprocessor(vardict)
 
-    jinja = load_jinja(t_dirname, extdict)
+    jinja = load_jinja([t_dirname] + list(include), extdict)
 
     if template.name == "<stdin>":
         stdin = template.read()

@@ -132,6 +132,16 @@ class XmlParser(yasha.Parser):
         return vars # Return value has to be dictionary
 ```
 
+## Tips and tricks
+
+### Referenced templates
+
+Use option `-I` / `--include` to extend the search path of the referenced templates aka hardcoded template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import).
+
+```bash
+yasha foo.c.jinja -Iskeletons -Imacros
+```
+
 ### Variable pre-processing before template rendering
 
 If you need to pre-process template variables before those are passed into the template, you can do that within an extension file by declaring a custom parser which overwrites the default parser:

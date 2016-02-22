@@ -144,7 +144,7 @@ yasha foo.c.jinja -Iskeletons -Imacros
 
 ### Variable pre-processing before template rendering
 
-If you need to pre-process template variables before those are passed into the template, you can do that within an extension file by declaring a custom parser which overwrites the default parser:
+If you need to pre-process template variables before those are passed into the template, you can do that within an extension file by declaring a custom parser which "overwrites" (is used before) the default parser:
 
 ```python
 import yasha
@@ -153,7 +153,7 @@ def postprocess(vars):
     vars["foo"] = "bar" # foo should always be bar
     return vars
 
-class YamlParser(yasha.YamlParser): # This will overwrite the default parser
+class YamlParser(yasha.YamlParser):
     def parse(self, file):
         vars = yasha.YamlParser.parse(file)
         return postprocess(vars)

@@ -116,7 +116,7 @@ def referenced_templates(template, include_paths):
     ast = env.parse(template.read())
 
     templates = list(meta.find_referenced_templates(ast))
-    return [template_realpath(t) for t in templates]
+    return [template_realpath(t) for t in templates if t is not None]
 
 def linesep(string):
     n = string.find("\n")
@@ -135,7 +135,7 @@ def print_version(ctx, param, value):
 @click.option("--output", "-o", type=click.File("wb"), help="Place a rendered tempalate into FILENAME.")
 @click.option("--variables", "-v", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Read template variables from FILENAME.")
 @click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Read template extensions from FILENAME.")
-@click.option("--include", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for templates embedded within TEMPLATE.")
+@click.option("--include", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for referenced templates in TEMPLATE, aka hardcoded template extensions, inclusions and imports.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
 @click.option("--no-extensions", is_flag=True, help="Omit template extensions.")
 @click.option("--trim", is_flag=True, help="Strips extra whitespace. Spares the single empty lines, though.")

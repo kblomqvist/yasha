@@ -102,6 +102,22 @@ def load_jinja(searchpath, extdict):
 
     return jinja
 
+def referenced_templates(template, include_paths):
+    def template_realpath(referenced_template):
+        for include in include_paths:
+            t = path.join(include, referenced_template)
+            t = path.realpath(t)
+            if path.isfile(t):
+                return t
+        return None
+
+    from jinja2 import Environment, meta
+    env = Environment()
+    ast = env.parse(template.read())
+
+    templates = list(meta.find_referenced_templates(ast))
+    return [template_realpath(t) for t in templates]
+
 def linesep(string):
     n = string.find("\n")
     if n < 1:
@@ -132,6 +148,8 @@ def cli(template, output, variables, extensions, include, no_variables, no_exten
 
     For example, a template called "foo.c.jinja" will be written into "foo.c" if
     the output file is not explicitly specified."""
+
+    include = [path.dirname(template.name)] + list(include)
 
     vardict = {
 
@@ -169,12 +187,15 @@ def cli(template, output, variables, extensions, include, no_variables, no_exten
             output = click.open_file(output, "wb", lazy=True)
 
     if m or md:
-        deps = path.relpath(output.name) + ": "
-        deps += path.relpath(template.name)
+        deps = [path.relpath(template.name)]
         if variables:
-            deps += " " + path.relpath(variables.name)
+            deps.append(path.relpath(variables.name))
         if extensions:
-            deps += " " + path.relpath(extensions.name)
+            deps.append(path.relpath(extensions.name))
+        for d in referenced_templates(template, include):
+            deps.append(path.relpath(d))
+
+        deps = path.relpath(output.name) + ": " + " ".join(deps)
         if m:
             click.echo(deps)
             return # Template won't be rendered
@@ -187,7 +208,6 @@ def cli(template, output, variables, extensions, include, no_variables, no_exten
         vardict = preprocessor(vardict)
 
     # Time to load Jinja
-    include = [path.dirname(template.name)] + list(include)
     jinja = load_jinja(include, extdict)
 
     if template.name == "<stdin>":

@@ -118,7 +118,7 @@ import xml.etree.ElementTree as et
 class XmlParser(yasha.Parser):
     file_extension = [".xml"]
 
-    def parse(self, file): # file type is click.File
+    def parse(self, file):
         tree = et.parse(file.name)
         root = tree.getroot()
 

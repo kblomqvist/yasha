@@ -35,7 +35,7 @@ Template variables can be defined in a separate template variable file. For exam
 The file containing the template variables can be given explicitly too:
 
 ```bash
-yasha foo.jinja --variables foo.yaml
+yasha --variables foo.yaml foo.jinja
 ```
 
 Or via environment variable:
@@ -48,7 +48,7 @@ yasha foo.jinja
 In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
 
 ```bash
-yasha foo.jinja --no-variables
+yasha --no-variables foo.jinja
 ```
 
 ### Variable file sharing
@@ -102,7 +102,7 @@ Note that the functions intended to work as a filter have to be prefixed by `fil
 And as you might guess, instead of relying on the automatic extension file look up, the file can be given explicitly as well.
 
 ```bash
-yasha foo.jinja --extensions foo.py
+yasha --extensions foo.py foo.jinja
 ```
 
 There's also `--no-extensions` option flag operating in a similar manner with `--no-variables`. It's also worth mentioning that the file sharing works for the extensions file as it works for the variables and that the environment variable name for the extensions is YASHA_EXTENSIONS.
@@ -139,7 +139,7 @@ class XmlParser(yasha.Parser):
 By default the referenced templates, aka hardcoded template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the rendered template location. To extend this search path you can use option `-I` / `--include`, like you would do with the GCC to include C header files.
 
 ```bash
-yasha foo.jinja -Iskeletons -Imacros
+yasha -Iskeletons -Imacros foo.jinja
 ```
 
 ### Variable pre-processing before template rendering
@@ -173,7 +173,7 @@ file(GLOB templates "src/*.jinja")
 foreach(tmpl ${templates})
     string(REGEX REPLACE "\\.[^.]*$" "" output ${tmpl})
     execute_process(
-        COMMAND yasha ${tmpl} -M
+        COMMAND yasha -M ${tmpl}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE deps
     )
@@ -181,7 +181,7 @@ foreach(tmpl ${templates})
     string(REPLACE " " ";" deps ${deps})
     add_custom_command(
         OUTPUT ${output}
-        COMMAND yasha ${tmpl} -o ${output}
+        COMMAND yasha -o ${output} ${tmpl}
         DEPENDS ${deps}
     )
     list(APPEND sources ${output})

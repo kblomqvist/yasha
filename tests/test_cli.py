@@ -108,11 +108,11 @@ def test_template_in_subdir(tmpdir, tmplvar):
 
 def test_custom_xmlparser(tmpdir):
     template = """
-    {% for p in persons -%}
+    {% for p in persons %}
     [[persons]]
     name = "{{ p.name }}"
     address = "{{ p.address }}"
-    {% endfor -%}
+    {% endfor %}
     """
 
     variables = """
@@ -189,30 +189,3 @@ def test_broken_extensions(tmpdir):
         check_output(cmd, stderr=STDOUT)
     assert e.value.returncode == 1
     assert b"Invalid syntax (foo.j2ext, line 1)" in e.value.output
-
-def test_trim(tmpdir):
-    template = """\n
-    [[persons]]
-    name = "Foo"\t
-    address = "Foo Valley"\n\n
-    [[persons]]
-    name = "Bar"  \t
-    address = "Bar Valley"
-    """
-
-    cwd = tmpdir.chdir()
-
-    file = tmpdir.join("foo.toml.jinja")
-    file.write(template)
-
-    errno = call(["yasha", "foo.toml.jinja", "--trim"])
-    assert errno == 0
-    assert path.isfile("foo.toml")
-
-    o = tmpdir.join("foo.toml")
-    assert o.read() == """    [[persons]]
-    name = "Foo"
-    address = "Foo Valley"\n
-    [[persons]]
-    name = "Bar"
-    address = "Bar Valley"\n"""

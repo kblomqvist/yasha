@@ -89,11 +89,11 @@ def parse_extensions(extmodule, extdict):
 
     return extdict
 
-def load_jinja(searchpath, extdict):
+def load_jinja(searchpath, extdict, trim=True, lstrip=True):
     from jinja2 import Environment, FileSystemLoader
 
     jinja = Environment(extensions=extdict["jinja_extensions"],
-        loader=FileSystemLoader(searchpath), trim_blocks=True, lstrip_blocks=True)
+        loader=FileSystemLoader(searchpath), trim_blocks=trim, lstrip_blocks=lstrip)
 
     for test in extdict["jinja_tests"]:
         jinja.tests[test.__name__.replace("test_", "")] = test
@@ -138,11 +138,12 @@ def print_version(ctx, param, value):
 @click.option("--include", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for referenced templates in TEMPLATE, aka hardcoded template extensions, inclusions and imports.")
 @click.option("--no-variables", is_flag=True, help="Omit template variables.")
 @click.option("--no-extensions", is_flag=True, help="Omit template extensions.")
-@click.option("--trim", is_flag=True, help="Strips extra whitespace. Spares the single empty lines, though.")
+@click.option("--no-trim-blocks", is_flag=True, help="Load Jinja with trim_blocks=False.")
+@click.option("--no-lstrip-blocks", is_flag=True, help="Load Jinja with lstrip_blocks=False.")
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(template, output, variables, extensions, include, no_variables, no_extensions, trim, m, md):
+def cli(template, output, variables, extensions, include, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, m, md):
     """This script reads the given Jinja template and renders its content
     into a new file, which name is derived from the given template name.
 
@@ -208,7 +209,7 @@ def cli(template, output, variables, extensions, include, no_variables, no_exten
         vardict = preprocessor(vardict)
 
     # Time to load Jinja
-    jinja = load_jinja(include, extdict)
+    jinja = load_jinja(include, extdict, not no_trim_blocks, not no_lstrip_blocks)
 
     if template.name == "<stdin>":
         stdin = template.read()
@@ -223,15 +224,4 @@ def cli(template, output, variables, extensions, include, no_variables, no_exten
     t_linesep = linesep(t_rendered)
     t_rendered = t_rendered.rstrip() + t_linesep
 
-    if trim:
-        prevline = None
-        for line in t_rendered.splitlines():
-            line = line.rstrip() + t_linesep
-            if line == t_linesep and prevline == line:
-                continue
-            if line == t_linesep and prevline == None:
-                continue
-            output.write(line.encode("utf-8"))
-            prevline = line
-    else:
-        output.write(t_rendered.encode("utf-8"))
+    output.write(t_rendered.encode("utf-8"))

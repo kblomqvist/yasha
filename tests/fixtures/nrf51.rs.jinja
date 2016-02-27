@@ -1,6 +1,6 @@
 {#- The MIT License (MIT)
 
-Copyright (c) 2015 Kim Blomqvist
+Copyright (c) 2015-2016 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,46 +25,48 @@ THE SOFTWARE. -#}
 use volatile_cell::VolatileCell;
 use core::ops::Drop;
 
-{%  set NO_FIELDS = False -%}
+{%- set NO_FIELDS = False -%}
 {%- set NO_ENUMES = False -%}
 {%- set NO_DESCRIPTIONS = False -%}
 
-{%- macro description(prefix, node) -%}
+{% macro description(prefix, node) %}
 {% if not NO_DESCRIPTIONS %}{{ prefix }} {{ node.description }}{% endif %}
-{%- endmacro -%}
+{% endmacro %}
 
-{%- macro register(r) -%}
+{% macro register(r) %}
 {{ "%#05x"|format(r.addressOffset) }} => {{ "reg%s"|format(r.size) }} {{ r.name }}
     {%- if not r.fields or NO_FIELDS %} {{ "{} " + description("//!", r) }}{% else %} {{ "{ " + description("//!", r) }}
-    {%- for f in r.fields %}
+    {% for f in r.fields %}
     {{ f.bitRange|bitrange }} => {{ f.name }}{% if f.access %}: {{ f.access|access }}{% endif %}
-    {%- if not f.enumeratedValues|enumlist or NO_ENUMES %},{{ description(" //!", f) }}{% else %} {{ "{ " + description("//!", f) }}
-        {%- for e in f.enumeratedValues|enumlist %}
+    {% if not f.enumeratedValues|enumlist or NO_ENUMES %},{{ description(" //!", f) }}{% else %} {{ "{ " + description("//!", f) }}
+        {% for e in f.enumeratedValues|enumlist %}
         {{ e.value|enumvalue }} => {{ e.name }}, {{ description("//=", e) }}
-        {%- endfor %}
-    }{%- endif %}
-    {%- endfor %}
-}{% endif %}
-{%- endmacro -%}
+        {% endfor %}
+    }{% endif %}
 
-{%- macro cluster(c) -%}
+    {% endfor %}
+}{% endif %}
+{% endmacro %}
+
+{% macro cluster(c) %}
 {{ "%#05x"|format(c.addressOffset) }} => group {{ c.name }} {{ "{ " + description("//!", c) }}
-    {%- for r in c.registers %}
+    {% for r in c.registers %}
     {{ register(r)|indent }}
-    {%- endfor %}
+    {% endfor %}
 }
-{%- endmacro -%}
+{% endmacro %}
 
 {% for p in peripherals %}
 ioregs! ({{ p.name }} @ {{ "%#010x"|format(p.baseAddress) }}
 {%- if not p.registers %}{% else %} = {
     {{ description("///", p) }}
-    {%- for r in p.registers %}
-    {%- if r.registers %}
+    {% for r in p.registers %}
+    {% if r.registers %}
     {{ cluster(r)|indent }}
-    {%- else %}
+    {% else %}
     {{ register(r)|indent }}
-    {%- endif %}
-    {%- endfor %}
+    {% endif %}
+    {% endfor %}
 }{% endif %});
+
 {% endfor %}

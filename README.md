@@ -155,7 +155,7 @@ def postprocess(vars):
 
 class YamlParser(yasha.YamlParser):
     def parse(self, file):
-        vars = yasha.YamlParser.parse(file)
+        vars = yasha.YamlParser.parse(self, file)
         return postprocess(vars)
 ```
 

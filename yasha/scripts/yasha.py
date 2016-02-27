@@ -93,7 +93,7 @@ def load_jinja(searchpath, extdict):
     from jinja2 import Environment, FileSystemLoader
 
     jinja = Environment(extensions=extdict["jinja_extensions"],
-        loader=FileSystemLoader(searchpath))
+        loader=FileSystemLoader(searchpath), trim_blocks=True, lstrip_blocks=True)
 
     for test in extdict["jinja_tests"]:
         jinja.tests[test.__name__.replace("test_", "")] = test

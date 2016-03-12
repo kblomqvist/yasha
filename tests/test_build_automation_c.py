@@ -41,7 +41,7 @@ def test_make():
 
     # Check program output
     out = check_output(["./build/a.out"])
-    assert b"foo has 3 chars ...\n" == out
+    assert b"bar has 3 chars ...\n" == out
 
     # Test template dependencies
     for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
@@ -70,7 +70,7 @@ def test_cmake():
 
     # Check program output
     out = check_output(["./a.out"])
-    assert b"foo has 3 chars ...\n" == out
+    assert b"bar has 3 chars ...\n" == out
 
     # Test template dependencies
     for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
@@ -100,7 +100,7 @@ def test_scons():
 
     # Check program output
     out = check_output(["./build/a.out"])
-    assert b"foo has 3 chars ...\n" == out
+    assert b"bar has 3 chars ...\n" == out
 
 # TODO: Fix race condition. Every now and then fails. Though,
 # call() shouldn't return before finished.

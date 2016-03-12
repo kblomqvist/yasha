@@ -22,29 +22,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from . import yasha
-
-import os
+import os, re
 from SCons.Builder import BuilderBase
+from click.testing import CliRunner
+
+from .scripts import yasha
 
 class Builder(BuilderBase):
     def __init__(self, action="yasha $SOURCE -o $TARGET"):
         def scan(node, env, path):
-            """
-            TODO: Doesn't take custom parsers into account.
-            """
             src = str(node.srcnode())
             src_dir = os.path.dirname(src)
             variant_dir = os.path.dirname(str(node))
 
-            variable_formats = []
-            for p in yasha.default_parsers():
-                variable_formats += p.file_extension
+            cli_command = [src, "-M"]
+            extensions = re.search(r"(-e|--extensions)\s*(.+)", action)
+            variables = re.search(r"(-v|--variables)\s*(.+)", action)
 
-            var = yasha.find_dependencies(src, variable_formats)
-            ext = yasha.find_dependencies(src, [".py", ".j2ext", ".jinja-ext"])
+            if extensions:
+                cli_command += ["-e", extensions.group(2)]
+            if variables:
+                cli_command += ["-v", extensions.group(2)]
+            if re.match(r"--no-variables", action):
+                cli_command += ["--no-variables"]
+            if re.match(r"--no-extensions", action):
+                cli_command += ["--no-extensions"]
 
-            deps = [d for d in [var, ext] if d != None]
+            runner = CliRunner()
+            result = runner.invoke(yasha.cli, cli_command)
+
+            deps = result.output[:-1].split(" ")[2:]
             deps = [d.replace(src_dir, variant_dir) for d in deps]
             return env.File(deps)
 

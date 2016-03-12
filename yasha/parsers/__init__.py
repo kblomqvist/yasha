@@ -27,6 +27,3 @@ from .parser import Parser
 from .svd import SvdParser
 from .toml import TomlParser
 from .yaml import YamlParser
-
-def default_parsers():
-    return [YamlParser(), TomlParser(), SvdParser()]

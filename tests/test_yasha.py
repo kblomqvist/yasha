@@ -37,26 +37,26 @@ def cwd(request, tmpdir):
 
 
 def test_template_depends_none(tmpdir, cwd):
-    dep = yasha.find_dependencies("foo.c.jinja", start=cwd)
+    dep = yasha.find_template_companion("foo.c.jinja", start=cwd)
     assert dep == None
 
 
 def test_template_depends_foo_yaml(tmpdir, cwd):
     tmpdir.join("foo.yaml").write("")
-    dep = yasha.find_dependencies("foo.c.jinja", start=cwd)
+    dep = yasha.find_template_companion("foo.c.jinja", start=cwd)
     assert dep == "foo.yaml"
 
 
 def test_template_depends_foo_c_yaml(tmpdir, cwd):
     tmpdir.join("foo.c.yaml").write("")
-    dep = yasha.find_dependencies("foo.c.jinja", start=cwd)
+    dep = yasha.find_template_companion("foo.c.jinja", start=cwd)
     assert dep == "foo.c.yaml"
 
 
 def test_template_depends_foo_yaml_in_subdir(tmpdir, cwd):
     sub = tmpdir.mkdir("sub")
     sub.join("foo.yaml").write("")
-    dep = yasha.find_dependencies("sub/foo.c.jinja", start=cwd)
+    dep = yasha.find_template_companion("sub/foo.c.jinja", start=cwd)
     assert dep == "sub/foo.yaml"
 
 
@@ -64,19 +64,19 @@ def test_template_depends_foo_c_yaml_in_subdir(tmpdir, cwd):
     sub = tmpdir.mkdir("sub")
     sub.join("foo.yaml").write("")
     sub.join("foo.c.yaml").write("")
-    dep = yasha.find_dependencies("sub/foo.c.jinja", start=cwd)
+    dep = yasha.find_template_companion("sub/foo.c.jinja", start=cwd)
     assert dep == "sub/foo.c.yaml"
 
 
 def test_template_depends_foo_yaml_below_subdir(tmpdir, cwd):
     tmpdir.join("foo.yaml").write("")
     tmpdir.mkdir("sub")
-    dep = yasha.find_dependencies("sub/foo.c.jinja", start=cwd)
+    dep = yasha.find_template_companion("sub/foo.c.jinja", start=cwd)
     assert dep == "foo.yaml"
 
 
 def test_dependencies_arent_find_below_cwd(tmpdir):
     tmpdir.join("foo.yaml").write("")
     tmpdir.mkdir("sub").chdir()
-    dep = yasha.find_dependencies("foo.c.jinja")
+    dep = yasha.find_template_companion("foo.c.jinja")
     assert dep == None

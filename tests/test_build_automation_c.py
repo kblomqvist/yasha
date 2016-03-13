@@ -50,7 +50,7 @@ def test_make(clean):
     assert b"bar has 3 chars ...\n" == out
 
     # Test template dependencies
-    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja", "foo.c.py", "header.jinja"]:
+    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja", "foo.c.py", "header.j2inc"]:
         call(["touch", "src/" + dep])
         out = check_output(["make"])
         assert not b"is up to date" in out
@@ -74,7 +74,7 @@ def test_cmake(clean):
     assert b"bar has 3 chars ...\n" == out
 
     # Test template dependencies
-    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja", "foo.c.py", "header.jinja"]:
+    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja", "foo.c.py", "header.j2inc"]:
         call(["touch", "../src/" + dep])
         out = check_output(["make"])
         assert b"Linking C executable" in out

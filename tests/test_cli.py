@@ -86,25 +86,25 @@ def test_template_in_subdir(tmpdir, tmplvar):
     assert path.isfile("sub/foo.c")
 
     o = tmpdir.join("sub/foo.c")
-    assert o.read() == "int x = 0;"
+    assert o.read() == "int x = 0;\n"
 
     v1 = tmpdir.join(varfile[1])
     v1.write(tmplvar["content"].format(1))
 
     call(["yasha", "sub/foo.c.jinja"])
-    assert o.read() == "int x = 1;"
+    assert o.read() == "int x = 1;\n"
 
     v2 = tmpdir.join(varfile[2])
     v2.write(tmplvar["content"].format(2))
 
     call(["yasha", "sub/foo.c.jinja"])
-    assert o.read() == "int x = 2;"
+    assert o.read() == "int x = 2;\n"
 
     call(["yasha", "sub/foo.c.jinja", "--variables", varfile[1]])
-    assert o.read() == "int x = 1;"
+    assert o.read() == "int x = 1;\n"
 
     call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
-    assert o.read() == "int x = 0;"
+    assert o.read() == "int x = 0;\n"
 
 def test_custom_xmlparser(tmpdir):
     template = """
@@ -168,8 +168,7 @@ class XmlParser(yasha.Parser):
     address = "Foo Valley"
     [[persons]]
     name = "Bar"
-    address = "Bar Valley"
-    """
+    address = "Bar Valley"\n"""
 
 def test_broken_extensions(tmpdir):
     from subprocess import CalledProcessError, STDOUT

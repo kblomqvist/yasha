@@ -125,24 +125,27 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
             output_d = click.open_file(output.name + ".d", "wb")
             output_d.write(deps.encode("utf-8"))
 
-    # Parse variables
-    vars = {}
-    if variables and not no_variables:
-        vars = parse_variables(variables, ex["variable_parsers"])
-    for preprocessor in ex["variable_preprocessors"]:
-        vars = preprocessor(vars)
-
-    # Time to load Jinja
+    # Load Jinja and get template
     jinja = yasha.load_jinja(
         searchpath, ex["tests"], ex["filters"], ex["classes"],
         not no_trim_blocks, not no_lstrip_blocks)
-
     if template.name == "<stdin>":
         stdin = template.read()
         t = jinja.from_string(stdin)
     else:
         t = jinja.get_template(os.path.basename(template.name))
 
-    # Finally render the template
-    t_rendered = t.render(vars)
+    # Finally parse variables and render the template
+    v = {}
+    if variables and not no_variables:
+        v.update(parse_variables(variables, ex["variable_parsers"]))
+    for preprocessor in ex["variable_preprocessors"]:
+        v = preprocessor(v)
+    t_rendered = t.render(v)
+
+    # Add newline at the EOF if missing from template
+    t_linesep = linesep(t_rendered)
+    t_rendered = t_rendered.rstrip() + t_linesep
+
+    # Write rendered template to file
     output.write(t_rendered.encode("utf-8"))

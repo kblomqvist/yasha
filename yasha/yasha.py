@@ -73,7 +73,7 @@ def find_referenced_templates(template, search_path):
     def realpath(tpl):
         for path in search_path:
             t = os.path.realpath(os.path.join(path, tpl))
-            if path.isfile(t):
+            if os.path.isfile(t):
                 return t
         return None
 

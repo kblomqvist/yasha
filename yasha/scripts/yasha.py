@@ -126,6 +126,7 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
             output_d.write(deps.encode("utf-8"))
 
     # Parse variables
+    vars = {}
     if variables and not no_variables:
         vars = parse_variables(variables, ex["variable_parsers"])
     for preprocessor in ex["variable_preprocessors"]:

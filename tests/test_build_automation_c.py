@@ -27,9 +27,15 @@ from os import path, chdir, mkdir
 from subprocess import call, check_output
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
-chdir(SCRIPT_PATH + "/fixtures/c_project")
 
-def test_make():
+@pytest.fixture()
+def clean():
+    chdir(SCRIPT_PATH + "/fixtures/c_project")
+    call(["make", "clean"])
+    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
+        assert not path.isfile("src/" + f)
+
+def test_make(clean):
     # First build
     out = check_output(["make"])
     assert not b"is up to date" in out
@@ -44,17 +50,12 @@ def test_make():
     assert b"bar has 3 chars ...\n" == out
 
     # Test template dependencies
-    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja", "foo.c.py", "header.jinja"]:
         call(["touch", "src/" + dep])
         out = check_output(["make"])
         assert not b"is up to date" in out
 
-    # Clean the build
-    call(["make", "clean"])
-    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile("src/" + f)
-
-def test_cmake():
+def test_cmake(clean):
     mkdir("build")
     chdir("build")
 
@@ -73,7 +74,7 @@ def test_cmake():
     assert b"bar has 3 chars ...\n" == out
 
     # Test template dependencies
-    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja", "foo.c.py", "header.jinja"]:
         call(["touch", "../src/" + dep])
         out = check_output(["make"])
         assert b"Linking C executable" in out
@@ -83,12 +84,9 @@ def test_cmake():
     for f in ["foo.c", "foo.h"]:
         assert not path.isfile("../src/" + f)
 
-    chdir("..")
-    call(["rm", "-rf", "build"])
-
 @pytest.mark.skipif(sys.version_info[0] > 2,
     reason="requires python2")
-def test_scons():
+def test_scons(clean):
     # First build
     out = check_output(["scons"])
     assert not b"is up to date" in out
@@ -114,5 +112,3 @@ def test_scons():
     call(["scons", "-c"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
         assert not path.isfile("build/" + f)
-
-    call(["rm", "-rf", "build"])

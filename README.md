@@ -170,10 +170,10 @@ project(yasha)
 file(GLOB sources "src/*.c")
 file(GLOB templates "src/*.jinja")
 
-foreach(tmpl ${templates})
-    string(REGEX REPLACE "\\.[^.]*$" "" output ${tmpl})
+foreach(template ${templates})
+    string(REGEX REPLACE "\\.[^.]*$" "" output ${template})
     execute_process(
-        COMMAND yasha -M ${tmpl}
+        COMMAND yasha -M ${template}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE deps
     )
@@ -181,7 +181,7 @@ foreach(tmpl ${templates})
     string(REPLACE " " ";" deps ${deps})
     add_custom_command(
         OUTPUT ${output}
-        COMMAND yasha -o ${output} ${tmpl}
+        COMMAND yasha -o ${output} ${template}
         DEPENDS ${deps}
     )
     list(APPEND sources ${output})

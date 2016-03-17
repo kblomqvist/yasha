@@ -15,16 +15,22 @@ will render `foo.jinja` template into a new file named as `foo`. See how the cre
 
 ## Installation
 
-As a regular user:
+As a regular user (the latest release):
 
 ```bash
 pip install yasha
 ```
 
-As a developer (for the latest development version):
+or the latest development version:
 
 ```bash
-git clone https://github.com/kblomqvist/yasha
+pip install git+https://github.com/kblomqvist/yasha.git
+```
+
+or if you would like to develop:
+
+```bash
+git clone https://github.com/kblomqvist/yasha.git
 pip install -e yasha
 ```
 

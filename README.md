@@ -142,7 +142,7 @@ class XmlParser(yasha.Parser):
 
 ### Search paths of referenced templates
 
-By default the referenced templates, aka hardcoded template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the rendered template location. To extend this search path you can use option `-I` / `--searchpath`, like you would do with the GCC to include C header files.
+By default the referenced templates, aka hardcoded template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path of referenced templates you can use command-line option `-I` / `--searchpath`. Like you would do with the GCC to include C header files.
 
 ```bash
 yasha -Iskeletons -Imacros foo.jinja

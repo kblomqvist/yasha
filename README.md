@@ -36,7 +36,7 @@ pip install -e yasha
 
 ## Template variables (variable file)
 
-Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not given explicitly, Yasha will look for it. Thus the above example call, `yasha foo.jinja`, tries to find `foo.yaml` or `foo.yml` from the same folder with the template itself. If the file is not found, subfolders will be checked until the current working directory is reached.
+Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not given explicitly, Yasha will look for it. Thus the above example call, `yasha foo.jinja`, tries to find `foo.yaml` or `foo.yml` from the same folder with the template itself.
 
 The file containing the template variables can be given explicitly too:
 
@@ -81,7 +81,7 @@ yasha include/foo.h.jinja
 yasha source/foo.c.jinja
 ```
 
-the variables defined in `foo.yaml` are used within both templates.
+the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached.
 
 ### Built-in variable file parsers
 

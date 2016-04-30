@@ -36,7 +36,7 @@ pip install -e yasha
 
 ## Template variables (variable file)
 
-Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not given explicitly, Yasha will look for it. Thus the above example call, `yasha foo.jinja`, tries to find `foo.yaml` or `foo.yml` from the same folder with the template itself.
+Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not explicitly given, Yasha will look for it. For example, `yasha foo.jinja` tries to find `foo.yaml` or `foo.yml` from the same folder with the template itself.
 
 The file containing the template variables can be given explicitly too:
 
@@ -51,7 +51,7 @@ export YASHA_VARIABLES=$HOME/foo.yaml
 yasha foo.jinja
 ```
 
-In case the variables shouldn't be used in spite of the file existence use ``--no-variables`` option flag:
+In case the variables shouldn't be used in spite of its existence, use ``--no-variables`` option flag:
 
 ```bash
 yasha --no-variables foo.jinja
@@ -62,16 +62,18 @@ yasha --no-variables foo.jinja
 Imagine that you would be writing C code and have the following two templates in two different folders
 
 ```
-include/foo.h.jinja
-source/foo.c.jinja
+root/
+    include/foo.h.jinja
+    source/foo.c.jinja
 ```
 
-and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` files you can make one `foo.yaml` like this:
+Now you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` you can create `foo.yaml` under the root folder:
 
 ```
-include/foo.h.jinja
-source/foo.c.jinja
-foo.yaml
+root/
+    include/foo.h.jinja
+    source/foo.c.jinja
+    foo.yaml
 ```
 
 Now when you call
@@ -91,7 +93,7 @@ the variables defined in `foo.yaml` are used within both templates. This works b
 
 ## Template extensions (extension file)
 
-Seems like the day has arrived when you would like to use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. Fortunately yasha has been a far-wise and supports these out of box. The functionality is similar to the variable file usage described above. So for a given `foo.jinja` template file, yasha will automatically seek `foo.py` file for extensions. In case you are generating python code you may like to use `.j2ext` or `.jinja-ext` file suffix for your template extension file instead of `.py`.
+You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. The functionality is similar to the variable file usage described above. So for a given `foo.jinja` template file, yasha will automatically look for `foo.py` file for template extensions. In case you are generating python code you may like to use `.j2ext` or `.jinja-ext` file suffix instead of `.py`.
 
 Here is an example of the extension file containing a filter and a test:
 
@@ -140,12 +142,19 @@ class XmlParser(yasha.Parser):
 
 ## Tips and tricks
 
-### Search paths of referenced templates
+### Append search path for referenced templates
 
-By default the referenced templates, aka hardcoded template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path of referenced templates you can use command-line option `-I`. Like you would do with the GCC to include C header files.
+By default the referenced templates, e.g template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path you can use command-line option `-I`. Like you would do with the GCC to include C header files.
 
 ```bash
-yasha -Iskeletons -Imacros foo.jinja
+yasha -I$HOME/jinja foo.jinja
+```
+
+Now you can, for example, reuse files you have collected under your `$HOME/jinja` folder.
+
+```jinja
+{% extends "skeleton.jinja" %}
+{% from "macros.jinja" import decorator %}
 ```
 
 ### Variable pre-processing before template rendering

@@ -111,11 +111,11 @@ And as you might guess, instead of relying on the automatic extension file look 
 yasha --extensions foo.py foo.jinja
 ```
 
-There's also `--no-extensions` option flag operating in a similar manner with `--no-variables`. Additionally the file sharing works for the extension file as it works for the variable file and the environment variable name `YASHA_EXTENSIONS` can be used to load extension file.
+There's also `--no-extensions` option flag operating in a similar manner with `--no-variables`. Additionally the file sharing works for the extension file as it works for the variable file. The environment variable name `YASHA_EXTENSIONS` is supported too.
 
 ### Custom variable file parser
 
-If none of the built-in parsers fit into your needs, it's possible to declare a your own parser within the extension file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.Parser` are considered as a custom parser and will be loaded.
+If none of the built-in parsers fit into your needs, it's possible to declare your own parser within the extension file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.Parser` are considered as a custom parser and will be loaded.
 
 ```python
 import yasha

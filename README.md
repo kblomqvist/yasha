@@ -36,9 +36,7 @@ pip install -e yasha
 
 ## Template variables (variable file)
 
-Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not explicitly given, Yasha will look for it. For example, `yasha foo.jinja` tries to find `foo.yaml` (or `foo.yml`) from the same folder with the template itself.
-
-The file containing the template variables can be given explicitly too:
+Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not explicitly given, Yasha will look for it. For example, the above command-line call `yasha foo.jinja` tries to find `foo.yaml` (or `foo.yml`) from the same folder with the template itself. However, the file containing the template variables can be given explicitly too:
 
 ```bash
 yasha --variables foo.yaml foo.jinja
@@ -83,7 +81,7 @@ yasha include/foo.h.jinja
 yasha source/foo.c.jinja
 ```
 
-the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory (`root` in this case) is reached.
+the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case.
 
 ### Built-in variable file parsers
 
@@ -144,7 +142,7 @@ class XmlParser(yasha.Parser):
 
 ### Append search path for referenced templates
 
-By default the referenced templates, e.g template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path you can use command-line option `-I` -- like you would do with the GCC to include C header files.
+By default the referenced templates, e.g template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path you can use command-line option `-I` — like you would do with the GCC to include C header files.
 
 ```bash
 yasha -I$HOME/jinja foo.jinja
@@ -273,7 +271,7 @@ endif
 
 ### SConstruct (SCons)
 
-Below is shown a simple example how to use Yasha with [SCons](http://scons.org/) for C files. There are too different kind of builders available in `yasha.scons`, Builder and CBuilder. The difference is that CBuilder doesn't include generated C header files into its return list so you can append it directly to sources list, like it's done below.
+Below is shown a simple example how to use Yasha with [SCons](http://scons.org/) for C files. There are too different kind of builders available in `yasha.scons`, Builder and CBuilder. The difference is that CBuilder doesn't include generated C header files into its return value so you can append it directly to sources list, like it's done below.
 
 ```python
 import os

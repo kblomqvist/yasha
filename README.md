@@ -36,7 +36,7 @@ pip install -e yasha
 
 ## Template variables (variable file)
 
-Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not explicitly given, Yasha will look for it. For example, the above command-line call `yasha foo.jinja` tries to find `foo.yaml` (or `foo.yml`) from the same folder with the template itself. However, the file containing the template variables can be given explicitly too:
+Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not explicitly given, Yasha will look for it. For example, the above command-line call, `yasha foo.jinja`, tries to find `foo.yaml` (or `foo.yml`) from the same folder with the template itself. However, the file containing the template variables can be given explicitly too:
 
 ```bash
 yasha --variables foo.yaml foo.jinja
@@ -65,7 +65,7 @@ root/
     source/foo.c.jinja
 ```
 
-Now you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` you can create `foo.yaml` under the root folder:
+and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` you can create `foo.yaml` under the root folder:
 
 ```
 root/
@@ -74,7 +74,7 @@ root/
     foo.yaml
 ```
 
-When you call
+Now when you call
 
 ```bash
 yasha include/foo.h.jinja

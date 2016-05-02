@@ -172,9 +172,13 @@ class YamlParser(yasha.YamlParser):
         return postprocess(vars)
 ```
 
-## Build automation examples for C
+## Build automation
 
-### CMakeList.txt (CMake)
+Using the command-line option `-M` Yasha returns the list of the template dependencies in a Makefile compatible format. With `-MD` option the separate `.d` file is created alongside template rendering. These options allow a convenient integration with the build automation softwares.
+
+### Examples using Yasha for C
+
+#### CMakeList.txt (CMake)
 
 ```CMake
 cmake_minimum_required(VERSION 2.8.7)
@@ -211,7 +215,7 @@ cmake ..
 make
 ```
 
-### Makefile (GNU Make)
+#### Makefile (GNU Make)
 
 ```Makefile
 # User variables
@@ -269,7 +273,7 @@ endif
 .phony : clean
 ```
 
-### SConstruct (SCons)
+#### SConstruct (SCons)
 
 Below is shown a simple example how to use Yasha with [SCons](http://scons.org/) for C files. There are too different kind of builders available in `yasha.scons`, Builder and CBuilder. The difference is that CBuilder doesn't include generated C header files into its return value so you can append it directly to sources list, like it's done below.
 

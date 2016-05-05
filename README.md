@@ -88,8 +88,8 @@ Considering the above example Yasha will look for variables in the following ord
 
 - `include/foo.h.yaml`
 - `include/foo.yaml`
-- `../foo.h.yaml`
-- `../foo.yaml`
+- `foo.h.yaml`
+- `foo.yaml`
 
 ### Built-in variable file parsers
 

@@ -77,11 +77,19 @@ root/
 Now when you call
 
 ```bash
+cd root
 yasha include/foo.h.jinja
 yasha source/foo.c.jinja
 ```
 
 the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case.
+
+Considering the above example Yasha will look for variables in the following order:
+
+- `include/foo.h.yaml`
+- `include/foo.yaml`
+- `../foo.h.yaml`
+- `../foo.yaml`
 
 ### Built-in variable file parsers
 
@@ -174,11 +182,9 @@ class YamlParser(yasha.YamlParser):
 
 ## Build automation
 
-Using the command-line option `-M` Yasha returns the list of the template dependencies in a Makefile compatible format. With `-MD` option the separate `.d` file is created alongside template rendering. These options allow a convenient integration with the build automation softwares.
+Yasha command-line options `-M` and `-MD` return the list of the template dependencies in a Makefile compatible format. The later creates the separate `.d` file alongside the template rendering instead of printing to stdin. These options allow integration with the build automation tools. Below are given examples for CMake, Make and SCons.
 
-### Examples using Yasha for C
-
-#### CMakeList.txt (CMake)
+### CMakeList.txt (CMake)
 
 ```CMake
 cmake_minimum_required(VERSION 2.8.7)
@@ -215,7 +221,7 @@ cmake ..
 make
 ```
 
-#### Makefile (GNU Make)
+### Makefile (GNU Make)
 
 ```Makefile
 # User variables
@@ -273,7 +279,7 @@ endif
 .phony : clean
 ```
 
-#### SConstruct (SCons)
+### SConstruct (SCons)
 
 Below is shown a simple example how to use Yasha with [SCons](http://scons.org/) for C files. There are too different kind of builders available in `yasha.scons`, Builder and CBuilder. The difference is that CBuilder doesn't include generated C header files into its return value so you can append it directly to sources list, like it's done below.
 

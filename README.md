@@ -180,6 +180,14 @@ class YamlParser(yasha.YamlParser):
         return postprocess(vars)
 ```
 
+### Working with STDIN and STDOUT
+
+Yasha can render templates from STDIN to STDOUT. For example, the below command-line call will render template from STDIN to STDOUT.
+
+```bash
+cat foo.jinja | yasha -v foo.yaml -
+```
+
 ## Build automation
 
 Yasha command-line options `-M` and `-MD` return the list of the template dependencies in a Makefile compatible format. The later creates the separate `.d` file alongside the template rendering instead of printing to stdout. These options allow integration with the build automation tools. Below are given examples for CMake, Make and SCons.

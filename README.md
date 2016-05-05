@@ -182,7 +182,7 @@ class YamlParser(yasha.YamlParser):
 
 ## Build automation
 
-Yasha command-line options `-M` and `-MD` return the list of the template dependencies in a Makefile compatible format. The later creates the separate `.d` file alongside the template rendering instead of printing to stdin. These options allow integration with the build automation tools. Below are given examples for CMake, Make and SCons.
+Yasha command-line options `-M` and `-MD` return the list of the template dependencies in a Makefile compatible format. The later creates the separate `.d` file alongside the template rendering instead of printing to stdout. These options allow integration with the build automation tools. Below are given examples for CMake, Make and SCons.
 
 ### CMakeList.txt (CMake)
 

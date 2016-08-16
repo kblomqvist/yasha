@@ -4,7 +4,7 @@
 ![MIT license](https://img.shields.io/pypi/l/yasha.svg)
 <img src="https://raw.githubusercontent.com/kblomqvist/yasha/master/yasha.png" align="right" />
 
-Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. The following command-line call
+Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest a command-line call
 
 ```bash
 yasha foo.jinja
@@ -12,6 +12,13 @@ yasha foo.jinja
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
+The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the parsed [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file of the system contained in ARM Cortex-M processor-based microcontrollers. This has been [tested for the Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures). Yasha has since evolved to be flexible enough for any project where code generation is needed. The tool allows you extending Jinja by writing your own filters and variable file parsers, and it operates smoothly with the commonly used build automation softwares like make, cmake and scons.
+
+The built-in variable file parsers are
+
+- `.svd` files are parsed as [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html)
+- `.toml` files are parsed as [TOML](https://github.com/toml-lang/toml)
+- `.yaml` and `.yml` files are parsed as [YAML](http://www.yaml.org/start.html)
 
 ## Installation
 
@@ -34,12 +41,42 @@ git clone https://github.com/kblomqvist/yasha.git
 pip install -e yasha
 ```
 
+## Usage
+
+```
+Usage: yasha [OPTIONS] TEMPLATE
+
+  Reads the given Jinja template and renders its content into a new file,
+  which name is derived from the given template name. For example, a template
+  called foo.c.jinja will be written into foo.c in case when the output
+  file is not explicitly specified.
+
+Options:
+  -o, --output FILENAME       Place a rendered tempalate into FILENAME.
+  -v, --variables FILENAME    Read template variables from FILENAME.
+  -e, --extensions FILENAME   Read template extensions from FILENAME.
+  -I, --searchpath DIRECTORY  Add DIRECTORY to the list of directories to be
+                              searched for referenced templates in TEMPLATE,
+                              aka hardcoded template extensions, inclusions
+                              and imports.
+  --no-variables              Omit template variables.
+  --no-extensions             Omit template extensions.
+  --no-trim-blocks            Load Jinja with trim_blocks=False.
+  --no-lstrip-blocks          Load Jinja with lstrip_blocks=False.
+  -M                          Outputs Makefile compatible list of
+                              dependencies. Doesn't render the template.
+  -MD                         Creates Makefile compatible .d file alongside a
+                              rendered template.
+  --version                   Print version and exit.
+  -h, --help                  Show this message and exit.
+```
+
 ## Template variables (variable file)
 
-Template variables can be defined in a separate template variable file. For example, [YAML](http://www.yaml.org/start.html) is supported. If the variable file is not explicitly given, Yasha will look for it. For example, the above command-line call, `yasha foo.jinja`, tries to find `foo.yaml` (or `foo.yml`) from the same folder with the template itself. However, the file containing the template variables can be given explicitly too:
+Template variables can be defined in a separate template variable file. If the variable file is not explicitly given, Yasha will look for it. For example, the above command-line call, `yasha foo.jinja`, tries to find `foo.yaml` (or `foo.yml`) from the same folder with the template itself. To explicitly specifying the variable file use `-v` option flag:
 
 ```bash
-yasha --variables foo.yaml foo.jinja
+yasha -v foo.yaml foo.jinja
 ```
 
 Or via environment variable:
@@ -82,20 +119,7 @@ yasha include/foo.h.jinja
 yasha source/foo.c.jinja
 ```
 
-the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case.
-
-Considering the above example Yasha will look for variables in the following order:
-
-- `include/foo.h.yaml`
-- `include/foo.yaml`
-- `foo.h.yaml`
-- `foo.yaml`
-
-### Built-in variable file parsers
-
-- `.svd` files are parsed as [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html)
-- `.toml` files are parsed as [TOML](https://github.com/toml-lang/toml)
-- `.yaml` and `.yml` files are parsed as [YAML](http://www.yaml.org/start.html)
+the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For your reference the variables are looked for in the following order: `include/foo.h.yaml`, `include/foo.yaml`, `foo.h.yaml`, `foo.yaml`.
 
 ## Template extensions (extension file)
 
@@ -116,7 +140,7 @@ Note that the functions intended to work as a filter have to be prefixed by `fil
 And as you might guess, instead of relying on the automatic extension file look up, the file can be given explicitly as well.
 
 ```bash
-yasha --extensions foo.py foo.jinja
+yasha -e foo.py foo.jinja
 ```
 
 There's also `--no-extensions` option flag operating in a similar manner with `--no-variables`. Additionally the file sharing works for the extension file as it works for the variable file. The environment variable name `YASHA_EXTENSIONS` is supported too.

@@ -60,11 +60,10 @@ def print_version(ctx, param, value):
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
 def cli(template, output, variables, extensions, searchpath, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, m, md):
-    """This script reads the given Jinja template and renders its content
-    into a new file, which name is derived from the given template name.
-
-    For example, a template called "foo.c.jinja" will be written into "foo.c" if
-    the output file is not explicitly specified."""
+    """Reads the given Jinja template and renders its content into a new file,
+    which name is derived from the given template name. For example, a template
+    called foo.c.jinja will be written into foo.c in case when the output
+    file is not explicitly specified."""
 
     searchpath = [os.path.dirname(template.name)] + list(searchpath)
 

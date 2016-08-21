@@ -144,11 +144,11 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
     # Write rendered template into file
     chunk_offset = None
     for chunk in t.generate(v):
-        chunk = chunk.encode("utf-8")
         chunk_offset = output.tell()
-        output.write(chunk)
+        output.write(chunk.encode("utf-8"))
 
     # Add newline at the EOF if missing from template
+    chunk = chunk.rstrip() + linesep(chunk)
     output.seek(chunk_offset)
     output.truncate()
-    output.write(chunk.rstrip() + linesep(chunk))
+    output.write(chunk.encode("utf-8"))

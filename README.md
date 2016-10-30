@@ -12,9 +12,9 @@ yasha foo.jinja
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
-The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the parsed [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file of the system contained in ARM Cortex-M processor-based microcontrollers. This has been [tested for the Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures). Yasha has since evolved to be flexible enough for any project where code generation is needed. The tool allows you extending Jinja by writing your own filters and variable file parsers, and it operates smoothly with the commonly used build automation softwares like make, cmake and scons.
+The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file of the ARM Cortex-M processor-based microcontrollers. [This was done for Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures). Yasha has since evolved to be flexible enough to be used in any project where the code generation is needed. The tool allows extending Jinja by domain specific filters, tests and extensions, and it operates smoothly with the commonly used build automation softwares like Make, CMake and SCons.
 
-The built-in variable file parsers are
+The built-in template variable file parsers are
 
 - `.svd` files are parsed as [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html)
 - `.toml` files are parsed as [TOML](https://github.com/toml-lang/toml)
@@ -73,13 +73,13 @@ Options:
 
 ## Template variables (variable file)
 
-Template variables can be defined in a separate template variable file. If the variable file is not explicitly given, Yasha will look for it. For example, the above command-line call, `yasha foo.jinja`, tries to find `foo.yaml` (or `foo.yml`) from the same folder with the template itself. To explicitly specifying the variable file use `-v` option flag:
+Template variables can be defined in a separate template variable file. If the file is not explicitly given, Yasha will look for it. For example, the command-line call, `yasha foo.jinja`, tries to find the appropriate variable file, e.g. `foo.yaml`, from the same folder with the template itself. To explicitly specifying the variable file use `-v` option flag:
 
 ```bash
 yasha -v foo.yaml foo.jinja
 ```
 
-Or via environment variable:
+Or give it via environment variable:
 
 ```bash
 export YASHA_VARIABLES=$HOME/foo.yaml
@@ -119,7 +119,7 @@ yasha include/foo.h.jinja
 yasha source/foo.c.jinja
 ```
 
-the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For your reference the variables are looked for in the following order: `include/foo.h.yaml`, `include/foo.yaml`, `foo.h.yaml`, `foo.yaml`.
+the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For the readers reference, the variables are looked for `include/foo.h.jinja` in following order: `include/foo.h.yaml`, `include/foo.yaml`, `foo.h.yaml`, `foo.yaml`.
 
 ## Template extensions (extension file)
 
@@ -174,7 +174,7 @@ class XmlParser(yasha.Parser):
 
 ### Append search path for referenced templates
 
-By default the referenced templates, e.g template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path you can use command-line option `-I` — like you would do with the GCC to include C header files.
+By default the referenced templates, i.e. template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path you can use command-line option `-I` — like you would do with the GCC to include C header files.
 
 ```bash
 yasha -I$HOME/jinja foo.jinja

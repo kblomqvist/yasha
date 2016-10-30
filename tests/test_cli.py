@@ -86,25 +86,25 @@ def test_template_in_subdir(tmpdir, tmplvar):
     assert path.isfile("sub/foo.c")
 
     o = tmpdir.join("sub/foo.c")
-    assert o.read() == "int x = 0;\n"
+    assert o.read() == "int x = 0;"
 
     v1 = tmpdir.join(varfile[1])
     v1.write(tmplvar["content"].format(1))
 
     call(["yasha", "sub/foo.c.jinja"])
-    assert o.read() == "int x = 1;\n"
+    assert o.read() == "int x = 1;"
 
     v2 = tmpdir.join(varfile[2])
     v2.write(tmplvar["content"].format(2))
 
     call(["yasha", "sub/foo.c.jinja"])
-    assert o.read() == "int x = 2;\n"
+    assert o.read() == "int x = 2;"
 
     call(["yasha", "sub/foo.c.jinja", "--variables", varfile[1]])
-    assert o.read() == "int x = 1;\n"
+    assert o.read() == "int x = 1;"
 
     call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
-    assert o.read() == "int x = 0;\n"
+    assert o.read() == "int x = 0;"
 
 def test_custom_xmlparser(tmpdir):
     template = """
@@ -112,8 +112,7 @@ def test_custom_xmlparser(tmpdir):
     [[persons]]
     name = "{{ p.name }}"
     address = "{{ p.address }}"
-    {% endfor %}
-    """
+    {% endfor %}"""
 
     variables = """
     <persons>
@@ -168,7 +167,7 @@ class XmlParser(yasha.Parser):
     address = "Foo Valley"
     [[persons]]
     name = "Bar"
-    address = "Bar Valley"\n\n"""
+    address = "Bar Valley"\n"""
 
 def test_broken_extensions(tmpdir):
     from subprocess import CalledProcessError, STDOUT

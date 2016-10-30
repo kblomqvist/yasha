@@ -141,14 +141,7 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
     for preprocessor in ex["variable_preprocessors"]:
         v = preprocessor(v)
 
-    # Write rendered template into file
-    chunk_offset = None
-    for chunk in t.generate(v):
-        chunk_offset = output.tell()
-        output.write(chunk.encode("utf-8"))
-
-    # Add newline at the EOF if missing from template
-    chunk = chunk.rstrip() + linesep(chunk)
-    output.seek(chunk_offset)
-    output.truncate()
-    output.write(chunk.encode("utf-8"))
+    # Render template and save it into output
+    t_stream = t.stream(v)
+    t_stream.enable_buffering(size=5)
+    t_stream.dump(output, encoding="utf-8")

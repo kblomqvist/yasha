@@ -130,7 +130,7 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
         not no_trim_blocks, not no_lstrip_blocks)
     if template.name == "<stdin>":
         stdin = template.read()
-        t = jinja.from_string(stdin)
+        t = jinja.from_string(stdin.decode("utf-8"))
     else:
         t = jinja.get_template(os.path.basename(template.name))
 

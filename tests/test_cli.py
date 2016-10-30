@@ -188,3 +188,19 @@ def test_broken_extensions(tmpdir):
         check_output(cmd, stderr=STDOUT)
     assert e.value.returncode == 1
     assert b"Invalid syntax (foo.j2ext, line 1)" in e.value.output
+
+def test_stdin_and_out():
+    cmd = ("echo -n \"foo\"", "|", "yasha", "-")
+    out = check_output(cmd, shell=True)
+    assert out == b"foo"
+
+def test_stdin_and_out_with_extensions_and_variables(fixtures_dir):
+    tpl = path.join(fixtures_dir, "nrf51.rs.jinja")
+    ext = path.join(fixtures_dir, "nrf51.rs.py")
+    var = path.join(fixtures_dir, "nrf51.svd")
+
+    expected_output = path.join(fixtures_dir, "nrf51.rs.expected")
+    with open(expected_output, "rb") as f:
+        cmd = "cat {} | yasha -e {} -v {} -".format(tpl, ext, var)
+        out = check_output(cmd, shell=True)
+        assert out == f.read()

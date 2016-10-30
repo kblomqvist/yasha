@@ -25,7 +25,7 @@ THE SOFTWARE.
 import os
 from .parsers import *
 
-__version__ = "2.0"
+__version__ = "2.1"
 
 DEFAULT_PARSERS = [YamlParser(), TomlParser(), SvdParser()]
 EXTENSIONS_FORMAT = [".py", ".j2ext", ".jinja-ext"]

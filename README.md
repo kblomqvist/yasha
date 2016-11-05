@@ -147,7 +147,20 @@ There's also `--no-extensions` option flag operating in a similar manner with `-
 
 ### Custom variable file parser
 
-If none of the built-in parsers fit into your needs, it's possible to declare your own parser within the extension file. For example, below is shown an example parser for a certain XML file. Note that all classes derived from `yasha.Parser` are considered as a custom parser and will be loaded.
+If none of the built-in parsers fit into your needs, it's possible to declare your own parser within the extension file. Note that all classes derived from `yasha.Parser` are considered as a custom parser and will be loaded. For example, below is shown an example XML file and a custom parser for that.
+
+```xml
+<persons>
+    <person>
+        <name>Foo</name>
+        <address>Foo Valley</address>
+    </person>
+    <person>
+        <name>Bar</name>
+        <address>Bar Valley</address>
+    </person>
+</persons>
+```
 
 ```python
 import yasha

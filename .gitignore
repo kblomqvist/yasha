@@ -12,3 +12,5 @@ tests/**/CMakeCache.txt
 tests/**/*.cmake
 tests/fixtures/nrf51.rs
 tests/fixtures/nrf51.rs.j2extc
+
+.cache/

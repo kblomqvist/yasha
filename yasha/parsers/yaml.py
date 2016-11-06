@@ -23,7 +23,8 @@ THE SOFTWARE.
 
 """
 
-import yaml
+from __future__ import absolute_import
+import yaml  # Absolute import needed to import correct yaml
 from . import parser
 
 

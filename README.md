@@ -12,7 +12,7 @@ yasha foo.jinja
 
 will render `foo.jinja` template into a new file named as `foo`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
-The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file of the ARM Cortex-M processor-based microcontrollers. [This was done for Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures). Yasha has since evolved to be flexible enough to be used in any project where the code generation is needed. The tool allows extending Jinja by domain specific filters, tests and extensions, and it operates smoothly with the commonly used build automation softwares like Make, CMake and SCons.
+The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file, and was used to interface with [the peripherals of Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures) ARM Cortex-M processor-based microcontroller. Yasha has since evolved to be flexible enough to be used in any project where the code generation is needed. The tool allows extending Jinja by domain specific filters, tests and extensions, and it operates smoothly with the commonly used build automation softwares like Make, CMake and SCons.
 
 The built-in template variable file parsers are
 
@@ -173,14 +173,14 @@ class XmlParser(yasha.Parser):
         tree = et.parse(file.name)
         root = tree.getroot()
 
-        vars = {"persons": []}
+        variables = {"persons": []}
         for elem in root.iter("person"):
-            vars["persons"].append({
+            variables["persons"].append({
                 "name": elem.find("name").text,
                 "address": elem.find("address").text,
             })
 
-        return vars # Return value has to be dictionary
+        return variables  # Return value has to be dictionary
 ```
 
 ## Tips and tricks
@@ -197,7 +197,7 @@ The above command-line call allows you to reuse files from `$HOME/jinja` folder 
 
 ```jinja
 {% extends "skeleton.jinja" %}
-{% from "macros.jinja" import decorator %}
+{% from "macros.jinja" import macro %}
 ```
 
 ### Variable pre-processing before template rendering
@@ -207,14 +207,15 @@ If you need to pre-process template variables before those are passed into the t
 ```python
 import yasha
 
-def postprocess(vars):
-    vars["foo"] = "bar" # foo should always be bar
-    return vars
+def postprocess(variables):
+    variables["foo"] = "bar"  # foo should always be bar
+    return variables
 
 class YamlParser(yasha.YamlParser):
+
     def parse(self, file):
-        vars = yasha.YamlParser.parse(self, file)
-        return postprocess(vars)
+        variables = yasha.YamlParser.parse(self, file)
+        return postprocess(variables)
 ```
 
 ### Working with STDIN and STDOUT

@@ -27,6 +27,7 @@ import os
 import click
 from .. import yasha
 
+
 def parse_variables(file, parsers):
     filename, filext = os.path.splitext(file.name)
     for parser in parsers:
@@ -34,17 +35,20 @@ def parse_variables(file, parsers):
             return parser.parse(file)
     return {}
 
+
 def linesep(string):
     n = string.find("\n")
     if n < 1:
         return "\n"
     return "\r\n" if string[n-1] == "\r" else "\n"
 
+
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     click.echo(yasha.__version__)
     ctx.exit()
+
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("template", type=click.File("rb"))
@@ -88,7 +92,8 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
             msg = e.msg[0].upper() + e.msg[1:]
             filename = os.path.relpath(e.filename)
             click.echo("Error: Cannot load extensions", nl=False, err=True)
-            click.echo(": {} ({}, line {})".format(msg, filename, e.lineno), err=True)
+            click.echo(": {} ({}, line {})".format(
+                msg, filename, e.lineno), err=True)
             raise click.Abort()
 
     # Default variable parsers
@@ -118,7 +123,7 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
         deps = os.path.relpath(output.name) + ": " + " ".join(deps)
         if m:
             click.echo(deps)
-            return # Template won't be rendered
+            return  # Template won't be rendered
         if md:
             deps += os.linesep
             output_d = click.open_file(output.name + ".d", "wb")

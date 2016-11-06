@@ -26,12 +26,14 @@ import pytest
 from os import path, chdir
 from subprocess import call, check_output
 
+
 @pytest.fixture(params=["toml", "yaml"])
 def tmplvar(request):
     if request.param == "toml":
         return {"filext": ".toml", "content": "number={}"}
     if request.param == "yaml":
         return {"filext": ".yaml", "content": "number: {}"}
+
 
 def test_template_in_subdir(tmpdir, tmplvar):
     """ This test contains several steps to test that the variables file
@@ -73,7 +75,7 @@ def test_template_in_subdir(tmpdir, tmplvar):
     cwd = tmpdir.chdir()
 
     varfile = [v + tmplvar["filext"] for v in
-        ["foo", "sub/foo", "sub/foo.c"]]
+               ["foo", "sub/foo", "sub/foo.c"]]
 
     t = tmpdir.mkdir("sub").join("foo.c.jinja")
     t.write("int x = {{ number }};")
@@ -105,6 +107,7 @@ def test_template_in_subdir(tmpdir, tmplvar):
 
     call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
     assert o.read() == "int x = 0;"
+
 
 def test_custom_xmlparser(tmpdir):
     template = """
@@ -169,6 +172,7 @@ class XmlParser(yasha.Parser):
     name = "Bar"
     address = "Bar Valley"\n"""
 
+
 def test_broken_extensions(tmpdir):
     from subprocess import CalledProcessError, STDOUT
     tmpdir.chdir()
@@ -189,10 +193,12 @@ def test_broken_extensions(tmpdir):
     assert e.value.returncode == 1
     assert b"Invalid syntax (foo.j2ext, line 1)" in e.value.output
 
+
 def test_stdin_and_out():
     cmd = ("echo -n \"foo\"", "|", "yasha", "-")
     out = check_output(cmd, shell=True)
     assert out == b"foo"
+
 
 def test_stdin_and_out_with_extensions_and_variables(fixtures_dir):
     tpl = path.join(fixtures_dir, "nrf51.rs.jinja")

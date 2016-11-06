@@ -22,11 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import pytest, sys
+import pytest
+import sys
 from os import path, chdir, mkdir
 from subprocess import call, check_output
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
+
 
 @pytest.fixture()
 def clean():
@@ -34,6 +36,7 @@ def clean():
     call(["make", "clean"])
     for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
         assert not path.isfile("src/" + f)
+
 
 def test_make(clean):
     # First build
@@ -54,6 +57,7 @@ def test_make(clean):
         call(["touch", "src/" + dep])
         out = check_output(["make"])
         assert not b"is up to date" in out
+
 
 def test_cmake(clean):
     mkdir("build")
@@ -84,8 +88,9 @@ def test_cmake(clean):
     for f in ["foo.c", "foo.h"]:
         assert not path.isfile("../src/" + f)
 
+
 @pytest.mark.skipif(sys.version_info[0] > 2,
-    reason="requires python2")
+                    reason="requires python2")
 def test_scons(clean):
     # First build
     out = check_output(["scons"])
@@ -103,7 +108,7 @@ def test_scons(clean):
 # TODO: Fix race condition. Every now and then fails. Though,
 # call() shouldn't return before finished.
 
-    for dep in []: #["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
+    for dep in []:  # ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
         call(["touch", "src/" + dep])
         out = check_output(["scons"])
         assert not b"is up to date" in out

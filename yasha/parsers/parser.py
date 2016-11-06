@@ -23,7 +23,9 @@ THE SOFTWARE.
 
 """
 
+
 class Parser():
     file_extension = []
+
     def parse(self, file):
         return {}

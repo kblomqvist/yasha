@@ -27,6 +27,7 @@ import pytest
 from yasha.parsers import svd
 import xml.etree.ElementTree as et
 
+
 def test_register_folding_commaseparated_index():
     r = svd.Register(et.fromstring(
         """
@@ -39,7 +40,7 @@ def test_register_folding_commaseparated_index():
         </register>
         """
     ))
-    a = r.to_array() # or maybe fold() would be more descriptive?
+    a = r.to_array()  # or maybe fold() would be more descriptive?
 
     assert len(a) == 3
     assert a[0].name == "GPIO_A"
@@ -59,7 +60,7 @@ def test_register_folding_integerrange_index():
         </register>
         """
     ))
-    a = r.to_array() # or maybe fold() would be more descriptive?
+    a = r.to_array()  # or maybe fold() would be more descriptive?
 
     assert len(a) == 4
     assert a[0].name == "IRQ3"

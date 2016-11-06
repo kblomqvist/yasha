@@ -27,6 +27,7 @@ from os import path, chdir
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
+
 @pytest.fixture
 def fixtures_dir():
     return path.join(SCRIPT_PATH, "fixtures")

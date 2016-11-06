@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+
 def filter_access(access):
     return {
         "read-only": "ro",
@@ -31,12 +32,14 @@ def filter_access(access):
         "read-writeOnce": "rw",
     }[access]
 
+
 def filter_bitrange(bitrange):
     msb, lsb = bitrange[1:-1].split(":")
     if msb == lsb:
         return "{}".format(lsb)
     else:
         return "{}..{}".format(lsb, msb)
+
 
 def filter_enumlist(lst):
     values = []
@@ -47,6 +50,7 @@ def filter_enumlist(lst):
     elif lst["write"]:
         values = lst["write"]
     return sorted(values, key=lambda x: x.value)
+
 
 def filter_enumvalue(value):
     if value < 256:

@@ -30,6 +30,7 @@ __version__ = "dev"
 DEFAULT_PARSERS = [YamlParser(), TomlParser(), SvdParser()]
 EXTENSIONS_FORMAT = [".py", ".j2ext", ".jinja-ext"]
 
+
 def find_template_companion(template, format=[".yml", ".yaml"], start=os.curdir):
     """
     Returns the first found template companion file. This can be a variable
@@ -60,6 +61,7 @@ def find_template_companion(template, format=[".yml", ".yaml"], start=os.curdir)
 
     return None
 
+
 def find_referenced_templates(template, search_path):
     """
     Returns a list of files which can be either {% imported %},
@@ -79,6 +81,7 @@ def find_referenced_templates(template, search_path):
 
     return [realpath(t) for t in referenced_templates if t is not None]
 
+
 def load_template_extensions(file):
     """
     Returns a dictionary of template extensions, which are
@@ -91,7 +94,7 @@ def load_template_extensions(file):
     try:
         from importlib.machinery import SourceFileLoader
         module = SourceFileLoader("extensions", file.name).load_module()
-    except ImportError: # Fallback to Python2
+    except ImportError:  # Fallback to Python2
         import imp
         desc = (".py", "rb", imp.PY_SOURCE)
         module = imp.load_module("extensions", file, file.name, desc)
@@ -122,13 +125,14 @@ def load_template_extensions(file):
 
     return e
 
+
 def load_jinja(search_path, tests=[], filters=[], classes=[], trim=True, lstrip=True):
     from jinja2 import Environment, FileSystemLoader
     jinja = Environment(
-        loader        = FileSystemLoader(search_path),
-        extensions    = classes,
-        trim_blocks   = trim,
-        lstrip_blocks = lstrip
+        loader=FileSystemLoader(search_path),
+        extensions=classes,
+        trim_blocks=trim,
+        lstrip_blocks=lstrip
     )
 
     for test in tests:

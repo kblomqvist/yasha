@@ -22,13 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import os, re
+import os
+import re
 from SCons.Builder import BuilderBase
 from click.testing import CliRunner
 
 from .scripts import yasha
 
+
 class Builder(BuilderBase):
+
     def __init__(self, action="yasha $SOURCE -o $TARGET"):
         def scan(node, env, path):
             src = str(node.srcnode())
@@ -62,14 +65,15 @@ class Builder(BuilderBase):
         from SCons.Scanner import Scanner
         from SCons.Action import Action
         BuilderBase.__init__(self,
-            action = Action(action),
-            emitter = emit,
-            source_scanner = Scanner(function=scan),
-            single_source = True
-        )
+                             action=Action(action),
+                             emitter=emit,
+                             source_scanner=Scanner(function=scan),
+                             single_source=True
+                             )
 
 
 class CBuilder(Builder):
+
     def __call__(self, *args, **kw):
         def is_c_file(file, include_headers=True):
             suffix = os.path.splitext(str(file))[1]
@@ -80,4 +84,3 @@ class CBuilder(Builder):
 
         sources = Builder.__call__(self, *args, **kw)
         return [x for x in sources if is_c_file(x, include_headers=False)]
-

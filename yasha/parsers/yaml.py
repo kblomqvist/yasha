@@ -23,11 +23,12 @@ THE SOFTWARE.
 
 """
 
-from __future__ import absolute_import
 import yaml
 from . import parser
 
+
 class YamlParser(parser.Parser):
     file_extension = [".yaml", ".yml"]
+
     def parse(self, file):
         return yaml.load(file)

@@ -27,6 +27,7 @@ import pytest
 import os
 import yasha.yasha as yasha
 
+
 @pytest.fixture(params=["tmpdir", "curdir"])
 def cwd(request, tmpdir):
     if request.param == "tmpdir":

@@ -25,6 +25,7 @@ THE SOFTWARE.
 import xml.etree.ElementTree as ET
 from . import parser
 
+
 class SvdParser(parser.Parser):
     """
     CMSIS System View Description format (CMSIS-SVD)
@@ -43,7 +44,9 @@ class SvdParser(parser.Parser):
         }
         return vars
 
+
 class SvdFile():
+
     def __init__(self, file):
         if type(file) is str:
             self.root = ET.fromstring(file)
@@ -112,21 +115,22 @@ class SvdElement(object):
 
         try:
             defaults = vars(defaults)
-        except: pass
+        except:
+            pass
 
         for key, value in vars(self).items():
             if isinstance(value, list) or isinstance(value, dict):
                 continue
             try:
                 value = element.find(to_mixed_case(key)).text
-            except: # Maybe it's attribute?
+            except:  # Maybe it's attribute?
                 default = defaults[key] if key in defaults else None
                 value = element.get(to_mixed_case(key), default)
 
             if value and key in self.cast_to_integer:
                 try:
                     value = int(value)
-                except: # It has to be hex
+                except:  # It has to be hex
                     value = int(value, 16)
 
             setattr(self, key, value)
@@ -226,24 +230,27 @@ class Peripheral(SvdElement):
     def from_element(self, element, defaults={}):
         SvdElement.from_element(self, element, defaults)
 
-        try: # Because registers may be None
+        try:  # Because registers may be None
             for r in element.find("registers"):
                 if r.tag == "cluster":
                     self.registers.append(Cluster(r, self, parent=self))
                 elif r.tag == "register":
                     r = Register(r, self, parent=self)
                     self.registers.extend(r.to_array())
-        except: pass
+        except:
+            pass
 
-        try: # Because interrupt may be None
+        try:  # Because interrupt may be None
             for i in element.findall("interrupt"):
                 self.interrupts.append(Interrupt(i))
-        except: pass
+        except:
+            pass
 
 
 class Register(SvdElement):
     type = "register"
-    cast_to_integer = ["size", "addressOffset", "dim", "dimIncrement", "resetValue", "resetMask"]
+    cast_to_integer = ["size", "addressOffset", "dim",
+                       "dimIncrement", "resetValue", "resetMask"]
     props = [
         "fields", "derivedFrom", "dim", "dimIncrement", "dimIndex", "name",
         "displayName", "description", "alternateGroup", "addressOffset", "size",
@@ -284,11 +291,12 @@ class Register(SvdElement):
                 except:
                     self.dimIndex = self.dimIndex.split(",")
 
-        try: # Because fields may be None
+        try:  # Because fields may be None
             for e in element.find("fields"):
                 field = Field(e, self, parent=self)
                 self.fields.append(field)
-        except: pass
+        except:
+            pass
 
     def to_array(self):
         """Replicate the register in accordance with it's dimensions
@@ -304,7 +312,7 @@ class Register(SvdElement):
         """
         if not self.dim:
             return [self]
-        if self.name.endswith("[%s]"): # C array like
+        if self.name.endswith("[%s]"):  # C array like
             self.name = self.name.replace("%s", str(self.dim))
             self.dim = self.dimIndex = self.dimIncrement = None
             return [self]
@@ -349,12 +357,13 @@ class Cluster(SvdElement):
 
         try:
             for e in element.findall("*"):
-                if e.tag == "cluster": # Cluster may include yet another cluster
+                if e.tag == "cluster":  # Cluster may include yet another cluster
                     self.registers.append(Cluster(e, defaults, parent=self))
                 elif e.tag == "register":
                     r = Register(e, defaults, parent=self)
                     self.registers.extend(r.to_array())
-        except: pass
+        except:
+            pass
 
 
 class Field(SvdElement):
@@ -398,7 +407,7 @@ class Field(SvdElement):
         self.bitWidth = self.msb - self.lsb + 1
         self.bitRange = "[{}:{}]".format(self.msb, self.lsb)
 
-        try: # Because enumeratedValues may be None
+        try:  # Because enumeratedValues may be None
             for e in element.findall("enumeratedValues"):
                 try:
                     usage = e.find("usage").text
@@ -407,7 +416,8 @@ class Field(SvdElement):
                 for e in e.findall("enumeratedValue"):
                     enum = EnumeratedValue(e, {}, parent=self)
                     self.enumeratedValues[usage].append(enum)
-        except: pass
+        except:
+            pass
 
 
 class EnumeratedValue(SvdElement):

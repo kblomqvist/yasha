@@ -27,41 +27,47 @@ from . import parser
 
 
 class SvdParser(parser.Parser):
-    """
-    CMSIS System View Description format (CMSIS-SVD)
-    http://www.keil.com/pack/doc/CMSIS/SVD/html/index.html
-    """
+    """Yasha parser for CMSIS-SVD files"""
     file_extension = [".svd"]
 
     def parse(self, file):
-        f = SvdFile(file)
-        f.parse()
+        svd = SvdFile(file)
+        svd.parse()
 
-        vars = {
-            "cpu": f.cpu,
-            "device": f.device,
-            "peripherals": [f.peripherals[name] for name in f.peripherals_order],
+        variables = {
+            "cpu": svd.cpu,
+            "device": svd.device,
+            "peripherals": [svd.peripherals[name] for
+                            name in svd.peripherals_order],
         }
-        return vars
+        return variables
 
 
 class SvdFile():
+    """SVD File: Entry class to parse CMSIS-SVD file
+
+    SVD = System View Description format
+    CMSIS = Cortex Microcontroller Software Interface Standard
+    Read more from http://www.keil.com/pack/doc/CMSIS/SVD/html/
+    """
 
     def __init__(self, file):
-        if type(file) is str:
+        if isinstance(file, str):
             self.root = ET.fromstring(file)
         else:
             tree = ET.parse(file)
             self.root = tree.getroot()
 
-    def parse(self):
-        self.cpu = Cpu(self.root.find("cpu"))
-        self.device = Device(self.root)
-
+        self.cpu = None
+        self.device = None
         self.peripherals = {}
         self.peripherals_order = []
         self.derived_peripherals = []
         self.peripheral_groups = {}
+
+    def parse(self):
+        self.cpu = Cpu(self.root.find("cpu"))
+        self.device = Device(self.root)
 
         for e in self.root.iter("peripheral"):
             p = Peripheral(e, self.device)
@@ -74,7 +80,7 @@ class SvdFile():
             if p.groupName:
                 try:
                     self.peripheral_groups[p.groupName].append(p.name)
-                except:
+                except KeyError:
                     self.peripheral_groups[p.groupName] = [p.name]
 
         for p in [self.peripherals[name] for name in self.derived_peripherals]:
@@ -123,14 +129,14 @@ class SvdElement(object):
                 continue
             try:
                 value = element.find(to_mixed_case(key)).text
-            except:  # Maybe it's attribute?
+            except AttributeError:  # Maybe it's attribute?
                 default = defaults[key] if key in defaults else None
                 value = element.get(to_mixed_case(key), default)
 
             if value and key in self.cast_to_integer:
                 try:
                     value = int(value)
-                except:  # It has to be hex
+                except ValueError:  # It has to be hex
                     value = int(value, 16)
 
             setattr(self, key, value)
@@ -152,6 +158,8 @@ class SvdElement(object):
 
 
 class Device(SvdElement):
+    """SVD Devices element"""
+
     type = "device"
     cast_to_integer = ["size"]
     props = [
@@ -178,6 +186,8 @@ class Device(SvdElement):
 
 
 class Cpu(SvdElement):
+    """SVD CPU section"""
+
     type = "cpu"
     props = [
         "name", "revision", "endian", "mpuPresent", "fpuPresent", "fpuDP",
@@ -201,6 +211,17 @@ class Cpu(SvdElement):
 
 
 class Peripheral(SvdElement):
+    """SVD Peripherals Level
+
+    A peripheral is a named collection of registers. A peripheral is mapped
+    to a defined base address within the device's address space. A peripheral
+    allocates one or more exclusive address blocks relative to its base
+    address, such that all described registers fit into the allocated address
+    blocks. Allocated addresses without an associated register description
+    are automatically considered reserved. The peripheral can be assigned to
+    a group of peripherals and may be associated with one or more interrupts.
+    """
+
     type = "peripheral"
     cast_to_integer = ["size", "baseAddress"]
     props = [
@@ -237,17 +258,27 @@ class Peripheral(SvdElement):
                 elif r.tag == "register":
                     r = Register(r, self, parent=self)
                     self.registers.extend(r.to_array())
-        except:
+        except TypeError:
             pass
 
         try:  # Because interrupt may be None
             for i in element.findall("interrupt"):
                 self.interrupts.append(Interrupt(i))
-        except:
+        except TypeError:
             pass
 
 
 class Register(SvdElement):
+    """SVD Registers Level
+
+    A register is a named, programmable resource that belongs to a
+    peripheral. Registers are mapped to a defined address in the address
+    space of the device. An address is specified relative to the peripheral
+    base address. The description of a register documents the purpose and
+    function of the resource. A debugger requires information about the
+    permitted access to a resource as well as side effects triggered by
+    read and write accesses respectively.
+    """
     type = "register"
     cast_to_integer = ["size", "addressOffset", "dim",
                        "dimIncrement", "resetValue", "resetMask"]
@@ -283,19 +314,19 @@ class Register(SvdElement):
         if self.dim:
             try:
                 self.dimIndex = int(self.dimIndex)
-            except:
+            except ValueError:
                 try:
                     start, stop = self.dimIndex.split("-")
                     start, stop = (int(start), int(stop)+1)
                     self.dimIndex = list(range(start, stop))
-                except:
+                except ValueError:
                     self.dimIndex = self.dimIndex.split(",")
 
         try:  # Because fields may be None
             for e in element.find("fields"):
                 field = Field(e, self, parent=self)
                 self.fields.append(field)
-        except:
+        except TypeError:
             pass
 
     def to_array(self):
@@ -331,6 +362,13 @@ class Register(SvdElement):
 
 
 class Cluster(SvdElement):
+    """SVD Cluster extension level
+
+    Cluster adds an optional sub-level within the CMSIS SVD registers level.
+    A cluster describes a sequence of neighboring registers within
+    a peripheral.
+    """
+
     type = "cluster"
     cast_to_integer = ["addressOffset", "dim", "dimIncrement"]
     props = [
@@ -355,18 +393,24 @@ class Cluster(SvdElement):
         # TODO: Should work like Register.to_array(), if there's self.dim
         self.name = self.name.replace("%s", str(self.dim))
 
-        try:
+        try:  # findall() may return None
             for e in element.findall("*"):
                 if e.tag == "cluster":  # Cluster may include yet another cluster
                     self.registers.append(Cluster(e, defaults, parent=self))
                 elif e.tag == "register":
                     r = Register(e, defaults, parent=self)
                     self.registers.extend(r.to_array())
-        except:
+        except TypeError:
             pass
 
 
 class Field(SvdElement):
+    """SVD Fields level
+
+    All fields of a register are enclosed between the <fields>
+    opening and closing tags.
+    """
+
     type = "field"
     cast_to_integer = ["bitOffset", "bitWidth", "lsb", "msb"]
     props = [
@@ -407,20 +451,26 @@ class Field(SvdElement):
         self.bitWidth = self.msb - self.lsb + 1
         self.bitRange = "[{}:{}]".format(self.msb, self.lsb)
 
-        try:  # Because enumeratedValues may be None
+        try:  # Because findall() may return None
             for e in element.findall("enumeratedValues"):
                 try:
                     usage = e.find("usage").text
-                except:
+                except AttributeError:
                     usage = "read-write"
                 for e in e.findall("enumeratedValue"):
                     enum = EnumeratedValue(e, {}, parent=self)
                     self.enumeratedValues[usage].append(enum)
-        except:
+        except TypeError:
             pass
 
 
 class EnumeratedValue(SvdElement):
+    """SVD Enumerated values Level
+
+    The concept of enumerated values creates a map between unsigned
+    integers and an identifier string.
+    """
+
     type = "enumeratedValue"
     cast_to_integer = ["value"]
     props = ["derivedFrom", "name", "description", "value", "isDefault"]

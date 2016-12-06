@@ -1,5 +1,5 @@
 [Default]
 bears = PEP8Bear
-default_actions = *: ApplyPatchAction
+default_actions = PEP8Bear: ApplyPatchAction
 files = **/*.py
 no_orig = True

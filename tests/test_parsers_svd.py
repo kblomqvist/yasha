@@ -27,9 +27,12 @@ import pytest
 from yasha.parsers import svd
 import xml.etree.ElementTree as et
 
+from os import path
+from subprocess import call, check_output
+
 
 def test_register_folding_commaseparated_index():
-    r = svd.Register(et.fromstring(
+    r = svd.SvdRegister(et.fromstring(
         """
         <register>
             <dim>3</dim>
@@ -40,7 +43,7 @@ def test_register_folding_commaseparated_index():
         </register>
         """
     ))
-    a = r.to_array()  # or maybe fold() would be more descriptive?
+    a = r.fold()
 
     assert len(a) == 3
     assert a[0].name == "GPIO_A"
@@ -49,7 +52,7 @@ def test_register_folding_commaseparated_index():
 
 
 def test_register_folding_integerrange_index():
-    r = svd.Register(et.fromstring(
+    r = svd.SvdRegister(et.fromstring(
         """
         <register>
             <dim>4</dim>
@@ -60,7 +63,7 @@ def test_register_folding_integerrange_index():
         </register>
         """
     ))
-    a = r.to_array()  # or maybe fold() would be more descriptive?
+    a = r.fold()
 
     assert len(a) == 4
     assert a[0].name == "IRQ3"
@@ -73,7 +76,7 @@ def test_register_folding_integerrange_index():
 
 
 def test_register_is_dimensionless_after_fold_up():
-    r = svd.Register(et.fromstring(
+    r = svd.SvdRegister(et.fromstring(
         """
         <register>
             <dim>4</dim>
@@ -84,14 +87,14 @@ def test_register_is_dimensionless_after_fold_up():
         </register>
         """
     ))
-    for r in r.to_array():
+    for r in r.fold():
         assert r.dim == None
         assert r.dimIndex == None
         assert r.dimIncrement == None
 
 
 def test_peripheral_interrupt_inheritance():
-    timer0 = svd.Peripheral(et.fromstring(
+    timer0 = svd.SvdPeripheral(et.fromstring(
         """
         <peripheral>
             <name>TIMER0</name>
@@ -103,7 +106,7 @@ def test_peripheral_interrupt_inheritance():
         </peripheral>
         """
     ))
-    timer1 = svd.Peripheral(et.fromstring(
+    timer1 = svd.SvdPeripheral(et.fromstring(
         """
         <peripheral derivedFrom="TIMER0">
             <name>TIMER1</name>
@@ -121,7 +124,7 @@ def test_peripheral_interrupt_inheritance():
     assert timer1.interrupts[0].name == "TIMER1_INT"
     assert timer1.interrupts[0].value == 43
 
-    timer1 = svd.Peripheral(et.fromstring(
+    timer1 = svd.SvdPeripheral(et.fromstring(
         """
         <peripheral derivedFrom="TIMER0">
             <name>TIMER1</name>
@@ -134,3 +137,15 @@ def test_peripheral_interrupt_inheritance():
     assert len(timer1.interrupts) == 1
     assert timer1.interrupts[0].name == "TIMER0_INT"
     assert timer1.interrupts[0].value == 42
+
+
+def test_nrf51svd_to_rust(fixtures_dir):
+    tpl = path.join(fixtures_dir, "nrf51.rs.jinja")
+    ext = path.join(fixtures_dir, "nrf51.rs.py")
+    var = path.join(fixtures_dir, "nrf51.svd")
+
+    expected_output = path.join(fixtures_dir, "nrf51.rs.expected")
+    with open(expected_output, "rb") as f:
+        cmd = "cat {} | yasha -e {} -v {} -".format(tpl, ext, var)
+        out = check_output(cmd, shell=True)
+        assert out.strip() == f.read().strip()

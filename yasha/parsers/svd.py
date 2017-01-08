@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import distutils
 import xml.etree.ElementTree as ET
 from . import parser
 
@@ -91,6 +92,7 @@ class SvdFile():
 class SvdElement(object):
     props = []
     props_to_integer = []
+    props_to_boolean = []
 
     def __init__(self, element=None, defaults={}, parent=None):
         if element is not None:
@@ -109,11 +111,15 @@ class SvdElement(object):
                 default = defaults[key] if key in defaults else None
                 value = element.get(key, default)
 
-            if value and key in self.props_to_integer:
-                try:
-                    value = int(value)
-                except ValueError:  # It has to be hex
-                    value = int(value, 16)
+            if value is not None:
+                if key in self.props_to_integer:
+                    try:
+                        value = int(value)
+                    except ValueError:  # It has to be hex
+                        value = int(value, 16)
+                elif key in self.props_to_boolean:
+                    value = distutils.util.strtobool(value)
+
             setattr(self, key, value)
 
     def inherit_from(self, element):
@@ -149,9 +155,13 @@ class SvdCpu(SvdElement):
     props = [
         "name", "revision", "endian", "mpuPresent", "fpuPresent", "fpuDP",
         "icachePresent", "dcachePresent", "itcmPresent", "dtcmPresent",
-        "vtorPresent", "nvicPrioBits", "vendorSystickConfig"
+        "vtorPresent", "nvicPrioBits", "vendorSystickConfig",
+        "deviceNumInterrupts"
     ]
-
+    props_to_boolean = [
+        "mpuPresent", "fpuPresent", "fpuDP", "icachePresent", "dcachePresent",
+        "itcmPresent", "dtcmPresent", "vtorPresent"
+    ]
 
 class SvdPeripheral(SvdElement):
     """SVD Peripherals Level

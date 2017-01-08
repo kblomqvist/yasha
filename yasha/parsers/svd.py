@@ -216,13 +216,14 @@ class SvdRegister(SvdElement):
     read and write accesses respectively.
     """
     props = [
-        "derivedFrom", "dim", "dimIncrement", "dimIndex", "name",
-        "displayName", "description", "alternateGroup", "addressOffset",
-        "size", "access", "resetValue", "resetMask", "modifiedWriteValues",
-        "readAction", "alternateRegister", "dataType"
+        "derivedFrom", "dim", "dimIncrement", "dimIndex", "dimName",
+        "name", "displayName", "description", "alternateGroup",
+        "alternateRegister", "addressOffset", "size", "access", "protection",
+        "resetValue", "resetMask", "dataType", "modifiedWriteValues",
+        "readAction"
     ]
     props_to_integer = [
-        "size", "addressOffset", "dim", "dimIncrement", "resetValue",
+        "dim", "dimIncrement", "addressOffset", "size", "resetValue",
         "resetMask"
     ]
 
@@ -246,6 +247,12 @@ class SvdRegister(SvdElement):
                 field = SvdField(elem, self, parent=self)
                 self.fields.append(field)
         except TypeError:  # element.findall() may return None
+            pass
+
+        try:
+            elem = element.find("writeConstraint")
+            self.writeConstraint = SvdWriteConstraint(elem, parent=self)
+        except TypeError:
             pass
 
 
@@ -301,12 +308,12 @@ class Cluster(SvdElement):
         self.name = self.name.replace("%s", str(self.dim))
 
         try:
-            for e in element.findall("*"):
-                if e.tag == "cluster":  # Cluster may include yet another cluster
-                    self.registers.append(Cluster(e, defaults, parent=self))
-                elif e.tag == "register":
-                    r = SvdRegister(e, defaults, parent=self)
-                    self.registers.extend(r.fold())
+            for elem in element.findall("*"):
+                if elem.tag == "cluster":  # Cluster may include yet another cluster
+                    self.registers.append(Cluster(elem, defaults, parent=self))
+                elif elem.tag == "register":
+                    reg = SvdRegister(elem, defaults, parent=self)
+                    self.registers.extend(reg.fold())
         except TypeError:  # element.findall() may return None
             pass
 
@@ -320,7 +327,7 @@ class SvdField(SvdElement):
     props = [
         "derivedFrom", "name", "description", "bitOffset", "bitWidth",
         "lsb", "msb", "bitRange", "access", "modifiedWriteValues",
-        "writeConstraint", "readAction"
+        "readAction"
     ]
     props_to_integer = ["bitOffset", "bitWidth", "lsb", "msb"]
 
@@ -332,16 +339,16 @@ class SvdField(SvdElement):
             "read-write": [],
         }
 
-        if self.bitRange:
+        if self.bitRange is not None:
             self.msb, self.lsb = self.bitRange[1:-1].split(":")
             self.msb = int(self.msb)
             self.lsb = int(self.lsb)
-        elif self.bitOffset:
+            self.bitOffset = self.lsb
+            self.bitWidth = self.msb - self.lsb + 1
+        elif self.bitOffset is not None and self.bitWidth is not None:
             self.lsb = self.bitOffset
             self.msb = self.bitWidth + self.lsb
-        self.bitOffset = self.lsb
-        self.bitWidth = self.msb - self.lsb + 1
-        self.bitRange = "[{}:{}]".format(self.msb, self.lsb)
+        self.bitRange = (self.msb, self.lsb)
 
         try:
             for e in element.findall("enumeratedValues"):
@@ -353,6 +360,12 @@ class SvdField(SvdElement):
                     enum = SvdEnumeratedValue(e, {}, parent=self)
                     self.enumeratedValues[usage].append(enum)
         except TypeError:  # element.findall() may return None
+            pass
+
+        try:
+            elem = element.find("writeConstraint")
+            self.writeConstraint = SvdWriteConstraint(elem, parent=self)
+        except TypeError:
             pass
 
 
@@ -370,6 +383,22 @@ class SvdInterrupt(SvdElement):
     props = ["name", "description", "value"]
     props_to_integer = ["value"]
 
+
 class SvdAddressBlock(SvdElement):
     props = ["addressBlock", "offset", "size", "usage", "protection"]
     props_to_integer = ["offset", "size"]
+
+
+class SvdWriteConstraint(SvdElement):
+    props = ["writeAsRead", "useEnumeratedValues"]
+    props_to_boolean = ["writeAsRead", "useEnumeratedValues"]
+
+    def from_element(self, element, defaults={}):
+        SvdElement.from_element(self, element, defaults)
+        try:
+            elem = element.find("range")
+            minimum = elem.find("minimum").text
+            maximum = elem.find("maximum").text
+            self.range = (int(minimum), int(maximum))
+        except:  # No range
+            pass

@@ -31,7 +31,7 @@ from os import path
 from subprocess import call, check_output
 
 
-def test_peripheral():
+def test_peripheral_element():
     periph = svd.SvdPeripheral(et.fromstring(
         """
         <peripheral>
@@ -62,6 +62,86 @@ def test_peripheral():
     assert periph.addressBlock.size == 1024
     assert periph.addressBlock.usage == "registers"
     assert periph.addressBlock.protection == "s"
+
+
+def test_peripheral_interrupt_inheritance():
+    timer0 = svd.SvdPeripheral(et.fromstring(
+        """
+        <peripheral>
+            <name>TIMER0</name>
+            <baseAddress>0x40000</baseAddress>
+            <interrupt>
+                <name>TIMER0_INT</name>
+                <value>42</value>
+            </interrupt>
+        </peripheral>
+        """
+    ))
+    timer1 = svd.SvdPeripheral(et.fromstring(
+        """
+        <peripheral derivedFrom="TIMER0">
+            <name>TIMER1</name>
+            <baseAddress>0x40400</baseAddress>
+            <interrupt>
+                <name>TIMER1_INT</name>
+                <value>43</value>
+            </interrupt>
+        </peripheral>
+        """
+    ))
+    timer1.inherit_from(timer0)
+
+    assert len(timer1.interrupts) == 1
+    assert timer1.interrupts[0].name == "TIMER1_INT"
+    assert timer1.interrupts[0].value == 43
+
+    timer1 = svd.SvdPeripheral(et.fromstring(
+        """
+        <peripheral derivedFrom="TIMER0">
+            <name>TIMER1</name>
+            <baseAddress>0x40400</baseAddress>
+        </peripheral>
+        """
+    ))
+    timer1.inherit_from(timer0)
+
+    assert len(timer1.interrupts) == 1
+    assert timer1.interrupts[0].name == "TIMER0_INT"
+    assert timer1.interrupts[0].value == 42
+
+
+def test_register_element():
+    reg = svd.SvdRegister(et.fromstring(
+        """
+        <register>
+            <name>TimerCtrl0</name>
+            <description>Timer Control Register</description>
+            <addressOffset>0x0</addressOffset>
+            <access>read-write</access>
+            <resetValue>0x00008001</resetValue>
+            <resetMask>0x0000ffff</resetMask>
+            <size>32</size>
+            <writeConstraint>
+                <writeAsRead>true</writeAsRead>
+                <useEnumeratedValues>true</useEnumeratedValues>
+                <range>
+                    <minimum>0</minimum>
+                    <maximum>5</maximum>
+                </range>
+            </writeConstraint>
+        </register>
+        """
+    ))
+    assert reg.name == "TimerCtrl0"
+    assert reg.description == "Timer Control Register"
+    assert reg.addressOffset == 0
+    assert reg.access == "read-write"
+    assert reg.resetValue == 0x8001
+    assert reg.resetMask == 0xffff
+    assert reg.size == 32
+    assert reg.writeConstraint.writeAsRead == True
+    assert reg.writeConstraint.useEnumeratedValues == True
+    assert reg.writeConstraint.range == (0,5)
 
 
 def test_register_folding_commaseparated_index():
@@ -126,51 +206,54 @@ def test_register_is_dimensionless_after_fold_up():
         assert r.dimIncrement == None
 
 
-def test_peripheral_interrupt_inheritance():
-    timer0 = svd.SvdPeripheral(et.fromstring(
+def test_field_element():
+    field = svd.SvdField(et.fromstring(
         """
-        <peripheral>
+        <field>
             <name>TIMER0</name>
-            <baseAddress>0x40000</baseAddress>
-            <interrupt>
-                <name>TIMER0_INT</name>
-                <value>42</value>
-            </interrupt>
-        </peripheral>
+            <description>This is TIMER0.</description>
+            <bitOffset>1</bitOffset>
+            <bitWidth>3</bitWidth>
+            <access>read-write</access>
+            <modifiedWriteValues>oneToSet</modifiedWriteValues>
+            <writeConstraint>
+                <range>
+                    <minimum>0</minimum>
+                    <maximum>5</maximum>
+                </range>
+            </writeConstraint>
+            <readAction>clear</readAction>
+        </field>
         """
     ))
-    timer1 = svd.SvdPeripheral(et.fromstring(
-        """
-        <peripheral derivedFrom="TIMER0">
-            <name>TIMER1</name>
-            <baseAddress>0x40400</baseAddress>
-            <interrupt>
-                <name>TIMER1_INT</name>
-                <value>43</value>
-            </interrupt>
-        </peripheral>
-        """
-    ))
-    timer1.inherit_from(timer0)
+    assert field.name == "TIMER0"
+    assert field.description == "This is TIMER0."
+    assert field.bitOffset == 1
+    assert field.bitWidth == 3
+    assert field.access == "read-write"
+    assert field.modifiedWriteValues == "oneToSet"
+    assert field.writeConstraint.range == (0,5)
+    assert field.readAction == "clear"
 
-    assert len(timer1.interrupts) == 1
-    assert timer1.interrupts[0].name == "TIMER1_INT"
-    assert timer1.interrupts[0].value == 43
+    # These are generated from bitOffset and bitWidth
+    assert field.lsb == 1
+    assert field.msb == 4
+    assert field.bitRange == (4,1)
 
-    timer1 = svd.SvdPeripheral(et.fromstring(
+    field = svd.SvdField(et.fromstring(
         """
-        <peripheral derivedFrom="TIMER0">
-            <name>TIMER1</name>
-            <baseAddress>0x40400</baseAddress>
-        </peripheral>
+        <field>
+            <bitRange>[7:0]</bitRange>
+        </field>
         """
     ))
-    timer1.inherit_from(timer0)
+    assert field.bitRange == (7,0)
 
-    assert len(timer1.interrupts) == 1
-    assert timer1.interrupts[0].name == "TIMER0_INT"
-    assert timer1.interrupts[0].value == 42
-
+    # These are generated from bitRange
+    assert field.lsb == 0
+    assert field.msb == 7
+    assert field.bitOffset == 0
+    assert field.bitWidth == 8
 
 def test_svdfile():
     file = svd.SvdFile(

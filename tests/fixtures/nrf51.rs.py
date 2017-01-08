@@ -34,7 +34,7 @@ def filter_access(access):
 
 
 def filter_bitrange(bitrange):
-    msb, lsb = bitrange[1:-1].split(":")
+    msb, lsb = bitrange
     if msb == lsb:
         return "{}".format(lsb)
     else:

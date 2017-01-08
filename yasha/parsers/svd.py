@@ -23,7 +23,7 @@ THE SOFTWARE.
 """
 
 import distutils
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree
 from . import parser
 
 
@@ -38,8 +38,7 @@ class SvdParser(parser.Parser):
         variables = {
             "cpu": svd.cpu,
             "device": svd.device,
-            "peripherals": [svd.peripherals[name] for
-                            name in svd.peripherals_order],
+            "peripherals": svd.peripherals,
         }
         return variables
 
@@ -54,39 +53,31 @@ class SvdFile():
 
     def __init__(self, file):
         if isinstance(file, str):
-            self.root = ET.fromstring(file)
+            self.root = ElementTree.fromstring(file)
         else:
-            tree = ET.parse(file)
+            tree = ElementTree.parse(file)
             self.root = tree.getroot()
 
         self.cpu = None
         self.device = None
-        self.peripherals = {}
-        self.peripherals_order = []
-        self.derived_peripherals = []
-        self.peripheral_groups = {}
+        self.peripherals = []
+        self.peripherals_dict = {}  # Lookup by peripheral name
 
     def parse(self):
         self.cpu = SvdCpu(self.root.find("cpu"))
         self.device = SvdDevice(self.root)
 
-        for e in self.root.iter("peripheral"):
-            p = SvdPeripheral(e, self.device)
-            self.peripherals[p.name] = p
-            self.peripherals_order.append(p.name)
+        derived_periphs = []
+        for elem in self.root.iter("peripheral"):
+            periph = SvdPeripheral(elem, self.device)
+            if periph.derivedFrom is not None:
+                derived_periphs.append(periph.name)
+            self.peripherals.append(periph)
+            self.peripherals_dict[periph.name] = periph
 
-            if p.derivedFrom:
-                self.derived_peripherals.append(p.name)
-
-            if p.groupName:
-                try:
-                    self.peripheral_groups[p.groupName].append(p.name)
-                except KeyError:
-                    self.peripheral_groups[p.groupName] = [p.name]
-
-        for p in [self.peripherals[name] for name in self.derived_peripherals]:
-            base = self.peripherals[p.derivedFrom]
-            p.inherit_from(base)
+        for periph in [self.peripherals_dict[name] for name in derived_periphs]:
+            base = self.peripherals_dict[periph.derivedFrom]
+            periph.inherit_from(base)
 
 
 class SvdElement(object):

@@ -35,7 +35,7 @@ def test_peripheral():
     periph = svd.SvdPeripheral(et.fromstring(
         """
         <peripheral>
-            <name>TIMER1</name>
+            <name>TIMER0</name>
             <version>1.0</version>
             <description>A standard timer</description>
             <baseAddress>0x40002000</baseAddress>
@@ -54,7 +54,7 @@ def test_peripheral():
     ))
 
     assert len(periph.interrupts) == 1
-    assert periph.name == "TIMER1"
+    assert periph.name == "TIMER0"
     assert periph.version == "1.0"
     assert periph.description == "A standard timer"
     assert periph.baseAddress == 1073750016
@@ -170,6 +170,34 @@ def test_peripheral_interrupt_inheritance():
     assert len(timer1.interrupts) == 1
     assert timer1.interrupts[0].name == "TIMER0_INT"
     assert timer1.interrupts[0].value == 42
+
+
+def test_svdfile():
+    file = svd.SvdFile(
+        """
+        <device>
+            <peripherals>
+                <peripheral>
+                    <name>TIMER0</name>
+                </peripheral>
+                <peripheral>
+                    <name>TIMER1</name>
+                </peripheral>
+                <peripheral>
+                    <name>TIMER2</name>
+                </peripheral>
+                <peripheral>
+                    <name>TIMER3</name>
+                </peripheral>
+            </peripherals>
+        </device>
+        """
+    )
+    file.parse()
+
+    assert len(file.peripherals) == 4
+    for idx, periph in enumerate(file.peripherals):
+        assert periph.name == "TIMER{}".format(idx)
 
 
 def test_nrf51svd_to_rust(fixtures_dir):

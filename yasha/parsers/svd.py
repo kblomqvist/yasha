@@ -134,11 +134,14 @@ class SvdElement(object):
 class SvdDevice(SvdElement):
     """SVD Devices element"""
     props = [
-        "name", "version", "description", "addressUnitBits", "width", "size",
-        "access", "resetValue", "resetMask", "vendor", "vendorID", "series",
-        "licenseText", "headerSystemFilename", "headerDefinitionsPrefix"
+        "schemaVersion", "vendor", "vendorID", "name", "series", "version",
+        "description", "licenseText", "headerSystemFilename",
+        "headerDefinitionsPrefix", "addressUnitBits", "width", "size",
+        "access", "protection", "resetValue", "resetMask"
     ]
-    props_to_integer = ["size"]
+    props_to_integer = [
+        "width", "size", "resetValue", "resetMask", "addressUnitBits"
+    ]
 
 
 class SvdCpu(SvdElement):

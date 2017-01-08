@@ -110,7 +110,6 @@ class SvdElement(object):
             except AttributeError:  # Maybe it's attribute?
                 default = defaults[key] if key in defaults else None
                 value = element.get(key, default)
-
             if value is not None:
                 if key in self.props_to_integer:
                     try:
@@ -175,16 +174,21 @@ class SvdPeripheral(SvdElement):
     a group of peripherals and may be associated with one or more interrupts.
     """
     props = [
-        "derivedFrom", "name", "version", "description", "groupName",
-        "prependToName", "appendToName", "disableCondition", "baseAddress",
-        "size", "access", "resetValue", "resetMask", "alternatePeripheral"
+        "derivedFrom", "dim", "dimIncrement", "dimIndex", "dimName", "name",
+        "version", "description", "alternatePeripheral", "groupName",
+        "appendToName", "headerStructName", "disableCondition", "baseAddress",
+        "size", "access", "protection", "resetValue", "resetMask"
     ]
-    props_to_integer = ["size", "baseAddress"]
+    props_to_integer = [
+        "dim", "dimIncrement", "baseAddress", "size", "resetValue",
+        "resetMask"
+    ]
 
     def from_element(self, element, defaults={}):
         SvdElement.from_element(self, element, defaults)
         self.registers = []
         self.interrupts = []
+        self.addressBlock = None
 
         try:
             for reg in element.find("registers"):
@@ -200,6 +204,12 @@ class SvdPeripheral(SvdElement):
             for i in element.findall("interrupt"):
                 self.interrupts.append(SvdInterrupt(i, parent=self))
         except TypeError:  # element.findall() may return None
+            pass
+
+        try:
+            block = element.find("addressBlock")
+            self.addressBlock = SvdAddressBlock(block, parent=self)
+        except TypeError:
             pass
 
 
@@ -368,3 +378,7 @@ class SvdEnumeratedValue(SvdElement):
 class SvdInterrupt(SvdElement):
     props = ["name", "description", "value"]
     props_to_integer = ["value"]
+
+class SvdAddressBlock(SvdElement):
+    props = ["addressBlock", "offset", "size", "usage", "protection"]
+    props_to_integer = ["offset", "size"]

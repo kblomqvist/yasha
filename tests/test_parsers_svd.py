@@ -31,6 +31,39 @@ from os import path
 from subprocess import call, check_output
 
 
+def test_peripheral():
+    periph = svd.SvdPeripheral(et.fromstring(
+        """
+        <peripheral>
+            <name>TIMER1</name>
+            <version>1.0</version>
+            <description>A standard timer</description>
+            <baseAddress>0x40002000</baseAddress>
+            <addressBlock>
+                <offset>0x0</offset>
+                <size>0x400</size>
+                <usage>registers</usage>
+                <protection>s</protection>
+            </addressBlock>
+            <interrupt>
+                <name>TIM0_INT</name>
+                <value>34</value>
+            </interrupt>
+        </peripheral>
+        """
+    ))
+
+    assert len(periph.interrupts) == 1
+    assert periph.name == "TIMER1"
+    assert periph.version == "1.0"
+    assert periph.description == "A standard timer"
+    assert periph.baseAddress == 1073750016
+    assert periph.addressBlock.offset == 0
+    assert periph.addressBlock.size == 1024
+    assert periph.addressBlock.usage == "registers"
+    assert periph.addressBlock.protection == "s"
+
+
 def test_register_folding_commaseparated_index():
     r = svd.SvdRegister(et.fromstring(
         """

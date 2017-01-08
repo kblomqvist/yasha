@@ -366,5 +366,5 @@ class SvdEnumeratedValue(SvdElement):
 
 
 class SvdInterrupt(SvdElement):
-    props = ["name", "value"]
+    props = ["name", "description", "value"]
     props_to_integer = ["value"]

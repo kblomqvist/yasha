@@ -126,13 +126,14 @@ def load_template_extensions(file):
     return e
 
 
-def load_jinja(search_path, tests=[], filters=[], classes=[], trim=True, lstrip=True):
+def load_jinja(search_path, tests=[], filters=[], classes=[], trim=True, lstrip=True, keep_trailing_newline=False):
     from jinja2 import Environment, FileSystemLoader
     jinja = Environment(
         loader=FileSystemLoader(search_path),
         extensions=classes,
         trim_blocks=trim,
-        lstrip_blocks=lstrip
+        lstrip_blocks=lstrip,
+        keep_trailing_newline=keep_trailing_newline
     )
 
     for test in tests:

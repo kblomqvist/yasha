@@ -60,10 +60,11 @@ def print_version(ctx, param, value):
 @click.option("--no-extensions", is_flag=True, help="Omit template extensions.")
 @click.option("--no-trim-blocks", is_flag=True, help="Load Jinja with trim_blocks=False.")
 @click.option("--no-lstrip-blocks", is_flag=True, help="Load Jinja with lstrip_blocks=False.")
+@click.option("--keep-trailing-newline", is_flag=True, help="Load Jinja with keep_trailing_newline=True.")
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(template, output, variables, extensions, searchpath, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, m, md):
+def cli(template, output, variables, extensions, searchpath, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
     """Reads the given Jinja template and renders its content into a new file,
     which name is derived from the given template name. For example, a template
     called foo.c.jinja will be written into foo.c in case when the output
@@ -132,7 +133,7 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
     # Load Jinja and get template
     jinja = yasha.load_jinja(
         searchpath, ex["tests"], ex["filters"], ex["classes"],
-        not no_trim_blocks, not no_lstrip_blocks)
+        not no_trim_blocks, not no_lstrip_blocks, keep_trailing_newline)
     if template.name == "<stdin>":
         stdin = template.read()
         t = jinja.from_string(stdin.decode("utf-8"))

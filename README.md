@@ -63,6 +63,7 @@ Options:
   --no-extensions             Omit template extensions.
   --no-trim-blocks            Load Jinja with trim_blocks=False.
   --no-lstrip-blocks          Load Jinja with lstrip_blocks=False.
+  --keep-trailing-newline     Load Jinja with keep_trailing_newline=True.
   -M                          Outputs Makefile compatible list of
                               dependencies. Doesn't render the template.
   -MD                         Creates Makefile compatible .d file alongside a

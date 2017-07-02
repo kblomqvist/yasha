@@ -7,12 +7,12 @@
 Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest a command-line call
 
 ```bash
-yasha -v var1 value1 -v var2 value2 template.j2
+yasha -v var1 value -v var2 value template.j2
 ```
 
-will render `template.j2` template, having two defined variables, into a new file named as `template`. See how the created file name is derived from the template name. The template itself remains unchanged.
+will render `template.j2`, having two defined variables, into a new file named as `template`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
-The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file, and was used to interface with [the peripherals of Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures) ARM Cortex-M processor-based microcontroller. Yasha has since evolved to be flexible enough to be used in any project where the code generation is needed. The tool allows extending Jinja by domain specific filters, tests and extensions, and it operates smoothly with the commonly used build automation softwares like Make, CMake and SCons.
+The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file, and was used to interface with [the peripherals of Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures) ARM Cortex-M processor-based microcontroller. Yasha has since evolved to be flexible enough to be used in any project where the code generation is needed. The tool allows extending Jinja by domain specific filters, tests and extensions, and it operates smoothly with the commonly used build automation software like Make, CMake and SCons.
 
 ## Installation
 
@@ -46,11 +46,11 @@ Usage: yasha [OPTIONS] TEMPLATE
 
 Options:
   -v <TEXT TEXT>...            Define template variable.
+  -o, --output FILENAME        Place a rendered template into FILENAME.
   -V, --variables FILENAME     Read template variables from FILENAME.
   -E, --extensions FILENAME    Read template extensions from FILENAME.
   -I, --includepath DIRECTORY  Add DIRECTORY to the list of directories to be
                                searched for the referenced templates.
-  -o, --output FILENAME        Place a rendered template into FILENAME.
   --no-variables               Omit template variable file.
   --no-extensions              Omit template extension file.
   --no-trim-blocks             Load Jinja with trim_blocks=False.
@@ -69,18 +69,16 @@ Options:
 Simple template variables can be defined via command-line using `-v` option
 
 ```bash
-yasha -v <var> <value> template.j2
+yasha -v var value template.j2
 ```
 
-However, in many cases it is more convenient to define variables in a separate template variable file.
+However, in many cases it is more convenient to define variables in a separate template variable file
 
 ```bash
 yasha -V variables.yaml template.j2
 ```
 
-Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) by default. If the variable file is not explicitly given, Yasha will look for it. For example, the command-line call, `yasha template.j2`, tries to find the appropriate variable file, e.g. `template.yaml`, from the same folder with the template itself.
-
-In case the variable file shouldn't be used in spite of its existence, use ``--no-variables`` option flag
+Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) by default. If the variable file is not explicitly given, Yasha will look for it. For example, omitting the `-V variables.yaml` Yasha tries to find the variable file named similarly with the template, e.g. `template.yaml`. In case the variable file shouldn't be used in spite of its existence, use ``--no-variables`` option flag
 
 ```bash
 yasha --no-variables template.j2
@@ -113,7 +111,12 @@ yasha include/foo.h.jinja
 yasha source/foo.c.jinja
 ```
 
-the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For the readers reference, the variables are looked for `include/foo.h.jinja` in following order: `include/foo.h.yaml`, `include/foo.yaml`, `foo.h.yaml`, `foo.yaml`.
+the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For the readers reference, the variables are looked for `foo.h.jinja` in following order:
+
+1. `include/foo.h.yaml`
+2. `include/foo.yaml`
+3. `foo.h.yaml`
+4. `foo.yaml`
 
 ## Template extensions
 
@@ -136,8 +139,6 @@ And as you might guess, instead of relying on the automatic extension file look 
 ```bash
 yasha -E extensions.py template.j2
 ```
-
-There's also `--no-extensions` option flag working the same way as `--no-variables`. Additionally the file sharing works for the extension file as it works for the variable file.
 
 ### Custom variable file parser
 

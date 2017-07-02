@@ -53,10 +53,10 @@ def print_version(ctx, param, value):
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("template", type=click.File("rb"))
 @click.option("-v", type=(str, str), multiple=True, help="Define template variable.")
+@click.option("--output", "-o", type=click.File("wb"), help="Place a rendered template into FILENAME.")
 @click.option("--variables", "-V", type=click.File("rb"), help="Read template variables from FILENAME.")
 @click.option("--extensions", "-E", type=click.File("rb"), help="Read template extensions from FILENAME.")
 @click.option("--includepath", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for the referenced templates.")
-@click.option("--output", "-o", type=click.File("wb"), help="Place a rendered template into FILENAME.")
 @click.option("--no-variables", is_flag=True, help="Omit template variable file.")
 @click.option("--no-extensions", is_flag=True, help="Omit template extension file.")
 @click.option("--no-trim-blocks", is_flag=True, help="Load Jinja with trim_blocks=False.")
@@ -65,7 +65,7 @@ def print_version(ctx, param, value):
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(template, v, variables, extensions, includepath, output, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
+def cli(template, v, output, variables, extensions, includepath, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
     """Reads the given Jinja template and renders its content into a new file.
     For example, a template called foo.c.j2 will be written into foo.c when
     the output file is not explicitly given."""

@@ -52,25 +52,25 @@ def print_version(ctx, param, value):
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.argument("template", type=click.File("rb"))
-@click.option("--output", "-o", type=click.File("wb"), help="Place a rendered tempalate into FILENAME.")
-@click.option("--variables", "-v", type=click.File("rb"), envvar="YASHA_VARIABLES", help="Read template variables from FILENAME.")
-@click.option("--extensions", "-e", type=click.File("rb"), envvar="YASHA_EXTENSIONS", help="Read template extensions from FILENAME.")
-@click.option("--searchpath", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for referenced templates in TEMPLATE, aka hardcoded template extensions, inclusions and imports.")
-@click.option("--no-variables", is_flag=True, help="Omit template variables.")
-@click.option("--no-extensions", is_flag=True, help="Omit template extensions.")
+@click.option("-v", type=(str, str), multiple=True, help="Define template variable.")
+@click.option("--variables", "-V", type=click.File("rb"), help="Read template variables from FILENAME.")
+@click.option("--extensions", "-E", type=click.File("rb"), help="Read template extensions from FILENAME.")
+@click.option("--includepath", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for the referenced templates.")
+@click.option("--output", "-o", type=click.File("wb"), help="Place a rendered template into FILENAME.")
+@click.option("--no-variables", is_flag=True, help="Omit template variable file.")
+@click.option("--no-extensions", is_flag=True, help="Omit template extension file.")
 @click.option("--no-trim-blocks", is_flag=True, help="Load Jinja with trim_blocks=False.")
 @click.option("--no-lstrip-blocks", is_flag=True, help="Load Jinja with lstrip_blocks=False.")
 @click.option("--keep-trailing-newline", is_flag=True, help="Load Jinja with keep_trailing_newline=True.")
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(template, output, variables, extensions, searchpath, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
-    """Reads the given Jinja template and renders its content into a new file,
-    which name is derived from the given template name. For example, a template
-    called foo.c.jinja will be written into foo.c in case when the output
-    file is not explicitly specified."""
+def cli(template, v, variables, extensions, includepath, output, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
+    """Reads the given Jinja template and renders its content into a new file.
+    For example, a template called foo.c.j2 will be written into foo.c when
+    the output file is not explicitly given."""
 
-    searchpath = [os.path.dirname(template.name)] + list(searchpath)
+    includepath = [os.path.dirname(template.name)] + list(includepath)
 
     ex = {
         "tests": [],
@@ -118,7 +118,7 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
             deps.append(os.path.relpath(variables.name))
         if extensions:
             deps.append(os.path.relpath(extensions.name))
-        for d in yasha.find_referenced_templates(template, searchpath):
+        for d in yasha.find_referenced_templates(template, includepath):
             deps.append(os.path.relpath(d))
 
         deps = os.path.relpath(output.name) + ": " + " ".join(deps)
@@ -132,7 +132,7 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
 
     # Load Jinja and get template
     jinja = yasha.load_jinja(
-        searchpath, ex["tests"], ex["filters"], ex["classes"],
+        includepath, ex["tests"], ex["filters"], ex["classes"],
         not no_trim_blocks, not no_lstrip_blocks, keep_trailing_newline)
     if template.name == "<stdin>":
         stdin = template.read()
@@ -141,13 +141,14 @@ def cli(template, output, variables, extensions, searchpath, no_variables, no_ex
         t = jinja.get_template(os.path.basename(template.name))
 
     # Finally parse variables and render the template
-    v = {}
+    vardict = {}
     if variables and not no_variables:
-        v.update(parse_variables(variables, ex["variable_parsers"]))
+        vardict.update(parse_variables(variables, ex["variable_parsers"]))
     for preprocessor in ex["variable_preprocessors"]:
-        v = preprocessor(v)
+        vardict = preprocessor(vardict)
+    vardict.update(dict(v))
 
     # Render template and save it into output
-    t_stream = t.stream(v)
+    t_stream = t.stream(vardict)
     t_stream.enable_buffering(size=5)
     t_stream.dump(output, encoding="utf-8")

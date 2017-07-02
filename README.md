@@ -80,7 +80,7 @@ yasha -V variables.yaml template.j2
 
 Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html), but custom parsers are also possible (see below).
 
-If the variable file is not explicitly given, Yasha will look for it. For example, omitting the `-V variables.yaml` part, Yasha tries to find a file named similarly than the corresponding template, i.e. `template.yaml`. In case you want to omit the variable file in spite of its existence, use ``--no-variables`` option flag.
+If the variable file is not explicitly given, Yasha will look for it. For example, omitting the `-V variables.yaml` part, Yasha tries to find a file named in the same way than the corresponding template but with the file extension of the YAML or TOML. In case you want to omit the variable file in spite of its existence, use ``--no-variables`` option flag.
 
 ### Variable file sharing
 

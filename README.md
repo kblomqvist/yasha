@@ -78,10 +78,9 @@ However, in many cases it is more convenient to define variables in a separate t
 yasha -V variables.yaml template.j2
 ```
 
-Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html) by default. If the variable file is not explicitly given, Yasha will look for it. For example, omitting the `-V variables.yaml` Yasha tries to find the variable file named similarly with the template, e.g. `template.yaml`. In case the variable file shouldn't be used in spite of its existence, use ``--no-variables`` option flag
+Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html), but custom parsers are also possible (see below).
 
-```bash
-yasha --no-variables template.j2
+If the variable file is not explicitly given, Yasha will look for it. For example, omitting the `-V variables.yaml` part, Yasha tries to find the file named similarly with the template, e.g. `template.yaml`. In case the variable file shouldn't be used in spite of its existence, use ``--no-variables`` option flag.
 ```
 
 ### Variable file sharing
@@ -111,7 +110,7 @@ yasha include/foo.h.jinja
 yasha source/foo.c.jinja
 ```
 
-the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For the readers reference, the variables are looked for `foo.h.jinja` in following order:
+the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For instance, variables are looked for `foo.h.jinja` in following order:
 
 1. `include/foo.h.yaml`
 2. `include/foo.yaml`
@@ -337,6 +336,8 @@ env.Program("a.out", sources)
 Another example with separate `build` and `src` directories.
 
 ```python
+# SConstruct
+
 import os
 import yasha.scons
 

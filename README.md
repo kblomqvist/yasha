@@ -7,10 +7,10 @@
 Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest a command-line call
 
 ```bash
-yasha -v var1 value -v var2 value template.j2
+yasha -V variables.yaml template.j2
 ```
 
-will render `template.j2`, having two defined variables, into a new file named as `template`. See how the created file name is derived from the template name. The template itself remains unchanged.
+will render `template.j2` into a new file named as `template`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
 The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file, and was used to interface with [the peripherals of Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures) ARM Cortex-M processor-based microcontroller. Yasha has since evolved to be flexible enough to be used in any project where the code generation is needed. The tool allows extending Jinja by domain specific filters, tests and extensions, and it operates smoothly with the commonly used build automation software like Make, CMake and SCons.
 
@@ -80,7 +80,7 @@ yasha -V variables.yaml template.j2
 
 Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html), but custom parsers are also possible (see below).
 
-If the variable file is not explicitly given, Yasha will look for it. For example, omitting the `-V variables.yaml` part, Yasha tries to find the file named similarly with the template, e.g. `template.yaml`. In case the variable file shouldn't be used in spite of its existence, use ``--no-variables`` option flag.
+If the variable file is not explicitly given, Yasha will look for it. For example, omitting the `-V variables.yaml` part, Yasha tries to find a file named similarly than the corresponding template, i.e. `template.yaml`. In case you want to omit the variable file in spite of its existence, use ``--no-variables`` option flag.
 
 ### Variable file sharing
 

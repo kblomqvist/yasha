@@ -118,11 +118,17 @@ the variables defined in `foo.yaml` are used within both templates. This works b
 
 ## Template extensions
 
-You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. The functionality is similar to the variable file usage described above. So for a given `foo.jinja` template file, yasha will automatically look for `foo.py` file for template extensions. In case you are generating python code you may like to use `.j2ext` or `.jinja-ext` file suffix instead of `.py`.
+You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file.
 
-Here is an example of the extension file containing a filter and a test:
+```bash
+yasha -E extensions.py template.j2
+```
+
+Python functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
 
 ```python
+# extensions.py
+
 def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
 
@@ -130,13 +136,9 @@ def test_even(number):
     return number % 2 == 0
 ```
 
-Note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`. In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. Meaning that all classes derived from `jinja2.ext.Extension` are loaded and available within the template.
+In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded by Yasha and available within the template.
 
-And as you might guess, instead of relying on the automatic extension file look up, the file can be given explicitly as well.
-
-```bash
-yasha -E extensions.py template.j2
-```
+Lastly, in case you are generating Python code you may like to use `.j2ext` or `.jinja-ext` file extension instead of `.py`. Yasha's automatic extension file look up searches for files with the `.j2ext` and `.jinja-ext` file extensions too.
 
 ### Custom variable file parser
 
@@ -180,17 +182,20 @@ class XmlParser(yasha.Parser):
 
 ### Append search path for referenced templates
 
-By default the referenced templates, i.e. template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path you can use command-line option `-I` — like you would do with the GCC to include C header files.
+By default the referenced templates, i.e. files referred to via Jinja's [extends](http://jinja.pocoo.org/docs/dev/templates/#extends), [include](http://jinja.pocoo.org/docs/dev/templates/#include) or [import](http://jinja.pocoo.org/docs/dev/templates/#import) statements, are searched in relation to the template location. To extend the search path you can use the command-line option `-I` — like you would do with GCC to include C header files.
 
 ```bash
-yasha -I $HOME/jinja template.j2
+yasha -I $HOME/jinja -V variables.yaml template.j2
 ```
 
-The above command-line call allows you to reuse files from `$HOME/jinja` folder within your template, like this
+The above command-line call allows you, for example, to inherit your template from `$HOME/jinja/skeleton.j2` template
 
 ```jinja
-{% extends "skeleton.jinja" %}
-{% from "macros.jinja" import macro %}
+{% extends "skeleton.j2" %}
+{% block main %}
+    {{ super() }}
+    ...
+{% endblock %}
 ```
 
 ### Variable pre-processing before template rendering

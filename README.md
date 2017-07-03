@@ -118,13 +118,13 @@ the variables defined in `foo.yaml` are used within both templates. This works b
 
 ## Template extensions
 
-You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file.
+You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file
 
 ```bash
-yasha -E extensions.py template.j2
+yasha -E extensions.py -V variables.yaml template.j2
 ```
 
-Python functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`.
+Functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`, like shown below
 
 ```python
 # extensions.py
@@ -136,9 +136,7 @@ def test_even(number):
     return number % 2 == 0
 ```
 
-In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded by Yasha and available within the template.
-
-Lastly, in case you are generating Python code you may like to use `.j2ext` or `.jinja-ext` file extension instead of `.py`. Yasha's automatic extension file look up searches for files with the `.j2ext` and `.jinja-ext` file extensions too.
+In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded by Yasha and available within the template. Lastly, in case you are generating Python code and you are relying to Yasha's automatic extension file look up, you may like to use `.j2ext` file extension instead of `.py`.
 
 ### Custom variable file parser
 

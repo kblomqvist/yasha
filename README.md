@@ -4,7 +4,7 @@
 ![MIT license](https://img.shields.io/pypi/l/yasha.svg)
 <img src="https://raw.githubusercontent.com/kblomqvist/yasha/master/yasha.png" align="right" />
 
-Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest a command-line call
+Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest, a command-line call
 
 ```bash
 yasha -V variables.yaml template.j2
@@ -72,7 +72,7 @@ Simple template variables can be defined via command-line using `-v` option
 yasha -v var value template.j2
 ```
 
-However, in many cases it is more convenient to define variables in a separate template variable file
+However, in many cases it is more convenient to define variables in a separate file
 
 ```bash
 yasha -V variables.yaml template.j2
@@ -82,14 +82,14 @@ Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.y
 
 ### Automatic variable file look up
 
-If the variable file is not explicitly given, Yasha will look for it by searching a file named in the same way than the corresponding template but with the file extension of the YAML or TOML. For example, consider the following template and template variables files
+If the variable file is not explicitly given, Yasha will look for it by searching a file named in the same way than the corresponding template but with the file extension of the YAML or TOML -- `.yml/.yaml` or `.toml` respectively. For example, consider the following template and template variables files
 
 ```
 template.j2
 template.yaml
 ```
 
-The command-line call
+Because of automatic variable file look up, the command-line call
 
 ```
 yasha template.j2
@@ -101,7 +101,7 @@ equals to
 yasha -V template.yaml template.j2
 ```
 
-because of automatic variable file look up. In case you want to omit the variable file in spite of its existence, use ``--no-variables`` option flag.
+In case you want to omit the variable file in spite of its existence, use ``--no-variables`` option flag.
 
 ### Variable file sharing
 
@@ -109,16 +109,16 @@ Imagine that you would be writing C code and have the following two templates in
 
 ```
 root/
-    include/foo.h.jinja
-    source/foo.c.jinja
+    include/foo.h.j2
+    source/foo.c.j2
 ```
 
 and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` you can create `foo.yaml` under the root folder:
 
 ```
 root/
-    include/foo.h.jinja
-    source/foo.c.jinja
+    include/foo.h.j2
+    source/foo.c.j2
     foo.yaml
 ```
 
@@ -126,11 +126,11 @@ Now when you call
 
 ```bash
 cd root
-yasha include/foo.h.jinja
-yasha source/foo.c.jinja
+yasha include/foo.h.j2
+yasha source/foo.c.j2
 ```
 
-the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For instance, variables are looked for `foo.h.jinja` in following order:
+the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For instance, variables are looked for `foo.h.j2` in following order:
 
 1. `include/foo.h.yaml`
 2. `include/foo.yaml`
@@ -157,7 +157,27 @@ def test_even(number):
     return number % 2 == 0
 ```
 
-In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded by Yasha and available within the template. Lastly, in case you are generating Python code and you are relying to Yasha's automatic extension file look up, you may like to use `.j2ext` file extension instead of `.py`.
+In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded by Yasha and available within the template.
+
+Like for variables file, Yasha supports automatic extension file look up and sharing too. In case you are generating Python code and you are relying to Yasha's automatic extension file look up, consider using the following naming convention for your files:
+
+```
+template.py.j2
+template.py.py
+template.py.yaml
+```
+
+In this case the command-line call
+
+```
+yasha template.py.j2
+```
+
+equals to
+
+```
+yasha -E template.py.py -V template.py.yaml template.py.j2
+```
 
 ### Custom variable file parser
 

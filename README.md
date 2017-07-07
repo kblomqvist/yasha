@@ -78,11 +78,11 @@ However, in many cases it is more convenient to define variables in a separate f
 yasha -V variables.yaml template.j2
 ```
 
-Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html), but custom parsers are also possible (see below).
+Yasha supports [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html) and [TOML](https://github.com/toml-lang/toml), but custom parsers are also possible (see below).
 
 ### Automatic variable file look up
 
-If the variable file is not explicitly given, Yasha will look for it by searching a file named in the same way than the corresponding template but with the file extension of the YAML or TOML -- `.yml/.yaml` or `.toml` respectively. For example, consider the following template and template variables files
+If the variable file is not explicitly given, Yasha will look for it by searching a file named in the same way than the corresponding template but with the file extension of JSON, YAML or TOML. For example, consider the following template and template variables files
 
 ```
 template.j2
@@ -159,6 +159,8 @@ def test_even(number):
 
 In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded by Yasha and available within the template.
 
+### Automatic extension file look up and sharing
+
 Like for variables file, Yasha supports automatic extension file look up and sharing too. In case you are generating Python code and you are relying to Yasha's automatic extension file look up, consider using the following naming convention for your files:
 
 ```
@@ -178,6 +180,8 @@ equals to
 ```
 yasha -E template.py.py -V template.py.yaml template.py.j2
 ```
+
+This guarantees that there's no collision between the names of rendered template and extension files.
 
 ### Custom variable file parser
 

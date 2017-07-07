@@ -26,87 +26,63 @@ import pytest
 from os import path, chdir
 from subprocess import call, check_output
 
+@pytest.fixture(params=('json', 'yaml', 'yml', 'toml'))
+def vartpl(request):
+    template = {
+        'json': '{{"int": {int}}}',
+        'yaml': 'int: {int}',
+        'yml': 'int: {int}',
+        'toml': 'int={int}',
+    }
+    fmt = request.param  # format
+    return (template[fmt], fmt)
 
-@pytest.fixture(params=["toml", "yaml"])
-def tmplvar(request):
-    if request.param == "toml":
-        return {"filext": ".toml", "content": "number={}"}
-    if request.param == "yaml":
-        return {"filext": ".yaml", "content": "number: {}"}
+
+@pytest.fixture
+def varfile(vartpl, tmpdir):
+    content = {'int': 1}
+    template, filext = vartpl
+    file = tmpdir.join('variables.{}'.format(filext))
+    file.write(template.format(**content))
+    return file
 
 
-def test_template_in_subdir(tmpdir, tmplvar):
-    """ This test contains several steps to test that the variables file
-        is correctly found when the template is placed in sub directory:
+def test_explicit_variable_file(tmpdir, varfile):
+    tpl = tmpdir.join('template.j2')
+    tpl.write('{{ int }}')
 
-        Step 1:
-            sub/
-              foo.c.jinja
-            foo.toml        <-- should be used
-
-        Step 2:
-            sub/
-              foo.c.jinja
-              foo.toml      <-- should be used
-            foo.toml
-
-        Step 3:
-            sub/
-              foo.c.jinja
-              foo.c.toml    <-- should be used
-              foo.toml
-            foo.toml
-
-        Step 4:
-            sub/
-              foo.c.jinja
-              foo.c.toml
-              foo.toml      <-- explicitly specified
-            foo.toml
-
-        Step 5:
-            sub/
-              foo.c.jinja
-              foo.c.toml
-              foo.toml
-            foo.toml        <-- explicitly specified
-    """
-
-    cwd = tmpdir.chdir()
-
-    varfile = [v + tmplvar["filext"] for v in
-               ["foo", "sub/foo", "sub/foo.c"]]
-
-    t = tmpdir.mkdir("sub").join("foo.c.jinja")
-    t.write("int x = {{ number }};")
-
-    v0 = tmpdir.join(varfile[0])
-    v0.write(tmplvar["content"].format(0))
-
-    errno = call(["yasha", "sub/foo.c.jinja"])
+    errno = call(('yasha', '-V', str(varfile), str(tpl)))
     assert errno == 0
-    assert path.isfile("sub/foo.c")
 
-    o = tmpdir.join("sub/foo.c")
-    assert o.read() == "int x = 0;"
+    output = tmpdir.join('template')
+    assert output.read() == '1'
 
-    v1 = tmpdir.join(varfile[1])
-    v1.write(tmplvar["content"].format(1))
 
-    call(["yasha", "sub/foo.c.jinja"])
-    assert o.read() == "int x = 1;"
+def test_variable_file_lookup(tmpdir, vartpl):
+    # cwd/
+    #   sub/
+    #     foo.c.j2
+    cwd = tmpdir.chdir()
+    tpl = tmpdir.mkdir('sub').join('foo.c.j2')
+    tpl.write('int x = {{ int }};')
 
-    v2 = tmpdir.join(varfile[2])
-    v2.write(tmplvar["content"].format(2))
+    # /cwd
+    #   sub/
+    #     foo.c.j2
+    #     foo.c.json    int = 2
+    #     foo.json      int = 1
+    #   foo.json        int = 0
+    for i, varfile in enumerate(('foo', 'sub/foo', 'sub/foo.c')):
+        varfile += '.' + vartpl[1]
+        varfile = tmpdir.join(varfile)
+        varfile.write(vartpl[0].format(int=i))
 
-    call(["yasha", "sub/foo.c.jinja"])
-    assert o.read() == "int x = 2;"
+        errno = call(('yasha', 'sub/foo.c.j2'))
+        assert errno == 0
+        assert path.isfile('sub/foo.c')
 
-    call(["yasha", "sub/foo.c.jinja", "--variables", varfile[1]])
-    assert o.read() == "int x = 1;"
-
-    call(["yasha", "sub/foo.c.jinja", "--variables", varfile[0]])
-    assert o.read() == "int x = 0;"
+        output = tmpdir.join('sub/foo.c')
+        assert output.read() == 'int x = {};'.format(i)
 
 
 def test_custom_xmlparser(tmpdir):

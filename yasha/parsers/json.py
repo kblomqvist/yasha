@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2016 Kim Blomqvist
+Copyright (c) 2015-2017 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,13 @@ THE SOFTWARE.
 
 """
 
-from .parser import Parser
-from .svd import SvdParser
-from .toml import TomlParser
-from .yaml import YamlParser
-from .json import JsonParser
+from __future__ import absolute_import
+import json
+from . import parser
+
+
+class JsonParser(parser.Parser):
+    file_extension = ['.json']
+
+    def parse(self, file):
+        return json.loads(file.read().decode('utf8'))

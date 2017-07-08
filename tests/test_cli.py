@@ -187,3 +187,35 @@ def test_stdin_and_out():
     cmd = ("echo -n \"foo\"", "|", "yasha", "-")
     out = check_output(cmd, shell=True)
     assert out == b"foo"
+
+
+def test_dont_override_extension_file_with_rendered_template(tmpdir):
+    from subprocess import CalledProcessError, STDOUT
+
+    cwd = tmpdir.chdir()
+    template = tmpdir.join('template.py.j2')
+    template.write('{{ template }}')
+
+    extensions = tmpdir.join('template.py')
+    extensions.write('extensions = True')
+
+    with pytest.raises(CalledProcessError) as e:
+       check_output(('yasha', 'template.py.j2'), stderr=STDOUT)
+    assert e.value.returncode == 1
+    assert b'Error' in e.value.output
+
+
+def test_dont_override_variables_file_with_rendered_template(tmpdir):
+    from subprocess import CalledProcessError, STDOUT
+
+    cwd = tmpdir.chdir()
+    template = tmpdir.join('template.yaml.j2')
+    template.write('{{ template }}')
+
+    variables = tmpdir.join('template.yaml')
+    variables.write('variables: True')
+
+    with pytest.raises(CalledProcessError) as e:
+       check_output(('yasha', 'template.yaml.j2'), stderr=STDOUT)
+    assert e.value.returncode == 1
+    assert b'Error' in e.value.output

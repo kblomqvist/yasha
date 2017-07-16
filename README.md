@@ -4,13 +4,13 @@
 ![MIT license](https://img.shields.io/pypi/l/yasha.svg)
 <img src="https://raw.githubusercontent.com/kblomqvist/yasha/master/yasha.png" align="right" />
 
-Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest a command-line call
+Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest, a command-line call
 
 ```bash
-yasha -v var1 value -v var2 value template.j2
+yasha -V variables.yaml template.j2
 ```
 
-will render `template.j2`, having two defined variables, into a new file named as `template`. See how the created file name is derived from the template name. The template itself remains unchanged.
+will render `template.j2` into a new file named as `template`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
 The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file, and was used to interface with [the peripherals of Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures) ARM Cortex-M processor-based microcontroller. Yasha has since evolved to be flexible enough to be used in any project where the code generation is needed. The tool allows extending Jinja by domain specific filters, tests and extensions, and it operates smoothly with the commonly used build automation software like Make, CMake and SCons.
 
@@ -72,15 +72,36 @@ Simple template variables can be defined via command-line using `-v` option
 yasha -v var value template.j2
 ```
 
-However, in many cases it is more convenient to define variables in a separate template variable file
+However, in many cases it is more convenient to define variables in a separate file
 
 ```bash
 yasha -V variables.yaml template.j2
 ```
 
-Yasha supports [TOML](https://github.com/toml-lang/toml) and [YAML](http://www.yaml.org/start.html), but custom parsers are also possible (see below).
+Yasha supports [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html) and [TOML](https://github.com/toml-lang/toml), but custom parsers are also possible (see below).
 
-If the variable file is not explicitly given, Yasha will look for it. For example, omitting the `-V variables.yaml` part, Yasha tries to find the file named similarly with the template, e.g. `template.yaml`. In case the variable file shouldn't be used in spite of its existence, use ``--no-variables`` option flag.
+### Automatic variable file look up
+
+If the variable file is not explicitly given, Yasha will look for it by searching a file named in the same way than the corresponding template but with the file extension of JSON, YAML or TOML. For example, consider the following template and template variables files
+
+```
+template.j2
+template.yaml
+```
+
+Because of automatic variable file look up, the command-line call
+
+```
+yasha template.j2
+```
+
+equals to
+
+```
+yasha -V template.yaml template.j2
+```
+
+In case you want to omit the variable file in spite of its existence, use ``--no-variables`` option flag.
 
 ### Variable file sharing
 
@@ -88,16 +109,16 @@ Imagine that you would be writing C code and have the following two templates in
 
 ```
 root/
-    include/foo.h.jinja
-    source/foo.c.jinja
+    include/foo.h.j2
+    source/foo.c.j2
 ```
 
 and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` you can create `foo.yaml` under the root folder:
 
 ```
 root/
-    include/foo.h.jinja
-    source/foo.c.jinja
+    include/foo.h.j2
+    source/foo.c.j2
     foo.yaml
 ```
 
@@ -105,11 +126,11 @@ Now when you call
 
 ```bash
 cd root
-yasha include/foo.h.jinja
-yasha source/foo.c.jinja
+yasha include/foo.h.j2
+yasha source/foo.c.j2
 ```
 
-the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For instance, variables are looked for `foo.h.jinja` in following order:
+the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For instance, variables are looked for `foo.h.j2` in following order:
 
 1. `include/foo.h.yaml`
 2. `include/foo.yaml`
@@ -118,11 +139,17 @@ the variables defined in `foo.yaml` are used within both templates. This works b
 
 ## Template extensions
 
-You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and/or [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates. The functionality is similar to the variable file usage described above. So for a given `foo.jinja` template file, yasha will automatically look for `foo.py` file for template extensions. In case you are generating python code you may like to use `.j2ext` or `.jinja-ext` file suffix instead of `.py`.
+You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file
 
-Here is an example of the extension file containing a filter and a test:
+```bash
+yasha -E extensions.py -V variables.yaml template.j2
+```
+
+Functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`, like shown below
 
 ```python
+# extensions.py
+
 def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
 
@@ -130,13 +157,31 @@ def test_even(number):
     return number % 2 == 0
 ```
 
-Note that the functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`. In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. Meaning that all classes derived from `jinja2.ext.Extension` are loaded and available within the template.
+In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded by Yasha and available within the template.
 
-And as you might guess, instead of relying on the automatic extension file look up, the file can be given explicitly as well.
+### Automatic extension file look up and sharing
 
-```bash
-yasha -E extensions.py template.j2
+Like for variables file, Yasha supports automatic extension file look up and sharing too. In case you are generating Python code and you are relying to Yasha's automatic extension file look up, consider using the following naming convention for your files:
+
 ```
+template.py.j2
+template.py.py
+template.py.yaml
+```
+
+In this case the command-line call
+
+```
+yasha template.py.j2
+```
+
+equals to
+
+```
+yasha -E template.py.py -V template.py.yaml template.py.j2
+```
+
+This guarantees that there's no collision between the names of rendered template and extension files.
 
 ### Custom variable file parser
 
@@ -180,17 +225,20 @@ class XmlParser(yasha.Parser):
 
 ### Append search path for referenced templates
 
-By default the referenced templates, i.e. template [extensions](http://jinja.pocoo.org/docs/dev/templates/#extends), [inclusions](http://jinja.pocoo.org/docs/dev/templates/#include) and [imports](http://jinja.pocoo.org/docs/dev/templates/#import), are searched in relation to the template location. To extend the search path you can use command-line option `-I` — like you would do with the GCC to include C header files.
+By default the referenced templates, i.e. files referred to via Jinja's [extends](http://jinja.pocoo.org/docs/dev/templates/#extends), [include](http://jinja.pocoo.org/docs/dev/templates/#include) or [import](http://jinja.pocoo.org/docs/dev/templates/#import) statements, are searched in relation to the template location. To extend the search path you can use the command-line option `-I` — like you would do with GCC to include C header files.
 
 ```bash
-yasha -I $HOME/jinja template.j2
+yasha -I $HOME/jinja -V variables.yaml template.j2
 ```
 
-The above command-line call allows you to reuse files from `$HOME/jinja` folder within your template, like this
+The above command-line call allows you, for example, to inherit your template from `$HOME/jinja/skeleton.j2` template
 
 ```jinja
-{% extends "skeleton.jinja" %}
-{% from "macros.jinja" import macro %}
+{% extends "skeleton.j2" %}
+{% block main %}
+    {{ super() }}
+    ...
+{% endblock %}
 ```
 
 ### Variable pre-processing before template rendering

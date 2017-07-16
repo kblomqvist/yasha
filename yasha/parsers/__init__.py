@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2016 Kim Blomqvist
+Copyright (c) 2015-2017 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,3 +27,4 @@ from .parser import Parser
 from .svd import SvdParser
 from .toml import TomlParser
 from .yaml import YamlParser
+from .json import JsonParser

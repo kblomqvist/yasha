@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2016 Kim Blomqvist
+Copyright (c) 2015-2017 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,9 @@ THE SOFTWARE.
 import os
 from .parsers import *
 
-__version__ = "3.0"
+__version__ = "3.1"
 
-DEFAULT_PARSERS = [YamlParser(), TomlParser(), SvdParser()]
+DEFAULT_PARSERS = [JsonParser(), YamlParser(), TomlParser(), SvdParser()]
 EXTENSIONS_FORMAT = [".py", ".j2ext", ".jinja-ext"]
 
 

@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2016 Kim Blomqvist
+Copyright (c) 2015-2017 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -111,6 +111,16 @@ def cli(template, v, output, variables, extensions, includepath, no_variables, n
         else:
             output = os.path.splitext(template.name)[0]
             output = click.open_file(output, "wb", lazy=True)
+
+        if variables and (output.name == variables.name):
+            msg = "Error: Extensions {} would be overridden by the rendered template."
+            click.echo(msg.format(variables.name), err=True)
+            raise click.Abort()
+
+        if extensions and (output.name == extensions.name):
+            msg = "Error: Variables {} would be overridden by the rendered template."
+            click.echo(msg.format(extensions.name), err=True)
+            raise click.Abort()
 
     if m or md:
         deps = [os.path.relpath(template.name)]

@@ -22,3 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 """
+
+from __future__ import absolute_import
+import json
+from . import parser
+
+
+class JsonParser(parser.Parser):
+    file_extension = ['.json']
+
+    def parse(self, file):
+        return json.loads(file.read().decode('utf8'))

@@ -220,24 +220,22 @@ class XmlParser(yasha.Parser):
         return variables  # Return value has to be dictionary
 ```
 
-### Built-in filters
+## Built-in filters
 
-#### env
+### env
 
 Fetches environment variable in a template like:
 
-```
+```jinja
 sqlalchemy:
   url: {{ 'POSTGRES_URL' | env }}
 ```
 
-#### subprocess (Python >= 3.5)
+### subprocess (Python >= 3.5)
 
-The `subprocess` filter allows you to spawn new processes, connect to their input/output/error pipes via CompletedProcess instance.
+The `subprocess` filter allows you to spawn new processes, connect to their input/output/error pipes via CompletedProcess instance. Use in conjunction with `stdout` and `stderr` filters in a template like:
 
-Use in conjunction with `stdout` and `stderr` filters in a template like:
-
-```
+```jinja
 os:
   type: {{ "lsb_release -a | grep Distributor | awk '{print $3}'" | subprocess | stdout }}
   version: {{ 'cat /etc/debian_version' | subprocess | stdout }}
@@ -245,7 +243,7 @@ os:
 
 producing:
 
-```
+```yaml
 os:
   type: Debian
   version: 9.1

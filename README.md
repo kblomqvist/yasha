@@ -220,6 +220,37 @@ class XmlParser(yasha.Parser):
         return variables  # Return value has to be dictionary
 ```
 
+### Built-in filters
+
+#### env
+
+Fetches environment variable in a template like:
+
+```
+sqlalchemy:
+  url: {{ 'POSTGRES_URL' | env }}
+```
+
+#### subprocess (Python >= 3.5)
+
+The `subprocess` filter allows you to spawn new processes, connect to their input/output/error pipes via CompletedProcess instance.
+
+Use in conjunction with `stdout` and `stderr` filters in a template like:
+
+```
+os:
+  type: {{ "lsb_release -a | grep Distributor | awk '{print $3}'" | subprocess | stdout }}
+  version: {{ 'cat /etc/debian_version' | subprocess | stdout }}
+```
+
+producing:
+
+```
+os:
+  type: Debian
+  version: 9.1
+```
+
 ## Tips and tricks
 
 ### Append search path for referenced templates

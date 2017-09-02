@@ -136,6 +136,9 @@ def load_jinja(search_path, tests=[], filters=[], classes=[], trim=True, lstrip=
         keep_trailing_newline=keep_trailing_newline
     )
 
+    from .filters import FILTERS as BUILTIN_FILTERS
+    jinja.filters.update(BUILTIN_FILTERS)
+
     for test in tests:
         name = test.__name__.replace("test_", "")
         jinja.tests[name] = test

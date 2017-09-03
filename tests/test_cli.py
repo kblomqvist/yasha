@@ -173,14 +173,40 @@ def test_broken_extensions(tmpdir):
 def test_inline_variable(tmpdir):
     cwd = tmpdir.chdir()
     tpl = tmpdir.join("template.j2")
-    tpl.write("{{ var }}")
+    tpl.write("{{ foo }}")
 
-    errno = call(["yasha", "-v", "var", "foo", "template.j2"])
+    errno = call(["yasha", "--foo", "bar", "template.j2"])
     assert errno == 0
     assert path.isfile("template")
 
     o = tmpdir.join("template")
-    assert o.read() == "foo"
+    assert o.read() == "bar"
+
+
+def test_explicit_inline_variable(tmpdir):
+    cwd = tmpdir.chdir()
+    tpl = tmpdir.join("template.j2")
+    tpl.write("{{ foo }}")
+
+    errno = call(["yasha", "--foo=bar", "template.j2"])
+    assert errno == 0
+    assert path.isfile("template")
+
+    o = tmpdir.join("template")
+    assert o.read() == "bar"
+
+
+def test_inline_variable_list(tmpdir):
+    cwd = tmpdir.chdir()
+    tpl = tmpdir.join("template.j2")
+    tpl.write("{{ foo }}")
+
+    errno = call(["yasha", "--foo=bar,baz", "template.j2"])
+    assert errno == 0
+    assert path.isfile("template")
+
+    o = tmpdir.join("template")
+    assert o.read() == "['bar', 'baz']"
 
 
 def test_stdin_and_out():

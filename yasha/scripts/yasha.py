@@ -50,9 +50,31 @@ def print_version(ctx, param, value):
     ctx.exit()
 
 
-@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+def parse_inline_variables(args):
+    rv = []
+    for i, arg in enumerate(args):
+        if arg[:2] != '--':
+            continue
+        if '=' in arg:
+            opt, val = arg[2:].split('=', 1)
+        else:
+            try:
+                if args[i+1] != '--':
+                    opt = arg[2:]
+                    val = args[i+1]
+            except IndexError:
+                break
+        if ',' in val:
+            val = val.split(',')
+        rv.append((opt, val))
+    return rv
+
+@click.command(context_settings=dict(
+    help_option_names=["-h", "--help"],
+    ignore_unknown_options=True,
+))
+@click.argument("inline_vars", nargs=-1, type=click.UNPROCESSED)
 @click.argument("template", type=click.File("rb"))
-@click.option("-v", type=(str, str), multiple=True, help="Define template variable.")
 @click.option("--output", "-o", type=click.File("wb"), help="Place a rendered template into FILENAME.")
 @click.option("--variables", "-V", type=click.File("rb"), help="Read template variables from FILENAME.")
 @click.option("--extensions", "-E", type=click.File("rb"), help="Read template extensions from FILENAME.")
@@ -65,7 +87,7 @@ def print_version(ctx, param, value):
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside a rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(template, v, output, variables, extensions, includepath, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
+def cli(inline_vars, template, output, variables, extensions, includepath, no_variables, no_extensions, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
     """Reads the given Jinja template and renders its content into a new file.
     For example, a template called foo.c.j2 will be written into foo.c when
     the output file is not explicitly given."""
@@ -156,7 +178,7 @@ def cli(template, v, output, variables, extensions, includepath, no_variables, n
         vardict.update(parse_variables(variables, ex["variable_parsers"]))
     for preprocessor in ex["variable_preprocessors"]:
         vardict = preprocessor(vardict)
-    vardict.update(dict(v))
+    vardict.update(dict(parse_inline_variables(inline_vars)))
 
     # Render template and save it into output
     t_stream = t.stream(vardict)

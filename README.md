@@ -266,16 +266,14 @@ os:
 
 Params: stdout=True, stderr=True, shell=True, check=True
 
-#### stdout (Python >= 3.5)
+### stdout (Python >= 3.5)
 
 Returns the captured stdout from the finished subprocess.
-
 Params: encoding=UTF-8
 
-#### stderr (Python >= 3.5)
+### stderr (Python >= 3.5)
 
 Returns the captured stderr from the finished subprocess.
-
 Params: encoding=UTF-8
 
 ## Tips and tricks

@@ -112,7 +112,7 @@ equals to
 yasha -v template.yaml template.j2
 ```
 
-In case you want to omit the variable file in spite of its existence, use ``--no-variables`` option flag.
+In case you want to omit the variable file in spite of its existence, use ``--no-variable-file`` option flag.
 
 ### Variable file sharing
 

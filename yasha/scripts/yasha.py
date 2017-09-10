@@ -56,6 +56,8 @@ def parse_template_variables(args):
             val = ast.literal_eval(val)
         except ValueError:
             pass
+        except SyntaxError:
+            raise # Maybe we want to do something for this
         if isinstance(val, str) and ',' in val:
             # Convert foo,bar,baz to list ['foo', 'bar', 'baz']
             val = val.split(',')

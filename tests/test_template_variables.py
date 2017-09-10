@@ -32,16 +32,26 @@ def t(tmpdir):
     return tmpdir.join('template.j2')
 
 
-def test_simple_variable(t):
+def test_string(t):
     t.write('{{ var is string }}, {{ var }}')
     out = check_output(['yasha', '--var', 'foo', '-o-', str(t)])
     assert out == b'True, foo'
+
+    t.write('{{ var is string }}, {{ var }}')
+    out = check_output(['yasha', '--var', "'foo'", '-o-', str(t)])
+    assert out == b"True, foo"
 
 
 def test_boolean(t):
     t.write('{{ var is sameas false }}, {{ var }}')
     out = check_output(['yasha', '--var', 'False', '-o-', str(t)])
     assert out == b'True, False'
+
+
+def test_number(t):
+    t.write('{{ var is number }}, {{ var + 1 }}')
+    out = check_output(['yasha', '--var', '1', '-o-', str(t)])
+    assert out == b'True, 2'
 
 
 def test_list(t):
@@ -56,19 +66,13 @@ def test_tuple(t):
     assert out == b'True, foobarbaz'
 
 
-def test_dictionary(t):
-    t.write("{{ var is mapping }}, {% for k in 'abc' %}{{ var[k] }}{% endfor %}")
-    out = check_output(['yasha', '--var', "{'a': 1, 'b': 2, 'c': 3}", '-o-', str(t)])
-    assert out == b'True, 123'
-
-
-def test_number_type(t):
-    t.write('{{ var is number }}, {{ var + 1 }}')
-    out = check_output(['yasha', '--var', '1', '-o-', str(t)])
-    assert out == b'True, 2'
-
-
 def test_comma_separated_list(t):
     t.write('{{ var is sequence }}, {{ var | join }}')
     out = check_output(['yasha', '--var', 'foo,bar,baz', '-o-', str(t)])
     assert out == b'True, foobarbaz'
+
+
+def test_dictionary(t):
+    t.write("{{ var is mapping }}, {% for k in 'abc' %}{{ var[k] }}{% endfor %}")
+    out = check_output(['yasha', '--var', "{'a': 1, 'b': 2, 'c': 3}", '-o-', str(t)])
+    assert out == b'True, 123'

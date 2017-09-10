@@ -37,7 +37,7 @@ pip install -e yasha
 ## Usage
 
 ```
-Usage: yasha [OPTIONS] [INLINE_VARIABLES]... TEMPLATE
+Usage: yasha [OPTIONS] [TEMPLATE_VARIABLES]... TEMPLATE
 
   Reads the given Jinja TEMPLATE and renders its content into a new file.
   For example, a template called 'foo.c.j2' will be written into 'foo.c' in

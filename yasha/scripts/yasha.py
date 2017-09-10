@@ -36,7 +36,7 @@ def parse_variables(file, parsers):
     return {}
 
 
-def parse_inline_variables(args):
+def parse_template_variables(args):
     import ast
     rv = []
     for i, arg in enumerate(args):
@@ -73,7 +73,7 @@ def print_version(ctx, param, value):
     help_option_names=["-h", "--help"],
     ignore_unknown_options=True,
 ))
-@click.argument("inline_variables", nargs=-1, type=click.UNPROCESSED)
+@click.argument("template_variables", nargs=-1, type=click.UNPROCESSED)
 @click.argument("template", type=click.File("rb"))
 @click.option("--output", "-o", type=click.File("wb"), help="Place the rendered template into FILENAME.")
 @click.option("--variables", "-v", type=click.File("rb"), help="Read template variables from FILENAME. Built-in parsers are: JSON, TOML and YAML.")
@@ -87,7 +87,7 @@ def print_version(ctx, param, value):
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside the rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(inline_variables, template, output, variables, extensions, include_path, no_variable_file, no_extension_file, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
+def cli(template_variables, template, output, variables, extensions, include_path, no_variable_file, no_extension_file, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
     """Reads the given Jinja TEMPLATE and renders its content
     into a new file. For example, a template called 'foo.c.j2'
     will be written into 'foo.c' in case the output file is not
@@ -189,7 +189,7 @@ def cli(inline_variables, template, output, variables, extensions, include_path,
         vardict.update(parse_variables(variables, ex["variable_parsers"]))
     for preprocessor in ex["variable_preprocessors"]:
         vardict = preprocessor(vardict)
-    vardict.update(dict(parse_inline_variables(inline_variables)))
+    vardict.update(dict(parse_template_variables(template_variables)))
 
     # Render template and save it into output
     t_stream = t.stream(vardict)

@@ -290,6 +290,6 @@ def test_nrf51svd_to_rust(fixtures_dir):
 
     expected_output = path.join(fixtures_dir, "nrf51.rs.expected")
     with open(expected_output, "rb") as f:
-        cmd = "cat {} | yasha -E {} -V {} -".format(tpl, ext, var)
+        cmd = "cat {} | yasha -e {} -v {} -".format(tpl, ext, var)
         out = check_output(cmd, shell=True)
         assert out.strip() == f.read().strip()

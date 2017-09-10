@@ -6,7 +6,7 @@
 Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest, a command-line call
 
 ```bash
-yasha -V variables.yaml template.j2
+yasha -v variables.yaml template.j2
 ```
 
 will render `template.j2` into a new file named as `template`. See how the created file name is derived from the template name. The template itself remains unchanged.
@@ -37,47 +37,59 @@ pip install -e yasha
 ## Usage
 
 ```
-Usage: yasha [OPTIONS] TEMPLATE
+Usage: yasha [OPTIONS] [INLINE_VARIABLES]... TEMPLATE
 
-  Reads the given Jinja template and renders its content into a new file.
-  For example, a template called foo.c.j2 will be written into foo.c when
-  the output file is not explicitly given.
+  Reads the given Jinja TEMPLATE and renders its content into a new file.
+  For example, a template called 'foo.c.j2' will be written into 'foo.c' in
+  case the output file is not explicitly given.
+
+  Template variables can be defined in a separate file or given as part of
+  the command-line call, e.g.
+
+      yasha --hello=world -o hello.txt hello.j2
+
+  defines a variable 'hello' for a template like:
+
+      Hello {{ hello }}!
 
 Options:
-  -v <TEXT TEXT>...            Define template variable.
-  -o, --output FILENAME        Place a rendered template into FILENAME.
-  -V, --variables FILENAME     Read template variables from FILENAME.
-  -E, --extensions FILENAME    Read template extensions from FILENAME.
-  -I, --includepath DIRECTORY  Add DIRECTORY to the list of directories to be
-                               searched for the referenced templates.
-  --no-variables               Omit template variable file.
-  --no-extensions              Omit template extension file.
-  --no-trim-blocks             Load Jinja with trim_blocks=False.
-  --no-lstrip-blocks           Load Jinja with lstrip_blocks=False.
-  --keep-trailing-newline      Load Jinja with keep_trailing_newline=True.
-  -M                           Outputs Makefile compatible list of
-                               dependencies. Doesn't render the template.
-  -MD                          Creates Makefile compatible .d file alongside a
-                               rendered template.
-  --version                    Print version and exit.
-  -h, --help                   Show this message and exit.
+  -o, --output FILENAME         Place the rendered template into FILENAME.
+  -v, --variables FILENAME      Read template variables from FILENAME. Built-
+                                in parsers are: JSON, TOML and YAML.
+  -e, --extensions FILENAME     Read template extensions from FILENAME. A
+                                Python file is expected.
+  -I, --include_path DIRECTORY  Add DIRECTORY to the list of directories to be
+                                searched for the referenced templates, i.e.
+                                files imported via 'include', 'extends' and
+                                'import' statements.
+  --no-variable-file            Omit template variable file.
+  --no-extension-file           Omit template extension file.
+  --no-trim-blocks              Load Jinja with trim_blocks=False.
+  --no-lstrip-blocks            Load Jinja with lstrip_blocks=False.
+  --keep-trailing-newline       Load Jinja with keep_trailing_newline=True.
+  -M                            Outputs Makefile compatible list of
+                                dependencies. Doesn't render the template.
+  -MD                           Creates Makefile compatible .d file alongside
+                                the rendered template.
+  --version                     Print version and exit.
+  -h, --help                    Show this message and exit.
 ```
 
 ## Template variables
 
-Simple template variables can be defined via command-line using `-v` option
+Template variables can be defined in a separate file. Yasha supports [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html) and [TOML](https://github.com/toml-lang/toml):
 
 ```bash
-yasha -v var value template.j2
+yasha -v variables.yaml template.j2
 ```
 
-However, in many cases it is more convenient to define variables in a separate file
+Additionally you may define variables as part of the command-line call, e.g.
 
 ```bash
-yasha -V variables.yaml template.j2
+yasha --foo=bar template.j2
 ```
 
-Yasha supports [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html) and [TOML](https://github.com/toml-lang/toml), but custom parsers are also possible (see below).
+A variable defined in this way can be Python literal or container kind, and it will overwrite a variable defined in a separate variable file.
 
 ### Automatic variable file look up
 
@@ -97,7 +109,7 @@ yasha template.j2
 equals to
 
 ```
-yasha -V template.yaml template.j2
+yasha -v template.yaml template.j2
 ```
 
 In case you want to omit the variable file in spite of its existence, use ``--no-variables`` option flag.
@@ -141,7 +153,7 @@ the variables defined in `foo.yaml` are used within both templates. This works b
 You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file
 
 ```bash
-yasha -E extensions.py -V variables.yaml template.j2
+yasha -e extensions.py -v variables.yaml template.j2
 ```
 
 Functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`, like shown below
@@ -177,7 +189,7 @@ yasha template.py.j2
 equals to
 
 ```
-yasha -E template.py.py -V template.py.yaml template.py.j2
+yasha -e template.py.py -v template.py.yaml template.py.j2
 ```
 
 This guarantees that there's no collision between the names of rendered template and extension files.
@@ -256,7 +268,7 @@ os:
 By default the referenced templates, i.e. files referred to via Jinja's [extends](http://jinja.pocoo.org/docs/dev/templates/#extends), [include](http://jinja.pocoo.org/docs/dev/templates/#include) or [import](http://jinja.pocoo.org/docs/dev/templates/#import) statements, are searched in relation to the template location. To extend the search path you can use the command-line option `-I` — like you would do with GCC to include C header files.
 
 ```bash
-yasha -I $HOME/jinja -V variables.yaml template.j2
+yasha -I $HOME/jinja -v variables.yaml template.j2
 ```
 
 The above command-line call allows you, for example, to inherit your template from `$HOME/jinja/skeleton.j2` template
@@ -292,7 +304,7 @@ class YamlParser(yasha.YamlParser):
 Yasha can render templates from STDIN to STDOUT. For example, the below command-line call will render template from STDIN to STDOUT.
 
 ```bash
-cat template.j2 | yasha -V variables.yaml -
+cat template.j2 | yasha -v variables.yaml -
 ```
 
 ## Build automation

@@ -51,7 +51,7 @@ def test_explicit_variable_file(tmpdir, varfile):
     tpl = tmpdir.join('template.j2')
     tpl.write('{{ int }}')
 
-    errno = call(('yasha', '-V', str(varfile), str(tpl)))
+    errno = call(('yasha', '-v', str(varfile), str(tpl)))
     assert errno == 0
 
     output = tmpdir.join('template')

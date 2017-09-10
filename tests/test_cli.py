@@ -170,45 +170,6 @@ def test_broken_extensions(tmpdir):
     assert b"Invalid syntax (foo.j2ext, line 1)" in e.value.output
 
 
-def test_inline_variable(tmpdir):
-    cwd = tmpdir.chdir()
-    tpl = tmpdir.join("template.j2")
-    tpl.write("{{ foo }}")
-
-    errno = call(["yasha", "--foo", "bar", "template.j2"])
-    assert errno == 0
-    assert path.isfile("template")
-
-    o = tmpdir.join("template")
-    assert o.read() == "bar"
-
-
-def test_explicit_inline_variable(tmpdir):
-    cwd = tmpdir.chdir()
-    tpl = tmpdir.join("template.j2")
-    tpl.write("{{ foo }}")
-
-    errno = call(["yasha", "--foo=bar", "template.j2"])
-    assert errno == 0
-    assert path.isfile("template")
-
-    o = tmpdir.join("template")
-    assert o.read() == "bar"
-
-
-def test_inline_variable_list(tmpdir):
-    cwd = tmpdir.chdir()
-    tpl = tmpdir.join("template.j2")
-    tpl.write("{{ foo }}")
-
-    errno = call(["yasha", "--foo=bar,baz", "template.j2"])
-    assert errno == 0
-    assert path.isfile("template")
-
-    o = tmpdir.join("template")
-    assert o.read() == "['bar', 'baz']"
-
-
 def test_stdin_and_out():
     cmd = ("echo -n \"foo\"", "|", "yasha", "-")
     out = check_output(cmd, shell=True)

@@ -63,7 +63,7 @@ def test_dictionary(t):
 
 
 def test_number_type(t):
-    t.write('{{ var is number }}, {{ var + 1 }}')
+    t.write('{{ var is number }}, {{ var + 1 }}')
     out = check_output(['yasha', '--var', '1', '-o-', str(t)])
     assert out == b'True, 2'
 

@@ -268,12 +268,14 @@ Params: stdout=True, stderr=True, shell=True, check=True
 
 ### stdout (Python >= 3.5)
 
-Returns the captured stdout from the finished subprocess.
+Returns the captured stdout for the finished `subprocess` filter.
+
 Params: encoding=UTF-8
 
 ### stderr (Python >= 3.5)
 
-Returns the captured stderr from the finished subprocess.
+Returns the captured stderr for the finished `subprocess` filter.
+
 Params: encoding=UTF-8
 
 ## Tips and tricks

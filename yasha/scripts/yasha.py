@@ -145,16 +145,6 @@ def cli(template_variables, template, output, variables, extensions, include_pat
             output = os.path.splitext(template.name)[0]
             output = click.open_file(output, "wb", lazy=True)
 
-        if variables and (output.name == variables.name):
-            msg = "Error: Extensions {} would be overridden by the rendered template."
-            click.echo(msg.format(variables.name), err=True)
-            raise click.Abort()
-
-        if extensions and (output.name == extensions.name):
-            msg = "Error: Variables {} would be overridden by the rendered template."
-            click.echo(msg.format(extensions.name), err=True)
-            raise click.Abort()
-
     if m or md:
         deps = [os.path.relpath(template.name)]
         if variables:

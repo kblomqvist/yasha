@@ -25,6 +25,7 @@ THE SOFTWARE.
 
 import os
 import click
+import encodings
 from .. import yasha
 
 
@@ -76,8 +77,9 @@ def print_version(ctx, param, value):
 @click.argument("template_variables", nargs=-1, type=click.UNPROCESSED)
 @click.argument("template", type=click.File("rb"))
 @click.option("--output", "-o", type=click.File("wb"), help="Place the rendered template into FILENAME.")
-@click.option("--variables", "-v", type=click.File("rb"), help="Read template variables from FILENAME. Built-in parsers are: JSON, TOML and YAML.")
+@click.option("--variables", "-v", type=click.File("rb"), help="Read template variables from FILENAME. Built-in parsers are JSON, TOML and YAML.")
 @click.option("--extensions", "-e", type=click.File("rb"), help="Read template extensions from FILENAME. A Python file is expected.")
+@click.option("--encoding", "-c", default=yasha.ENCODING, help="Default is UTF-8.")
 @click.option("--include_path", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for the referenced templates, i.e. files imported via 'include', 'extends' and 'import' statements.")
 @click.option("--no-variable-file", is_flag=True, help="Omit template variable file.")
 @click.option("--no-extension-file", is_flag=True, help="Omit template extension file.")
@@ -87,7 +89,7 @@ def print_version(ctx, param, value):
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside the rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(template_variables, template, output, variables, extensions, include_path, no_variable_file, no_extension_file, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
+def cli(template_variables, template, output, variables, extensions, encoding, include_path, no_variable_file, no_extension_file, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
     """Reads the given Jinja TEMPLATE and renders its content
     into a new file. For example, a template called 'foo.c.j2'
     will be written into 'foo.c' in case the output file is not
@@ -103,6 +105,13 @@ def cli(template_variables, template, output, variables, extensions, include_pat
         Hello {{ hello }}!
     """
 
+    # Set the encoding of the template file
+    if encodings.search_function(encoding) is None:
+        click.echo("Error: Unrecognized encoding name '{}'".format(encoding))
+        raise click.Abort()
+    yasha.ENCODING = encoding
+
+    # Append include path of referenced templates
     include_path = [os.path.dirname(template.name)] + list(include_path)
 
     ex = {
@@ -161,7 +170,7 @@ def cli(template_variables, template, output, variables, extensions, include_pat
         if md:
             deps += os.linesep
             output_d = click.open_file(output.name + ".d", "wb")
-            output_d.write(deps.encode("utf-8"))
+            output_d.write(deps.encode(yasha.ENCODING))
 
     # Load Jinja and get template
     jinja = yasha.load_jinja(
@@ -169,7 +178,7 @@ def cli(template_variables, template, output, variables, extensions, include_pat
         not no_trim_blocks, not no_lstrip_blocks, keep_trailing_newline)
     if template.name == "<stdin>":
         stdin = template.read()
-        t = jinja.from_string(stdin.decode("utf-8"))
+        t = jinja.from_string(stdin.decode(yasha.ENCODING))
     else:
         t = jinja.get_template(os.path.basename(template.name))
 
@@ -184,4 +193,4 @@ def cli(template_variables, template, output, variables, extensions, include_pat
     # Render template and save it into output
     t_stream = t.stream(vardict)
     t_stream.enable_buffering(size=5)
-    t_stream.dump(output, encoding="utf-8")
+    t_stream.dump(output, encoding=yasha.ENCODING)

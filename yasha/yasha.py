@@ -27,6 +27,7 @@ from .parsers import *
 
 __version__ = "dev"
 
+ENCODING = 'utf-8'
 DEFAULT_PARSERS = [JsonParser(), YamlParser(), TomlParser(), SvdParser()]
 EXTENSIONS_FORMAT = [".py", ".j2ext", ".jinja-ext"]
 

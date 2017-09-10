@@ -55,9 +55,10 @@ Usage: yasha [OPTIONS] [TEMPLATE_VARIABLES]... TEMPLATE
 Options:
   -o, --output FILENAME         Place the rendered template into FILENAME.
   -v, --variables FILENAME      Read template variables from FILENAME. Built-
-                                in parsers are: JSON, TOML and YAML.
+                                in parsers are JSON, TOML and YAML.
   -e, --extensions FILENAME     Read template extensions from FILENAME. A
                                 Python file is expected.
+  -c, --encoding TEXT           Default is UTF-8.
   -I, --include_path DIRECTORY  Add DIRECTORY to the list of directories to be
                                 searched for the referenced templates, i.e.
                                 files imported via 'include', 'extends' and
@@ -243,9 +244,11 @@ sqlalchemy:
   url: {{ 'POSTGRES_URL' | env }}
 ```
 
+Params: default=None
+
 ### subprocess (Python >= 3.5)
 
-The `subprocess` filter allows you to spawn new processes, connect to their input/output/error pipes via CompletedProcess instance. Use in conjunction with `stdout` and `stderr` filters in a template like:
+The `subprocess` filter allows you to spawn new processes and connect to their output/error pipes via `CompletedProcess` instance. Use in conjunction with `stdout` and `stderr` filters in a template like:
 
 ```jinja
 os:
@@ -260,6 +263,20 @@ os:
   type: Debian
   version: 9.1
 ```
+
+Params: stdout=True, stderr=True, shell=True, check=True
+
+#### stdout (Python >= 3.5)
+
+Returns the captured stdout from the finished subprocess.
+
+Params: encoding=UTF-8
+
+#### stderr (Python >= 3.5)
+
+Returns the captured stderr from the finished subprocess.
+
+Params: encoding=UTF-8
 
 ## Tips and tricks
 

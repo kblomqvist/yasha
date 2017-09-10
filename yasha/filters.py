@@ -26,6 +26,7 @@ import os
 import sys
 import subprocess
 
+from .yasha import ENCODING
 
 def do_env(value, default=None):
     return os.environ.get(value, default)
@@ -41,12 +42,12 @@ def do_subprocess(args, stdout=True, stderr=True, shell=True, check=True):
     assert sys.version_info >= (3,5)
     return subprocess.run(**kwargs)
 
-def do_stdout(cp, encoding='UTF-8'):
+def do_stdout(cp, encoding=ENCODING):
     assert sys.version_info >= (3,5)
     assert isinstance(cp, subprocess.CompletedProcess)
     return cp.stdout.decode(encoding=encoding) if cp.stdout else None
 
-def do_stderr(cp, encoding='UTF-8'):
+def do_stderr(cp, encoding=ENCODING):
     assert sys.version_info >= (3,5)
     assert isinstance(cp, subprocess.CompletedProcess)
     return cp.stderr.decode(encoding=encoding) if cp.stderr else None

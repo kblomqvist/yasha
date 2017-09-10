@@ -38,6 +38,12 @@ def test_simple_variable(t):
     assert out == b'True, foo'
 
 
+def test_boolean(t):
+    t.write('{{ var is sameas false }}, {{ var }}')
+    out = check_output(['yasha', '--var', 'False', '-o-', str(t)])
+    assert out == b'True, False'
+
+
 def test_list(t):
     t.write('{{ var is sequence }}, {{ var | join }}')
     out = check_output(['yasha', '--var', "['foo', 'bar', 'baz']", '-o-', str(t)])

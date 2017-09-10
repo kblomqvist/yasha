@@ -5,7 +5,8 @@ python:
   - "3.6"
 
 install:
-  - pip install .
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install --user scons; fi
+  - pip install --user .
 
 script:
   - py.test -v tests

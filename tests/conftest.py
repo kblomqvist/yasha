@@ -31,3 +31,8 @@ SCRIPT_PATH = path.dirname(path.realpath(__file__))
 @pytest.fixture
 def fixtures_dir():
     return path.join(SCRIPT_PATH, "fixtures")
+
+
+@pytest.fixture()
+def template(tmpdir):
+    return tmpdir.join('template.j2')

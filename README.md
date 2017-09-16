@@ -248,12 +248,12 @@ Params: default=None
 
 ### subprocess (Python >= 3.5)
 
-The `subprocess` filter allows you to spawn new processes and connect to their output/error pipes via `CompletedProcess` instance. Use in conjunction with `stdout` and `stderr` filters in a template like:
+The `subprocess` filter allows you to spawn new processes and connect to their stdout. Use in a template like:
 
 ```jinja
 os:
-  type: {{ "lsb_release -a | grep Distributor | awk '{print $3}'" | subprocess | stdout }}
-  version: {{ 'cat /etc/debian_version' | subprocess | stdout }}
+  type: {{ "lsb_release -a | grep Distributor | awk '{print $3}'" | subprocess }}
+  version: {{ 'cat /etc/debian_version' | subprocess }}
 ```
 
 producing:
@@ -264,19 +264,7 @@ os:
   version: 9.1
 ```
 
-Params: stdout=True, stderr=True, shell=True, check=True
-
-### stdout (Python >= 3.5)
-
-Returns the captured stdout for the finished `subprocess` filter.
-
-Params: encoding=UTF-8
-
-### stderr (Python >= 3.5)
-
-Returns the captured stderr for the finished `subprocess` filter.
-
-Params: encoding=UTF-8
+Params: encoding=UTF-8, check=True, strip=True
 
 ## Tips and tricks
 

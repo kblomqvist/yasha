@@ -23,11 +23,13 @@ THE SOFTWARE.
 """
 
 import os
-import pytest
-from subprocess import call, check_output
+import sys
+from subprocess import check_output
 
-def test_env(tmpdir):
-    template = tmpdir.join('template.j2')
+import pytest
+
+
+def test_env(template):
     template.write("{{ 'POSTGRES_URL' | env('postgresql://localhost') }}")
 
     out = check_output(['yasha', str(template), '-o-'])
@@ -36,3 +38,11 @@ def test_env(tmpdir):
     os.environ['POSTGRES_URL'] = 'postgresql://127.0.0.1'
     out = check_output(['yasha', str(template), '-o-'])
     assert out == b'postgresql://127.0.0.1'
+
+
+@pytest.mark.skipif(sys.version_info < (3,5),
+                    reason="Requires Python>=3.5")
+def test_subprocess(template):
+	template.write('{{ "uname" | subprocess }}')
+	out = check_output(('yasha', str(template), '-o-'))
+	assert out.decode() == os.uname().sysname

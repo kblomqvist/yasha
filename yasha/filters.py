@@ -26,35 +26,32 @@ import os
 import sys
 import subprocess
 
+from click import ClickException
 from .yasha import ENCODING
 
 def do_env(value, default=None):
     return os.environ.get(value, default)
 
-def do_subprocess(args, stdout=True, stderr=True, shell=True, check=True):
+def do_subprocess(cmd, encoding=ENCODING, check=True, strip=True):
+    assert sys.version_info >= (3,5)
     kwargs = dict(
-        args=args,
-        stdout=subprocess.PIPE if stdout else None,
-        stderr=subprocess.PIPE if stderr else None,
-        shell=shell,
-        check=check,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True,
+        check=False,
     )
-    assert sys.version_info >= (3,5)
-    return subprocess.run(**kwargs)
-
-def do_stdout(cp, encoding=ENCODING):
-    assert sys.version_info >= (3,5)
-    assert isinstance(cp, subprocess.CompletedProcess)
-    return cp.stdout.decode(encoding=encoding) if cp.stdout else None
-
-def do_stderr(cp, encoding=ENCODING):
-    assert sys.version_info >= (3,5)
-    assert isinstance(cp, subprocess.CompletedProcess)
-    return cp.stderr.decode(encoding=encoding) if cp.stderr else None
+    result = subprocess.run(cmd, **kwargs)
+    if result.returncode and check:
+        errno = result.returncode
+        error = result.stderr.decode().strip()
+        msg = "Command '{}' returned non-zero exit status {}\n{}"
+        raise ClickException(msg.format(cmd, errno, error))
+    if not strip:
+        return result.stdout.decode(encoding=encoding)
+    else:
+        return result.stdout.decode(encoding=encoding).strip()
 
 FILTERS = {
     'env': do_env,
     'subprocess': do_subprocess,
-    'stdout': do_stdout,
-    'stderr': do_stderr,
 }

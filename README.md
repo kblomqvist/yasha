@@ -268,7 +268,7 @@ os:
   version: {{ 'cat /etc/debian_version' | shell }}
 ```
 
-producing:
+to produce something similar like:
 
 ```yaml
 os:
@@ -285,6 +285,12 @@ The `subprocess` filter allows you to spawn new processes, but unlike `shell` it
 ```jinja
 {% set cp = "uname" | subprocess %}
 platform: {{ cp.stdout.decode() }}
+```
+
+to produce something similar like:
+
+```
+platform: Linux
 ```
 
 Params: stdout=True, stderr=True, shell=True, check=True

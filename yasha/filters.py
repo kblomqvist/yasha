@@ -40,12 +40,17 @@ def do_subprocess(cmd, stdout=True, stderr=True, shell=True, check=True):
         shell=shell,
         check=False,
     )
+
+    if sys.version_info >= (3,6):
+        kwargs['encoding'] = ENCODING
+
     result = subprocess.run(cmd, **kwargs)
     if check and result.returncode:
         errno = result.returncode
         error = result.stderr.decode().strip()
         msg = "Command '{}' returned non-zero exit status {}\n{}"
         raise ClickException(msg.format(cmd, errno, error))
+
     return result
 
 def do_shell(cmd, encoding=ENCODING, check=True, strip=True):

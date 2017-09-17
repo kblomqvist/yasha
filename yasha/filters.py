@@ -32,19 +32,25 @@ from .yasha import ENCODING
 def do_env(value, default=None):
     return os.environ.get(value, default)
 
-def do_subprocess(cmd, stdout=True, stderr=True, shell=True, check=True):
+def do_subprocess(cmd, stdout=True, stderr=True, check=True, timeout=2):
     assert sys.version_info >= (3,5)
     kwargs = dict(
         stdout=subprocess.PIPE if stdout else None,
         stderr=subprocess.PIPE if stderr else None,
-        shell=shell,
+        shell=True,
         check=False,
+        timeout=timeout,
     )
 
     if sys.version_info >= (3,6):
         kwargs['encoding'] = ENCODING
 
-    result = subprocess.run(cmd, **kwargs)
+    try:
+        result = subprocess.run(cmd, **kwargs)
+    except TimeoutExpired:
+        msg = "Command '{}' timed out after waiting for {} seconds"
+        raise ClickException(msg.format(cmd, timeout))
+
     if check and result.returncode:
         errno = result.returncode
         error = result.stderr.decode().strip()
@@ -53,12 +59,12 @@ def do_subprocess(cmd, stdout=True, stderr=True, shell=True, check=True):
 
     return result
 
-def do_shell(cmd, encoding=ENCODING, check=True, strip=True):
-    result = do_subprocess(cmd, check=check)
+def do_shell(cmd, strip=True, check=True, timeout=2):
+    result = do_subprocess(cmd, check=check, timeout=timeout)
     if not strip:
-        return result.stdout.decode(encoding=encoding)
+        return result.stdout.decode(encoding=ENCODING)
     else:
-        return result.stdout.decode(encoding=encoding).strip()
+        return result.stdout.decode(encoding=ENCODING).strip()
 
 FILTERS = {
     'env': do_env,

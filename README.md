@@ -276,7 +276,7 @@ os:
   version: 9.1
 ```
 
-Params: encoding=UTF-8, check=True, strip=True
+Params: strip=True, check=True, timeout=2
 
 ### subprocess (Python >= 3.5)
 
@@ -293,7 +293,7 @@ to produce something similar like:
 platform: Linux
 ```
 
-Params: stdout=True, stderr=True, shell=True, check=True
+Params: stdout=True, stderr=True, check=True, timeout=2
 
 ## Tips and tricks
 

@@ -32,35 +32,28 @@ from .yasha import ENCODING
 def do_env(value, default=None):
     return os.environ.get(value, default)
 
-def do_shell(cmd, encoding=ENCODING, check=True, strip=True):
+def do_subprocess(cmd, stdout=True, stderr=True, shell=True, check=True):
     assert sys.version_info >= (3,5)
     kwargs = dict(
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True,
+        stdout=subprocess.PIPE if stdout else None,
+        stderr=subprocess.PIPE if stderr else None,
+        shell=shell,
         check=False,
     )
     result = subprocess.run(cmd, **kwargs)
-    if result.returncode and check:
+    if check and result.returncode:
         errno = result.returncode
         error = result.stderr.decode().strip()
         msg = "Command '{}' returned non-zero exit status {}\n{}"
         raise ClickException(msg.format(cmd, errno, error))
+    return result
+
+def do_shell(cmd, encoding=ENCODING, check=True, strip=True):
+    result = do_subprocess(cmd, check=check)
     if not strip:
         return result.stdout.decode(encoding=encoding)
     else:
         return result.stdout.decode(encoding=encoding).strip()
-
-def do_subprocess(args, stdout=True, stderr=True, shell=True, check=True):
-    assert sys.version_info >= (3,5)
-    kwargs = dict(
-        args=args,
-        stdout=subprocess.PIPE if stdout else None,
-        stderr=subprocess.PIPE if stderr else None,
-        shell=shell,
-        check=check,
-    )
-    return subprocess.run(**kwargs)
 
 FILTERS = {
     'env': do_env,

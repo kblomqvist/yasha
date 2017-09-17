@@ -42,7 +42,15 @@ def test_env(template):
 
 @pytest.mark.skipif(sys.version_info < (3,5),
                     reason="Requires Python>=3.5")
+def test_shell(template):
+    template.write('{{ "uname" | shell }}')
+    out = check_output(('yasha', str(template), '-o-'))
+    assert out.decode() == os.uname().sysname
+
+
+@pytest.mark.skipif(sys.version_info < (3,5),
+                    reason="Requires Python>=3.5")
 def test_subprocess(template):
-	template.write('{{ "uname" | subprocess }}')
-	out = check_output(('yasha', str(template), '-o-'))
-	assert out.decode() == os.uname().sysname
+    template.write('{% set return = "uname" | subprocess %}{{ return.stdout.decode() }}')
+    out = check_output(('yasha', str(template), '-o-'))
+    assert out.decode().strip() == os.uname().sysname

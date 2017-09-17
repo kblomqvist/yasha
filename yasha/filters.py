@@ -32,7 +32,7 @@ from .yasha import ENCODING
 def do_env(value, default=None):
     return os.environ.get(value, default)
 
-def do_subprocess(cmd, encoding=ENCODING, check=True, strip=True):
+def do_shell(cmd, encoding=ENCODING, check=True, strip=True):
     assert sys.version_info >= (3,5)
     kwargs = dict(
         stdout=subprocess.PIPE,
@@ -51,7 +51,19 @@ def do_subprocess(cmd, encoding=ENCODING, check=True, strip=True):
     else:
         return result.stdout.decode(encoding=encoding).strip()
 
+def do_subprocess(args, stdout=True, stderr=True, shell=True, check=True):
+    assert sys.version_info >= (3,5)
+    kwargs = dict(
+        args=args,
+        stdout=subprocess.PIPE if stdout else None,
+        stderr=subprocess.PIPE if stderr else None,
+        shell=shell,
+        check=check,
+    )
+    return subprocess.run(**kwargs)
+
 FILTERS = {
     'env': do_env,
+    'shell': do_shell,
     'subprocess': do_subprocess,
 }

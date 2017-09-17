@@ -78,7 +78,7 @@ Options:
 
 ## Template variables
 
-Template variables can be defined in a separate file. Yasha supports [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html) and [TOML](https://github.com/toml-lang/toml):
+Template variables can be defined in a separate file. [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html) and [TOML](https://github.com/toml-lang/toml) are supported:
 
 ```bash
 yasha -v variables.yaml template.j2
@@ -87,10 +87,22 @@ yasha -v variables.yaml template.j2
 Additionally you may define variables as part of the command-line call, e.g.
 
 ```bash
-yasha --foo=bar template.j2
+yasha -v variables.yaml --foo=bar template.j2
 ```
 
-A variable defined in this way can be Python literal or container kind, and it will overwrite a variable defined in a separate variable file.
+A variable defined via command-line will overwrite a variable defined in file. The variable given this way can also be a string presentation of Python object (i.e. literal):
+
+```bash
+echo "{{ list | join }}" | yasha --list="['foo', 'bar', 'baz']" -
+foobarbaz
+```
+
+The following is also interpreted as a list:
+
+```bash
+echo "{{ list | join }}" | yasha --list=foo,bar,baz -
+foobarbaz
+```
 
 ### Automatic variable file look up
 
@@ -246,14 +258,14 @@ sqlalchemy:
 
 Params: default=None
 
-### subprocess (Python >= 3.5)
+### shell (Python >= 3.5)
 
-The `subprocess` filter allows you to spawn new processes and connect to their stdout. Use in a template like:
+The `shell` filter allows you to spawn new processes and connect to their stdout. Use in a template like:
 
 ```jinja
 os:
-  type: {{ "lsb_release -a | grep Distributor | awk '{print $3}'" | subprocess }}
-  version: {{ 'cat /etc/debian_version' | subprocess }}
+  type: {{ "lsb_release -a | grep Distributor | awk '{print $3}'" | shell }}
+  version: {{ 'cat /etc/debian_version' | shell }}
 ```
 
 producing:
@@ -265,6 +277,17 @@ os:
 ```
 
 Params: encoding=UTF-8, check=True, strip=True
+
+### subprocess (Python >= 3.5)
+
+The `subprocess` filter allows you to spawn new processes, but unlike `shell` returns a `CompletedProcess` instance. Use in a template like:
+
+```jinja
+{% set return = "uname" | subprocess %}
+platform: {{ return.stdout.decode() }}
+```
+
+Params: stdout=True, stderr=True, shell=True, check=True
 
 ## Tips and tricks
 

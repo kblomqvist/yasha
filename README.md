@@ -343,13 +343,13 @@ yasha --foo=foo,bar,baz template.j2
 
 Other possible literals are:
 
-`-1`, `0`, `1`, `2` (an integer)
-`2+3j`, `0+5j`, `2j` (a complex number)
-`3.5`, `-2.7` (a float)
-`(1,)`, `(1, 2)` (a tuple)
-`{'a': 2}` (a dict)
-`{1, 2, 3}` (a set)
-`True`, `False` (boolean)
+- `-1`, `0`, `1`, `2` (an integer)
+- `2+3j`, `0+5j` (a complex number)
+- `3.5`, `-2.7` (a float)
+- `(1,)`, `(1, 2)` (a tuple)
+- `{'a': 2}` (a dict)
+- `{1, 2, 3}` (a set)
+- `True`, `False` (boolean)
 
 ## Build automation
 

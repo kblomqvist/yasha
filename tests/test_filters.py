@@ -28,17 +28,20 @@ import subprocess
 
 import pytest
 
-def check_output(*args, stdin=None):
-    kwargs = dict(
+def check_output(*args, **kwargs):
+    params = dict(
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        input=stdin.encode() if stdin else None,
         check=False,
     )
+    if 'stdin' in kwargs:
+        stdin = kwargs['stdin']
+        params['input'] = stdin.encode() if stdin else None
+
     if sys.version_info < (3, 5):
         return (subprocess.check_output(args), 0)
     else:
-        cp = subprocess.run(args, **kwargs)
+        cp = subprocess.run(args, **params)
         return (cp.stdout, cp.returncode)
 
 

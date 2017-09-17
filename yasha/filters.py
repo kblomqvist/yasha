@@ -42,9 +42,6 @@ def do_subprocess(cmd, stdout=True, stderr=True, check=True, timeout=2):
         timeout=timeout,
     )
 
-    if sys.version_info >= (3,6):
-        kwargs['encoding'] = ENCODING
-
     try:
         result = subprocess.run(cmd, **kwargs)
     except subprocess.TimeoutExpired:

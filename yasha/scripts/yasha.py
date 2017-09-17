@@ -82,7 +82,7 @@ def print_version(ctx, param, value):
 @click.option("--variables", "-v", type=click.File("rb"), help="Read template variables from FILENAME. Built-in parsers are JSON, TOML and YAML.")
 @click.option("--extensions", "-e", type=click.File("rb"), help="Read template extensions from FILENAME. A Python file is expected.")
 @click.option("--encoding", "-c", default=yasha.ENCODING, help="Default is UTF-8.")
-@click.option("--include_path", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for the referenced templates, i.e. files imported via 'include', 'extends' and 'import' statements.")
+@click.option("--include_path", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for the referenced templates.")
 @click.option("--no-variable-file", is_flag=True, help="Omit template variable file.")
 @click.option("--no-extension-file", is_flag=True, help="Omit template extension file.")
 @click.option("--no-trim-blocks", is_flag=True, help="Load Jinja with trim_blocks=False.")
@@ -100,11 +100,11 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
     Template variables can be defined in a separate file or
     given as part of the command-line call, e.g.
 
-        yasha --hello=world -o hello.txt hello.j2
+        yasha --hello=world -o letter.txt letter.j2
 
     defines a variable 'hello' for a template like:
     
-        Hello {{ hello }}!
+        Hello {{ hello }} !
     """
 
     # Set the encoding of the template file

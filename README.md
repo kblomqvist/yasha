@@ -46,11 +46,11 @@ Usage: yasha [OPTIONS] [TEMPLATE_VARIABLES]... TEMPLATE
   Template variables can be defined in a separate file or given as part of
   the command-line call, e.g.
 
-      yasha --hello=world -o hello.txt hello.j2
+      yasha --hello=world -o letter.txt letter.j2
 
   defines a variable 'hello' for a template like:
 
-      Hello {{ hello }}!
+      Hello {{ hello }} !
 
 Options:
   -o, --output FILENAME         Place the rendered template into FILENAME.
@@ -60,9 +60,7 @@ Options:
                                 Python file is expected.
   -c, --encoding TEXT           Default is UTF-8.
   -I, --include_path DIRECTORY  Add DIRECTORY to the list of directories to be
-                                searched for the referenced templates, i.e.
-                                files imported via 'include', 'extends' and
-                                'import' statements.
+                                searched for the referenced templates.
   --no-variable-file            Omit template variable file.
   --no-extension-file           Omit template extension file.
   --no-trim-blocks              Load Jinja with trim_blocks=False.
@@ -90,19 +88,7 @@ Additionally you may define variables as part of the command-line call, e.g.
 yasha -v variables.yaml --foo=bar template.j2
 ```
 
-A variable defined via command-line will overwrite a variable defined in file. The variable given this way can also be a string presentation of Python object (i.e. literal):
-
-```bash
-echo "{{ list | join }}" | yasha --list="['foo', 'bar', 'baz']" -
-foobarbaz
-```
-
-The following is also interpreted as a list:
-
-```bash
-echo "{{ list | join }}" | yasha --list=foo,bar,baz -
-foobarbaz
-```
+A variable defined via command-line will overwrite a variable defined in file.
 
 ### Automatic variable file look up
 
@@ -340,6 +326,30 @@ Yasha can render templates from STDIN to STDOUT. For example, the below command-
 ```bash
 cat template.j2 | yasha -v variables.yaml -
 ```
+
+### Python literals as part of the command-line call
+
+Variables given as part of the command-line call can be Python literals, e.g. a list would be defined like this
+
+```
+yasha --foo="['foo', 'bar', 'baz']" template.j2
+```
+
+The following is also interpreted as a list
+
+```
+yasha --foo=foo,bar,baz template.j2
+```
+
+Other possible literals are:
+
+`-1`, `0`, `1`, `2` (an integer)
+`2+3j`, `0+5j`, `2j` (a complex number)
+`3.5`, `-2.7` (a float)
+`(1,)`, `(1, 2)` (a tuple)
+`{'a': 2}` (a dict)
+`{1, 2, 3}` (a set)
+`True`, `False` (boolean)
 
 ## Build automation
 

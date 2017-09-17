@@ -47,7 +47,7 @@ def do_subprocess(cmd, stdout=True, stderr=True, check=True, timeout=2):
 
     try:
         result = subprocess.run(cmd, **kwargs)
-    except TimeoutExpired:
+    except subprocess.TimeoutExpired:
         msg = "Command '{}' timed out after waiting for {} seconds"
         raise ClickException(msg.format(cmd, timeout))
 

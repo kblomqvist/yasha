@@ -280,7 +280,7 @@ Params: encoding=UTF-8, check=True, strip=True
 
 ### subprocess (Python >= 3.5)
 
-The `subprocess` filter allows you to spawn new processes, but unlike `shell` it returns a `CompletedProcess` instance. Use in a template like:
+The `subprocess` filter allows you to spawn new processes, but unlike `shell` it returns a CompletedProcess instance, or CalledProcessError if check is set False. Use in a template like:
 
 ```jinja
 {% set cp = "uname" | subprocess %}

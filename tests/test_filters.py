@@ -24,45 +24,65 @@ THE SOFTWARE.
 
 import os
 import sys
-from subprocess import check_output
+import subprocess
 
 import pytest
+
+def check_output(*args, stdin=None):
+    kwargs = dict(
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        input=stdin.encode() if stdin else None,
+        check=False,
+    )
+    if sys.version_info < (3, 5):
+        return (subprocess.check_output(args), 0)
+    else:
+        cp = subprocess.run(args, **kwargs)
+        return (cp.stdout, cp.returncode)
 
 
 def test_env(template):
     template.write("{{ 'POSTGRES_URL' | env('postgresql://localhost') }}")
 
-    out = check_output(['yasha', str(template), '-o-'])
+    out, retcode = check_output('yasha', str(template), '-o-')
     assert out == b'postgresql://localhost'
 
     os.environ['POSTGRES_URL'] = 'postgresql://127.0.0.1'
-    out = check_output(['yasha', str(template), '-o-'])
+    out, retcode = check_output('yasha', str(template), '-o-')
     assert out == b'postgresql://127.0.0.1'
 
 
 @pytest.mark.skipif(sys.version_info < (3,5), reason="Requires Python>=3.5")
-def test_shell(template):
-    template.write('{{ "uname" | shell }}')
-    out = check_output(('yasha', str(template), '-o-'))
+def test_shell():
+    template = '{{ "uname" | shell }}'
+    out, retcode = check_output('yasha', '-', stdin=template)
     assert out.decode() == os.uname().sysname
 
 
 @pytest.mark.skipif(sys.version_info < (3,5), reason="Requires Python>=3.5")
-def test_subprocess(template):
-    template.write('{% set return = "uname" | subprocess %}{{ return.stdout.decode() }}')
-    out = check_output(('yasha', str(template), '-o-'))
+def test_subprocess():
+    template = (
+        '{% set r = "uname" | subprocess %}'
+        '{{ r.stdout.decode() }}'
+    )
+    out, retcode = check_output('yasha', '-', stdin=template)
     assert out.decode().strip() == os.uname().sysname
 
 
 @pytest.mark.skipif(sys.version_info < (3,5), reason="Requires Python>=3.5")
-def test_subprocess_unknown_cmd(template):
-    template.write('{{ "unknown_cmd" | subprocess }}')
-    # out = check_output(('yasha', str(template), '-o-'))
-    # assert 'unknown_cmd: not found' in out.decode()
+def test_subprocess_with_unknown_cmd():
+    template = '{{ "unknown_cmd" | subprocess }}'
+    out, retcode = check_output('yasha', '-', stdin=template)
+    assert retcode != 0
+    assert b'unknown_cmd: not found' in out
 
 
 @pytest.mark.skipif(sys.version_info < (3,5), reason="Requires Python>=3.5")
-def test_subprocess_dont_check(template):
-    template.write('{% set r = "unknown_cmd" | subprocess(check=False) %}{{ r.returncode > 0 }}')
-    out = check_output(('yasha', str(template), '-o-'))
+def test_subprocess_with_unknown_cmd_while_check_is_false():
+    template = (
+        '{% set r = "unknown_cmd" | subprocess(check=False) %}'
+        '{{ r.returncode > 0 }}'
+    )
+    out, retcode = check_output('yasha', '-', stdin=template)
     assert out == b'True'

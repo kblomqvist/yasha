@@ -24,8 +24,11 @@ THE SOFTWARE.
 """
 
 import os
-import click
 import encodings
+
+import click
+from click import ClickException
+
 from .. import yasha
 
 
@@ -79,7 +82,7 @@ def print_version(ctx, param, value):
 @click.argument("template_variables", nargs=-1, type=click.UNPROCESSED)
 @click.argument("template", type=click.File("rb"))
 @click.option("--output", "-o", type=click.File("wb"), help="Place the rendered template into FILENAME.")
-@click.option("--variables", "-v", type=click.File("rb"), help="Read template variables from FILENAME. Built-in parsers are JSON, TOML and YAML.")
+@click.option("--variables", "-v", type=click.File("rb"), help="Read template variables from FILENAME. Built-in parsers are JSON, YAML and TOML.")
 @click.option("--extensions", "-e", type=click.File("rb"), help="Read template extensions from FILENAME. A Python file is expected.")
 @click.option("--encoding", "-c", default=yasha.ENCODING, help="Default is UTF-8.")
 @click.option("--include_path", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for the referenced templates.")
@@ -109,8 +112,8 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
 
     # Set the encoding of the template file
     if encodings.search_function(encoding) is None:
-        click.echo("Error: Unrecognized encoding name '{}'".format(encoding))
-        raise click.Abort()
+        msg = "Unrecognized encoding name '{}'"
+        raise ClickException(msg.format(encoding))
     yasha.ENCODING = encoding
 
     # Append include path of referenced templates
@@ -134,12 +137,10 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
             e = yasha.load_template_extensions(extensions)
             ex.update(e)
         except SyntaxError as e:
-            msg = e.msg[0].upper() + e.msg[1:]
+            msg = "Unable to load extensions\n{} ({}, line {})"
+            error = e.msg[0].upper() + e.msg[1:]
             filename = os.path.relpath(e.filename)
-            click.echo("Error: Cannot load extensions", nl=False, err=True)
-            click.echo(": {} ({}, line {})".format(
-                msg, filename, e.lineno), err=True)
-            raise click.Abort()
+            raise ClickException(msg.format(error, filename, e.lineno))
 
     # Default variable parsers
     ex["variable_parsers"] += yasha.DEFAULT_PARSERS

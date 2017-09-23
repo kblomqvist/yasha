@@ -237,20 +237,21 @@ class XmlParser(yasha.Parser):
 
 ### env
 
-Params: default=None
+Params: *default=None*
 
-Fetches environment variable in a template like:
+Reads environment variable in a template like
 
 ```jinja
 sqlalchemy:
   url: {{ 'POSTGRES_URL' | env }}
 ```
 
-### shell (Python >= 3.5)
+### shell
 
-Params: strip=True, check=True, timeout=2
+Params: *strip=True, check=True, timeout=2*  
+Requires: *Python >= 3.5*
 
-Allows you to spawn new processes and connect to their standard output. The output is decoded and stripped by default. Use in a template like:
+Allows to spawn new processes and connect to their standard output. The output is decoded and stripped by default.
 
 ```jinja
 os:
@@ -258,32 +259,29 @@ os:
   version: {{ 'cat /etc/debian_version' | shell }}
 ```
 
-to produce something similar like:
-
 ```yaml
 os:
   type: Debian
   version: 9.1
 ```
 
-### subprocess (Python >= 3.5)
+### subprocess
 
-Params: stdout=True, stderr=True, check=True, timeout=2
+Params: *stdout=True, stderr=True, check=True, timeout=2*  
+Requires: *Python >= 3.5*
 
-Allows you to spawn new processes, but unlike `shell` behaves like Python's standard library. Use in a template like:
+Allows to spawn new processes, but unlike `shell` behaves like Python's standard library.
 
 ```jinja
 {% set r = "uname" | subprocess(check=False) %}
-{# Returns either the instance of CompletedPorcess or CalledProcessError #}
+{# Returns either CompletedPorcess or CalledProcessError instance #}
 
 {% if r.returncode -%}
-  platform: Unkown
+  platform: Unknown
 {% else -%}
   platform: {{ r.stdout.decode() }}
 {%- endif %}
 ```
-
-to produce something similar like:
 
 ```yaml
 platform: Linux

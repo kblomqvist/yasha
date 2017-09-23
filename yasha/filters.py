@@ -57,7 +57,7 @@ def do_subprocess(cmd, stdout=True, stderr=True, check=True, timeout=2):
     return result
 
 def do_shell(cmd, strip=True, check=True, timeout=2):
-    result = do_subprocess(cmd, check=check, timeout=timeout)
+    result = do_subprocess(cmd, stderr=False, check=check, timeout=timeout)
     if not strip:
         return result.stdout.decode(encoding=ENCODING)
     else:

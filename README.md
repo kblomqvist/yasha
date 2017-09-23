@@ -235,6 +235,8 @@ class XmlParser(yasha.Parser):
 
 ### env
 
+Params: default=None
+
 Fetches environment variable in a template like:
 
 ```jinja
@@ -242,11 +244,13 @@ sqlalchemy:
   url: {{ 'POSTGRES_URL' | env }}
 ```
 
-Params: default=None
-
 ### shell (Python >= 3.5)
 
-The `shell` filter allows you to spawn new processes and connect to their stdout. Use in a template like:
+Params: strip=True, check=True, timeout=2
+
+The `shell` filter allows you to spawn new processes and connect to their stdout. The output is decoded and stripped by default.
+
+Use in a template like:
 
 ```jinja
 os:
@@ -262,24 +266,30 @@ os:
   version: 9.1
 ```
 
-Params: strip=True, check=True, timeout=2
-
 ### subprocess (Python >= 3.5)
 
-The `subprocess` filter allows you to spawn new processes, but unlike `shell` it returns a CompletedProcess instance, or CalledProcessError if check is set False. Use in a template like:
+Params: stdout=True, stderr=True, check=True, timeout=2
+
+The `subprocess` filter allows you to spawn new processes, but unlike `shell` it behaves like Python's standard library.
+
+Use in a template like:
 
 ```jinja
-{% set cp = "uname" | subprocess %}
-platform: {{ cp.stdout.decode() }}
+{# Returns either the instance of CompletedPorcess or CalledProcessError #}
+{% set r = "uname" | subprocess(check=False) %}
+
+{% if r.returncode -%}
+  platform: Unkown
+{% else -%}
+  platform: {{ r.stdout.decode() }}
+{%- endif %}
 ```
 
 to produce something similar like:
 
-```
+```yaml
 platform: Linux
 ```
-
-Params: stdout=True, stderr=True, check=True, timeout=2
 
 ## Tips and tricks
 

@@ -237,8 +237,6 @@ class XmlParser(yasha.Parser):
 
 ### env
 
-Params: *default=None*
-
 Reads environment variable in a template like
 
 ```jinja
@@ -246,10 +244,9 @@ sqlalchemy:
   url: {{ 'POSTGRES_URL' | env }}
 ```
 
-### shell
+Params: *default=None*
 
-Params: *strip=True, check=True, timeout=2*  
-Requires: *Python >= 3.5*
+### shell
 
 Allows to spawn new processes and connect to their standard output. The output is decoded and stripped by default.
 
@@ -265,10 +262,10 @@ os:
   version: 9.1
 ```
 
-### subprocess
-
-Params: *stdout=True, stderr=True, check=True, timeout=2*  
 Requires: *Python >= 3.5*
+Params: *strip=True, check=True, timeout=2*  
+
+### subprocess
 
 Allows to spawn new processes, but unlike `shell` behaves like Python's standard library.
 
@@ -286,6 +283,9 @@ Allows to spawn new processes, but unlike `shell` behaves like Python's standard
 ```yaml
 platform: Linux
 ```
+
+Requires: *Python >= 3.5*
+Params: *stdout=True, stderr=True, check=True, timeout=2*  
 
 ## Tips and tricks
 

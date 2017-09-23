@@ -170,6 +170,25 @@ def test_broken_extensions(tmpdir):
     assert b"Invalid syntax (foo.j2ext, line 1)" in e.value.output
 
 
+def test_broken_extensions_name_error(tmpdir):
+    from subprocess import CalledProcessError, STDOUT
+    tmpdir.chdir()
+
+    extensions = "asd"
+
+    tpl = tmpdir.join("foo.jinja")
+    tpl.write("")
+
+    ext = tmpdir.join("foo.j2ext")
+    ext.write(extensions)
+
+    with pytest.raises(CalledProcessError) as e:
+        cmd = ["yasha", "foo.jinja"]
+        check_output(cmd, stderr=STDOUT)
+    assert e.value.returncode == 1
+    assert b"name 'asd' is not defined" in e.value.output
+
+
 def test_stdin_and_out():
     cmd = ("echo -n \"foo\"", "|", "yasha", "-")
     out = check_output(cmd, shell=True)

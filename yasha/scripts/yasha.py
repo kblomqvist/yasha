@@ -136,6 +136,9 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
         try:
             e = yasha.load_template_extensions(extensions)
             ex.update(e)
+        except NameError as e:
+            msg = 'Unable to load extensions, {}'
+            raise ClickException(msg.format(e))
         except SyntaxError as e:
             msg = "Unable to load extensions\n{} ({}, line {})"
             error = e.msg[0].upper() + e.msg[1:]

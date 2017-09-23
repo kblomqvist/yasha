@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import distutils
 from xml.etree import ElementTree
 from . import parser
 
@@ -108,7 +107,7 @@ class SvdElement(object):
                     except ValueError:  # It has to be hex
                         value = int(value, 16)
                 elif key in self.props_to_boolean:
-                    value = distutils.util.strtobool(value)
+                    value = value.lower() in ("yes", "true", "t", "1")
 
             setattr(self, key, value)
 

@@ -262,8 +262,8 @@ os:
   version: 9.1
 ```
 
-Requires: *Python >= 3.5*
-Params: *strip=True, check=True, timeout=2*  
+Requires: *Python >= 3.5*  
+Params: *strip=True, check=True, timeout=2*
 
 ### subprocess
 
@@ -284,8 +284,8 @@ Allows to spawn new processes, but unlike `shell` behaves like Python's standard
 platform: Linux
 ```
 
-Requires: *Python >= 3.5*
-Params: *stdout=True, stderr=True, check=True, timeout=2*  
+Requires: *Python >= 3.5*  
+Params: *stdout=True, stderr=True, check=True, timeout=2*
 
 ## Tips and tricks
 

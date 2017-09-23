@@ -89,8 +89,6 @@ def test_cmake(clean):
         assert not path.isfile("../src/" + f)
 
 
-@pytest.mark.skipif(sys.version_info[0] > 2,
-                    reason="requires python2")
 def test_scons(clean):
     # First build
     out = check_output(["scons"])

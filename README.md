@@ -6,10 +6,10 @@
 Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest, a command-line call
 
 ```bash
-yasha -v variables.yaml template.j2
+yasha -v variables.yaml template.txt.j2
 ```
 
-will render `template.j2` into a new file named as `template`. See how the created file name is derived from the template name. The template itself remains unchanged.
+will render `template.txt.j2` into a new file named as `template.txt`. See how the created file name is derived from the template name. The template itself remains unchanged.
 
 The tool was originally written to generate code for the zinc.rs' [I/O register interface](http://zinc.rs/apidocs/ioreg/index.html) from the [CMSIS-SVD](https://www.keil.com/pack/doc/CMSIS/SVD/html/index.html) description file, and was used to interface with [the peripherals of Nordic nRF51](https://github.com/kblomqvist/yasha/tree/master/tests/fixtures) ARM Cortex-M processor-based microcontroller. Yasha has since evolved to be flexible enough to be used in any project where the code generation is needed. The tool allows extending Jinja by domain specific filters, tests and extensions, and it operates smoothly with the commonly used build automation software like Make, CMake and SCons.
 
@@ -101,13 +101,13 @@ template.yaml
 
 Because of automatic variable file look up, the command-line call
 
-```
+```bash
 yasha template.j2
 ```
 
 equals to
 
-```
+```bash
 yasha -v template.yaml template.j2
 ```
 
@@ -142,10 +142,12 @@ yasha source/foo.c.j2
 
 the variables defined in `foo.yaml` are used within both templates. This works because subfolders will be checked for the variable file until the current working directory is reached — `root` in this case. For instance, variables are looked for `foo.h.j2` in following order:
 
-1. `include/foo.h.yaml`
-2. `include/foo.yaml`
-3. `foo.h.yaml`
-4. `foo.yaml`
+```
+include/foo.h.yaml
+include/foo.yaml
+foo.h.yaml
+foo.yaml
+```
 
 ## Template extensions
 
@@ -181,13 +183,13 @@ template.py.yaml
 
 In this case the command-line call
 
-```
+```bash
 yasha template.py.j2
 ```
 
 equals to
 
-```
+```bash
 yasha -e template.py.py -v template.py.yaml template.py.j2
 ```
 
@@ -248,9 +250,7 @@ sqlalchemy:
 
 Params: strip=True, check=True, timeout=2
 
-The `shell` filter allows you to spawn new processes and connect to their stdout. The output is decoded and stripped by default.
-
-Use in a template like:
+Allows you to spawn new processes and connect to their standard output. The output is decoded and stripped by default. Use in a template like:
 
 ```jinja
 os:
@@ -270,13 +270,11 @@ os:
 
 Params: stdout=True, stderr=True, check=True, timeout=2
 
-The `subprocess` filter allows you to spawn new processes, but unlike `shell` it behaves like Python's standard library.
-
-Use in a template like:
+Allows you to spawn new processes, but unlike `shell` behaves like Python's standard library. Use in a template like:
 
 ```jinja
-{# Returns either the instance of CompletedPorcess or CalledProcessError #}
 {% set r = "uname" | subprocess(check=False) %}
+{# Returns either the instance of CompletedPorcess or CalledProcessError #}
 
 {% if r.returncode -%}
   platform: Unkown
@@ -341,13 +339,13 @@ cat template.j2 | yasha -v variables.yaml -
 
 Variables given as part of the command-line call can be Python literals, e.g. a list would be defined like this
 
-```
+```bash
 yasha --foo="['foo', 'bar', 'baz']" template.j2
 ```
 
 The following is also interpreted as a list
 
-```
+```bash
 yasha --foo=foo,bar,baz template.j2
 ```
 

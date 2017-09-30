@@ -47,9 +47,9 @@ class Builder(BuilderBase):
             if variables:
                 cli_command += ["-v", extensions.group(2)]
             if re.match(r"--no-variables", action):
-                cli_command += ["--no-variables"]
+                cli_command += ["--no-variable-file"]
             if re.match(r"--no-extensions", action):
-                cli_command += ["--no-extensions"]
+                cli_command += ["--no-extension-file"]
 
             runner = CliRunner()
             result = runner.invoke(cli.cli, cli_command)

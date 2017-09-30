@@ -1,0 +1,36 @@
+Version 4.0
+
+Major release, unreleased
+
+- Reverted the change introduced in version 3.0 to use uppercase `-E`
+  and `-V` option flags for extension and variable files. Also fixes
+  the SCons builder, which was still using lowercase options.
+- Template variables given as part of the command-line call are now
+  given in form of long option, i.e. `--foo bar` or `--foo=bar`,
+  instead of `-v foo bar`. All unknown long options which has a value
+  are interpreted as a template variable.
+- Python literals can be used in template variables given as part of
+  the call, e.g. `--foo "['bar', 'baz']"`.
+- Added new command-line option `-c` to set template encoding.
+  Default is UTF-8.
+- Added `env` built-in filter to read environment variable in template.
+- Added `shell` built-in filter to run a shell command and to connect
+  to its stdout in template. Requires Python >= 3.5.
+- Added `subprocess` built-in filter to spawn new processes, but unlike
+  shell it returns a CompletedProcess instance, or CalledProcessError
+  in case of error if check was set False. Requires Python >= 3.5.
+- Removed overwrite protection for variable/extension file. Caused more
+  confusion than protection.
+- Command-line option `--no-variables` is now `--no-variable-file`.
+- Command-line option `--no-extensions` is now `--no-extension-file`.
+- Fixed issue where command-line call `yasha ../template.j2` looked up
+  template companion files till root folder `/`.
+
+
+Version 3.1
+
+Minor release
+
+- Support JSON formatted variable files.
+- Prevent misoverwrition of the variable/extension file by the
+  rendered template.

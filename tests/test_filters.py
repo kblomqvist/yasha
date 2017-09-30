@@ -33,6 +33,7 @@ def check_output(*args, **kwargs):
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         check=False,
+        timeout=2,
     )
     if 'stdin' in kwargs:
         stdin = kwargs['stdin']
@@ -45,7 +46,8 @@ def check_output(*args, **kwargs):
         return (cp.stdout, cp.returncode)
 
 
-def test_env(template):
+def test_env(tmpdir):
+    template = tmpdir.join('template.j2')
     template.write("{{ 'POSTGRES_URL' | env('postgresql://localhost') }}")
 
     out, retcode = check_output('yasha', str(template), '-o-')

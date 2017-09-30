@@ -29,36 +29,46 @@ __version__ = "dev"
 
 ENCODING = 'utf-8'
 DEFAULT_PARSERS = [JsonParser(), YamlParser(), TomlParser(), SvdParser()]
-EXTENSIONS_FORMAT = [".py", ".j2ext", ".jinja-ext"]
+EXTENSIONS_FORMAT = (".py", ".j2ext", ".jinja-ext")
 
 
-def find_template_companion(template, format=[".yml", ".yaml"], start=os.curdir):
+def find_template_companion(template, extension, check=True):
     """
-    Returns the first found template companion file. This can be a variable
-    file or extension file.
+    Returns the first found template companion file
     """
-    if type(format) is str:
-        format = [format]
 
-    path = os.path.dirname(template)
-    path = os.path.join(start, path)
-    template = os.path.basename(template)
+    if check and not os.path.isfile(template):
+        return None # May be '<stdin>' (click)
+
+    template = os.path.abspath(template)
+    template_basename = os.path.basename(template).split('.')
+
+    current_path = os.path.dirname(template)
+    stop_path = os.path.commonprefix((os.getcwd(), current_path))
+    stop_path = os.path.dirname(stop_path) # Make sure to remove 'test_' from '/tmp/pytest-of-foo/pytest-111/test_'
+
+    token = template_basename[0] + '.'
 
     while True:
-        file = os.path.join(path, template)
-        file, filext = os.path.splitext(file)
+        for file in sorted(os.listdir(current_path)):
+            if not file.startswith(token):
+                continue
+            if not file.endswith(extension):
+                continue
+            file = file.split('.')
 
-        while filext:
-            for ext in format:
-                if os.path.isfile(file + ext):
-                    return os.path.relpath(file + ext, start)
-            file, filext = os.path.splitext(file)
+            for i in range(1, len(template_basename)):
+                if not template_basename[:-i] == file[:-1]:
+                    continue
 
-        if os.path.normpath(path) == start:
+                # Template companion file found!
+                return os.path.join(current_path, '.'.join(file))
+
+        if current_path == stop_path:
             break
-        if os.path.realpath(path) == "/":
-            break
-        path = os.path.join(path, "..")
+
+        # cd ..
+        current_path = os.path.split(current_path)[0]
 
     return None
 

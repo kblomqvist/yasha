@@ -59,15 +59,15 @@ def test_explicit_variable_file(tmpdir, varfile):
 
 
 def test_variable_file_lookup(tmpdir, vartpl):
-    # cwd/
-    #   sub/
+    # /cwd
+    #   /sub
     #     foo.c.j2
     cwd = tmpdir.chdir()
     tpl = tmpdir.mkdir('sub').join('foo.c.j2')
     tpl.write('int x = {{ int }};')
 
     # /cwd
-    #   sub/
+    #   /sub
     #     foo.c.j2
     #     foo.c.json    int = 2
     #     foo.json      int = 1

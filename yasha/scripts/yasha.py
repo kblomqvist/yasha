@@ -150,7 +150,7 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
 
     if not variables and not no_variable_file:
         filext = sum([p.file_extension for p in ex["variable_parsers"]], [])
-        path = yasha.find_template_companion(template.name, filext)
+        path = yasha.find_template_companion(template.name, tuple(filext))
         variables = click.open_file(path, "rb") if path else None
 
     if not output:

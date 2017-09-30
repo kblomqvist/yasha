@@ -1,33 +1,36 @@
 Version 4.0
+-----------
 
 Major release, unreleased
 
 - Reverted the change introduced in version 3.0 to use uppercase `-E`
-  and `-V` option flags for extension and variable files. Also fixes
+  and `-V` option flags for extension and variable files. Fixes
   the SCons builder, which was still using lowercase options.
-- Template variables given as part of the command-line call are now
-  given in form of long option, i.e. `--foo bar` or `--foo=bar`,
-  instead of `-v foo bar`. All unknown long options which has a value
-  are interpreted as a template variable.
-- Python literals can be used in template variables given as part of
-  the call, e.g. `yasha --foo "['bar', 'baz']" template.j2`.
+- Changed the way how template variables given as part of the
+  command-line call are defined. From this version all unknown long
+  options which has a proper value are interpreted as a template
+  variable, e.g. `--foo=bar` or `--foo bar`. Note that `-v foo bar` is
+  not working anymore.
+- Python literals can be used as part of the command-line call,
+  e.g. `yasha --foo "['bar', 'baz']" template.j2`.
 - Added new command-line option `-c` to set template encoding.
   Default is UTF-8.
-- Added `env` built-in filter to read environment variable in template.
-- Added `shell` built-in filter to run a shell command and to connect
-  to its stdout in template. Requires Python >= 3.5.
-- Added `subprocess` built-in filter to spawn new processes, but unlike
-  shell it returns a CompletedProcess instance, or CalledProcessError
-  in case of error if check was set False. Requires Python >= 3.5.
+- Added `env` template filter to read environment variable.
+- Added `shell` template filter to run a shell command. and to connect
+  its standard output. Requires Python >= 3.5.
+- Added `subprocess` template filter to spawn new processes, but unlike
+  shell a CompletedProcess instance is returned, or CalledProcessError
+  in case of error. Requires Python >= 3.5.
+- Fixed an issue where the command-line call `yasha ../template.j2`
+  searched for template companion files till root folder.
 - Removed the variable/extension file overwrite protection introduced
   in version 3.1. Caused more confusion than protection.
 - Command-line option `--no-variables` is now `--no-variable-file`.
 - Command-line option `--no-extensions` is now `--no-extension-file`.
-- Fixed an issue where command-line call `yasha ../template.j2`
-  searched for template companion files till root folder.
 
 
 Version 3.1
+-----------
 
 Minor release
 
@@ -37,6 +40,7 @@ Minor release
 
 
 Version 3.0
+-----------
 
 Major release
 

@@ -10,7 +10,7 @@ Major release, unreleased
   instead of `-v foo bar`. All unknown long options which has a value
   are interpreted as a template variable.
 - Python literals can be used in template variables given as part of
-  the call, e.g. `--foo "['bar', 'baz']"`.
+  the call, e.g. `yasha --foo "['bar', 'baz']" template.j2`.
 - Added new command-line option `-c` to set template encoding.
   Default is UTF-8.
 - Added `env` built-in filter to read environment variable in template.
@@ -19,12 +19,12 @@ Major release, unreleased
 - Added `subprocess` built-in filter to spawn new processes, but unlike
   shell it returns a CompletedProcess instance, or CalledProcessError
   in case of error if check was set False. Requires Python >= 3.5.
-- Removed overwrite protection for variable/extension file. Caused more
-  confusion than protection.
+- Removed the variable/extension file overwrite protection introduced
+  in version 3.1. Caused more confusion than protection.
 - Command-line option `--no-variables` is now `--no-variable-file`.
 - Command-line option `--no-extensions` is now `--no-extension-file`.
-- Fixed issue where command-line call `yasha ../template.j2` looked up
-  template companion files till root folder `/`.
+- Fixed an issue where command-line call `yasha ../template.j2`
+  searched for template companion files till root folder.
 
 
 Version 3.1
@@ -34,3 +34,15 @@ Minor release
 - Support JSON formatted variable files.
 - Prevent misoverwrition of the variable/extension file by the
   rendered template.
+
+
+Version 3.0
+
+Major release
+
+- Added support for so called inline variables given as part of the
+  command-line call using -v option. This change breaks backward
+  compatibility as variable and extension files are now given via
+  -V and -E, respectively.
+- Added --keep-trailing-newline option to load Jinja with
+  keep-trailing-newline=True.

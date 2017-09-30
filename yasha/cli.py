@@ -29,7 +29,7 @@ import encodings
 import click
 from click import ClickException
 
-from .. import yasha
+from . import yasha
 
 
 def parse_variables(file, parsers):

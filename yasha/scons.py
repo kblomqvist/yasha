@@ -27,7 +27,7 @@ import re
 from SCons.Builder import BuilderBase
 from click.testing import CliRunner
 
-from .scripts import yasha
+from . import cli
 
 
 class Builder(BuilderBase):
@@ -52,7 +52,7 @@ class Builder(BuilderBase):
                 cli_command += ["--no-extensions"]
 
             runner = CliRunner()
-            result = runner.invoke(yasha.cli, cli_command)
+            result = runner.invoke(cli.cli, cli_command)
 
             deps = result.output[:-1].split(" ")[2:]
             deps = [d.replace(src_dir, variant_dir) for d in deps]

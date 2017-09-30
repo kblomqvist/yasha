@@ -26,7 +26,7 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        yasha=yasha.scripts.yasha:cli
+        yasha=yasha.cli:cli
     ''',
     classifiers=[
         "Programming Language :: Python :: 2.7",

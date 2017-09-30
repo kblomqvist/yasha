@@ -46,7 +46,7 @@ Usage: yasha [OPTIONS] [TEMPLATE_VARIABLES]... TEMPLATE
   Template variables can be defined in a separate file or given as part of
   the command-line call, e.g.
 
-      yasha --hello=world -o letter.txt letter.j2
+      yasha --hello=world -o output.txt template.j2
 
   defines a variable 'hello' for a template like:
 
@@ -55,7 +55,7 @@ Usage: yasha [OPTIONS] [TEMPLATE_VARIABLES]... TEMPLATE
 Options:
   -o, --output FILENAME         Place the rendered template into FILENAME.
   -v, --variables FILENAME      Read template variables from FILENAME. Built-
-                                in parsers are JSON, TOML and YAML.
+                                in parsers are JSON, YAML and TOML.
   -e, --extensions FILENAME     Read template extensions from FILENAME. A
                                 Python file is expected.
   -c, --encoding TEXT           Default is UTF-8.
@@ -294,13 +294,13 @@ Params: *stdout=True, stderr=True, check=True, timeout=2*
 By default the referenced templates, i.e. files referred to via Jinja's [extends](http://jinja.pocoo.org/docs/dev/templates/#extends), [include](http://jinja.pocoo.org/docs/dev/templates/#include) or [import](http://jinja.pocoo.org/docs/dev/templates/#import) statements, are searched in relation to the template location. To extend the search path you can use the command-line option `-I` — like you would do with GCC to include C header files.
 
 ```bash
-yasha -I $HOME/jinja -v variables.yaml template.j2
+yasha -I ~/.yasha -v variables.yaml template.j2
 ```
-
-The above command-line call allows you, for example, to inherit your template from `$HOME/jinja/skeleton.j2` template
 
 ```jinja
 {% extends "skeleton.j2" %}
+{# Searched from ~/.yasha #}
+
 {% block main %}
     {{ super() }}
     ...

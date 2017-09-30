@@ -103,7 +103,7 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
     Template variables can be defined in a separate file or
     given as part of the command-line call, e.g.
 
-        yasha --hello=world -o letter.txt letter.j2
+        yasha --hello=world -o output.txt template.j2
 
     defines a variable 'hello' for a template like:
     

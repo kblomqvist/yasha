@@ -151,15 +151,19 @@ foo.yaml
 
 ## Template extensions
 
-You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file
+You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file (extensions.py).
 
 ```bash
 yasha -e extensions.py -v variables.yaml template.j2
 ```
 
+### Filters
+
 Functions intended to work as a filter have to be either prefixed by `filter_`
 
 ```python
+# extensions.py
+
 def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
 ```
@@ -175,9 +179,13 @@ FILTERS = {
 }
 ```
 
-Similarly test functions have to be either prefixed by `test_`
+### Tests
+
+Functions intended to work as a test have to be either prefixed by `test_`
 
 ```python
+# extensions.py
+
 def test_even(number):
     return number % 2 == 0
 ```
@@ -192,6 +200,8 @@ TESTS = {
     'even': to_even,
 }
 ```
+
+### Classes
 
 In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded and available within the template.
 

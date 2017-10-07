@@ -36,7 +36,8 @@ def find_template_companion(template, extension='', check=True):
     """
 
     if check and not os.path.isfile(template):
-        return None # May be '<stdin>' (click)
+        yield ''
+        return # May be '<stdin>' (click)
 
     template = os.path.abspath(template)
     template_basename = os.path.basename(template).split('.')

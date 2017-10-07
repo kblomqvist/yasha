@@ -23,8 +23,38 @@ THE SOFTWARE.
 
 """
 
-from .parser import Parser
-from .svd import SvdParser
-from .toml import TomlParser
-from .yaml import YamlParser
-from .json import JsonParser
+from .yasha import ENCODING
+
+def parse_json(file):
+    import json
+    variables = json.loads(file.read().decode(ENCODING))
+    return variables if variables else dict()
+
+def parse_yaml(file):
+    import yaml
+    variables = yaml.load(file)
+    return variables if variables else dict()
+
+def parse_toml(file):
+    import pytoml as toml
+    variables = toml.load(file)
+    return variables if variables else dict()
+
+def parse_svd(file):
+    """Parse CMSIS-SVD files"""
+    from .cmsis import SVDFile
+    svd = SVDFile(file)
+    svd.parse()
+    return {
+        "cpu": svd.cpu,
+        "device": svd.device,
+        "peripherals": svd.peripherals,
+    }
+
+PARSERS = {
+    'json': parse_json,
+    'yaml': parse_yaml,
+    'yml': parse_yaml,
+    'toml': parse_toml,
+    'svd': parse_svd,
+}

@@ -23,16 +23,14 @@ THE SOFTWARE.
 """
 
 import os
-from .parsers import *
+import ast
 
 __version__ = "dev"
 
 ENCODING = 'utf-8'
-DEFAULT_PARSERS = [JsonParser(), YamlParser(), TomlParser(), SvdParser()]
-EXTENSIONS_FORMAT = (".py", ".j2ext", ".jinja-ext")
+EXTENSION_FILE_FORMATS = ('py', 'yasha', 'j2ext', 'jinja-ext')
 
-
-def find_template_companion(template, extension, check=True):
+def find_template_companion(template, extension='', check=True):
     """
     Returns the first found template companion file
     """
@@ -56,21 +54,15 @@ def find_template_companion(template, extension, check=True):
             if not file.endswith(extension):
                 continue
             file = file.split('.')
-
             for i in range(1, len(template_basename)):
-                if not template_basename[:-i] == file[:-1]:
-                    continue
-
-                # Template companion file found!
-                return os.path.join(current_path, '.'.join(file))
+                if template_basename[:-i] == file[:-1]:
+                    yield os.path.join(current_path, '.'.join(file))
 
         if current_path == stop_path:
             break
 
         # cd ..
         current_path = os.path.split(current_path)[0]
-
-    return None
 
 
 def find_referenced_templates(template, search_path):
@@ -93,69 +85,42 @@ def find_referenced_templates(template, search_path):
     return [realpath(t) for t in referenced_templates if t is not None]
 
 
-def load_template_extensions(file):
-    """
-    Returns a dictionary of template extensions, which are
-    Jinja tests, filters and classes, template variable parsers
-    and variable preprocessors.
-    """
-    from jinja2.ext import Extension
-    import inspect
-
-    try:
-        from importlib.machinery import SourceFileLoader
-        module = SourceFileLoader("extensions", file.name).load_module()
-    except ImportError:  # Fallback to Python2
-        import imp
-        desc = (".py", "rb", imp.PY_SOURCE)
-        module = imp.load_module("extensions", file, file.name, desc)
-
-    e = {
-        "tests": [],
-        "filters": [],
-        "classes": [],
-        "variable_parsers": [],
-        "variable_preprocessors": [],
-    }
-
-    for attr in [getattr(module, x) for x in dir(module)]:
-        if inspect.isfunction(attr):
-            name = attr.__name__
-            if name.startswith("test_"):
-                e["tests"].append(attr)
-            elif name.startswith("filter_"):
-                e["filters"].append(attr)
-            elif name.startswith("preprocess_"):
-                e["variable_preprocessors"].append(attr)
-
-        elif inspect.isclass(attr):
-            if issubclass(attr, Extension):
-                e["classes"].append(attr)
-            elif issubclass(attr, Parser):
-                e["variable_parsers"].append(attr())
-
-    return e
+def parse_cli_variables(args):
+    variables = dict()
+    for i, arg in enumerate(args):
+        if arg[:2] != '--':
+            continue
+        if '=' in arg:
+            opt, val = arg[2:].split('=', 1)
+        else:
+            try:
+                if args[i+1] != '--':
+                    opt = arg[2:]
+                    val = args[i+1]
+            except IndexError:
+                break
+        try:
+            val = ast.literal_eval(val)
+        except ValueError:
+            pass
+        except SyntaxError:
+            pass
+        if isinstance(val, str) and ',' in val:
+            # Convert foo,bar,baz to list ['foo', 'bar', 'baz']
+            val = val.split(',')
+        variables[opt] = val
+    return variables
 
 
-def load_jinja(search_path, tests=[], filters=[], classes=[], trim=True, lstrip=True, keep_trailing_newline=False):
+def load_jinja(path, tests, filters, classes, trim_blocks, lstrip_blocks, keep_trailing_newline):
     from jinja2 import Environment, FileSystemLoader
     jinja = Environment(
-        loader=FileSystemLoader(search_path),
+        loader=FileSystemLoader(path),
         extensions=classes,
-        trim_blocks=trim,
-        lstrip_blocks=lstrip,
+        trim_blocks=trim_blocks,
+        lstrip_blocks=lstrip_blocks,
         keep_trailing_newline=keep_trailing_newline
     )
-
-    from .filters import FILTERS as BUILTIN_FILTERS
-    jinja.filters.update(BUILTIN_FILTERS)
-
-    for test in tests:
-        name = test.__name__.replace("test_", "")
-        jinja.tests[name] = test
-
-    for filt in filters:
-        name = filt.__name__.replace("filter_", "")
-        jinja.filters[name] = filt
-
+    jinja.tests.update(tests)
+    jinja.filters.update(filters)
     return jinja

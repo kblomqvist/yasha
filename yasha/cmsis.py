@@ -23,26 +23,8 @@ THE SOFTWARE.
 """
 
 from xml.etree import ElementTree
-from . import parser
 
-
-class SvdParser(parser.Parser):
-    """Yasha parser for CMSIS-SVD files"""
-    file_extension = [".svd"]
-
-    def parse(self, file):
-        svd = SvdFile(file)
-        svd.parse()
-
-        variables = {
-            "cpu": svd.cpu,
-            "device": svd.device,
-            "peripherals": svd.peripherals,
-        }
-        return variables
-
-
-class SvdFile():
+class SVDFile():
     """SVD File: Entry class to parse CMSIS-SVD file
 
     SVD = System View Description format

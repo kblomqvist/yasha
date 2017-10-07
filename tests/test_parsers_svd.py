@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 import pytest
 
-from yasha.parsers import svd
+from yasha import cmsis
 import xml.etree.ElementTree as et
 
 from os import path
@@ -32,7 +32,7 @@ from subprocess import call, check_output
 
 
 def test_peripheral_element():
-    periph = svd.SvdPeripheral(et.fromstring(
+    periph = cmsis.SvdPeripheral(et.fromstring(
         """
         <peripheral>
             <name>TIMER0</name>
@@ -65,7 +65,7 @@ def test_peripheral_element():
 
 
 def test_peripheral_interrupt_inheritance():
-    timer0 = svd.SvdPeripheral(et.fromstring(
+    timer0 = cmsis.SvdPeripheral(et.fromstring(
         """
         <peripheral>
             <name>TIMER0</name>
@@ -77,7 +77,7 @@ def test_peripheral_interrupt_inheritance():
         </peripheral>
         """
     ))
-    timer1 = svd.SvdPeripheral(et.fromstring(
+    timer1 = cmsis.SvdPeripheral(et.fromstring(
         """
         <peripheral derivedFrom="TIMER0">
             <name>TIMER1</name>
@@ -95,7 +95,7 @@ def test_peripheral_interrupt_inheritance():
     assert timer1.interrupts[0].name == "TIMER1_INT"
     assert timer1.interrupts[0].value == 43
 
-    timer1 = svd.SvdPeripheral(et.fromstring(
+    timer1 = cmsis.SvdPeripheral(et.fromstring(
         """
         <peripheral derivedFrom="TIMER0">
             <name>TIMER1</name>
@@ -111,7 +111,7 @@ def test_peripheral_interrupt_inheritance():
 
 
 def test_register_element():
-    reg = svd.SvdRegister(et.fromstring(
+    reg = cmsis.SvdRegister(et.fromstring(
         """
         <register>
             <name>TimerCtrl0</name>
@@ -145,7 +145,7 @@ def test_register_element():
 
 
 def test_register_folding_commaseparated_index():
-    r = svd.SvdRegister(et.fromstring(
+    r = cmsis.SvdRegister(et.fromstring(
         """
         <register>
             <dim>3</dim>
@@ -165,7 +165,7 @@ def test_register_folding_commaseparated_index():
 
 
 def test_register_folding_integerrange_index():
-    r = svd.SvdRegister(et.fromstring(
+    r = cmsis.SvdRegister(et.fromstring(
         """
         <register>
             <dim>4</dim>
@@ -189,7 +189,7 @@ def test_register_folding_integerrange_index():
 
 
 def test_register_is_dimensionless_after_fold_up():
-    r = svd.SvdRegister(et.fromstring(
+    r = cmsis.SvdRegister(et.fromstring(
         """
         <register>
             <dim>4</dim>
@@ -207,7 +207,7 @@ def test_register_is_dimensionless_after_fold_up():
 
 
 def test_field_element():
-    field = svd.SvdField(et.fromstring(
+    field = cmsis.SvdField(et.fromstring(
         """
         <field>
             <name>TIMER0</name>
@@ -240,7 +240,7 @@ def test_field_element():
     assert field.msb == 4
     assert field.bitRange == (4,1)
 
-    field = svd.SvdField(et.fromstring(
+    field = cmsis.SvdField(et.fromstring(
         """
         <field>
             <bitRange>[7:0]</bitRange>
@@ -256,7 +256,7 @@ def test_field_element():
     assert field.bitWidth == 8
 
 def test_svdfile():
-    file = svd.SvdFile(
+    file = cmsis.SVDFile(
         """
         <device>
             <peripherals>

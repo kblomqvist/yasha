@@ -157,19 +157,43 @@ You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-f
 yasha -e extensions.py -v variables.yaml template.j2
 ```
 
-Functions intended to work as a filter have to be prefixed by `filter_`. Similarly test functions have to be prefixed by `test_`, like shown below
+Functions intended to work as a filter have to be either prefixed by `filter_`
 
 ```python
-# extensions.py
-
 def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
+```
 
+or defined in `FILTERS` dictionary
+
+```python
+def to_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
+    return value.strftime(format)
+
+FILTERS = {
+    'datetimeformat': to_datetimeformat,
+}
+```
+
+Similarly test functions have to be either prefixed by `test_`
+
+```python
 def test_even(number):
     return number % 2 == 0
 ```
 
-In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded by Yasha and available within the template.
+of defined in `TESTS` dictionary
+
+```python
+def to_even(number):
+    return number % 2 == 0
+
+TESTS = {
+    'even': to_even,
+}
+```
+
+In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded and available within the template.
 
 ### Automatic extension file look up and sharing
 
@@ -197,7 +221,7 @@ This guarantees that there's no collision between the names of rendered template
 
 ### Custom variable file parser
 
-If none of the built-in parsers fit into your needs, it's possible to declare your own parser within the extension file. Note that all classes derived from `yasha.Parser` are considered as a custom parser and will be loaded. For example, below is shown an example XML file and a custom parser for that.
+If none of the built-in parsers fit into your needs, it's possible to declare your own parser within the extension file. For example, below is shown an example XML file and a custom parser for that.
 
 ```xml
 <persons>
@@ -213,24 +237,20 @@ If none of the built-in parsers fit into your needs, it's possible to declare yo
 ```
 
 ```python
-import yasha
 import xml.etree.ElementTree as et
 
-class XmlParser(yasha.Parser):
-    file_extension = [".xml"]
+def parse_xml(self, file):
+    tree = et.parse(file.name)
+    root = tree.getroot()
 
-    def parse(self, file):
-        tree = et.parse(file.name)
-        root = tree.getroot()
+    variables = {"persons": []}
+    for elem in root.iter("person"):
+        variables["persons"].append({
+            "name": elem.find("name").text,
+            "address": elem.find("address").text,
+        })
 
-        variables = {"persons": []}
-        for elem in root.iter("person"):
-            variables["persons"].append({
-                "name": elem.find("name").text,
-                "address": elem.find("address").text,
-            })
-
-        return variables  # Return value has to be dictionary
+    return variables  # Return value has to be dictionary
 ```
 
 ## Built-in filters
@@ -289,42 +309,6 @@ Params: *stdout=True, stderr=True, check=True, timeout=2*
 
 ## Tips and tricks
 
-### Append search path for referenced templates
-
-By default the referenced templates, i.e. files referred to via Jinja's [extends](http://jinja.pocoo.org/docs/dev/templates/#extends), [include](http://jinja.pocoo.org/docs/dev/templates/#include) or [import](http://jinja.pocoo.org/docs/dev/templates/#import) statements, are searched in relation to the template location. To extend the search path you can use the command-line option `-I` — like you would do with GCC to include C header files.
-
-```bash
-yasha -I ~/.yasha -v variables.yaml template.j2
-```
-
-```jinja
-{% extends "skeleton.j2" %}
-{# Searched from ~/.yasha #}
-
-{% block main %}
-    {{ super() }}
-    ...
-{% endblock %}
-```
-
-### Variable pre-processing before template rendering
-
-If you need to pre-process template variables before those are passed into the template, you can do that within an extension file by declaring a custom parser which "overwrites" (is used before) the default parser.
-
-```python
-import yasha
-
-def postprocess(variables):
-    variables["foo"] = "bar"  # foo should always be bar
-    return variables
-
-class YamlParser(yasha.YamlParser):
-
-    def parse(self, file):
-        variables = yasha.YamlParser.parse(self, file)
-        return postprocess(variables)
-```
-
 ### Working with STDIN and STDOUT
 
 Yasha can render templates from STDIN to STDOUT. For example, the below command-line call will render template from STDIN to STDOUT.
@@ -356,6 +340,55 @@ Other possible literals are:
 - `{'a': 2}` (a dict)
 - `{1, 2, 3}` (a set)
 - `True`, `False` (boolean)
+
+### Append search path for referenced templates
+
+By default the referenced templates, i.e. files referred to via Jinja's [extends](http://jinja.pocoo.org/docs/dev/templates/#extends), [include](http://jinja.pocoo.org/docs/dev/templates/#include) or [import](http://jinja.pocoo.org/docs/dev/templates/#import) statements, are searched in relation to the template location. To extend the search path you can use the command-line option `-I` — like you would do with GCC to include C header files.
+
+```bash
+yasha -v variables.yaml -I ~/.yasha template.j2
+```
+
+```jinja
+{% extends "skeleton.j2" %}
+{# Searched from ~/.yasha #}
+
+{% block main %}
+    {{ super() }}
+    ...
+{% endblock %}
+```
+
+### Variable pre-processing before template rendering
+
+If you need to pre-process template variables before those are passed into the template, you can do that within an extension file by wrapping the built-in parsers.
+
+```python
+# extensions.py
+
+from yasha.parsers import PARSERS
+
+def wrapper(parse):
+   def postprocess(file):
+       variables = parse(file)
+       variables['foo'] = 'bar' # foo should always be bar
+       return variables
+   return postprocess
+
+for name, function in PARSERS.items():
+    PARSERS[name] = wrapper(function)
+```
+
+### Loading Ansible filters
+
+Ansible is an IT automation platform that makes your applications and systems easier to deploy. It is based on Jinja2 and offers a large set of filters, which can be easily enabled via Yasha extensions.
+
+```python
+# extensions.py
+
+from ansible.plugins.filter.core import FilterModule
+FILTERS = FilterModule().filters()
+```
 
 ## Build automation
 

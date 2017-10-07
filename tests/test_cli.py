@@ -107,21 +107,17 @@ def test_custom_xmlparser(tmpdir):
     """
 
     extensions = """
-import yasha
-class XmlParser(yasha.Parser):
-    file_extension = [".xml"]
-
-    def parse(self, file):
-        import xml.etree.ElementTree as et
-        tree = et.parse(file.name)
-        root = tree.getroot()
-        vars = {"persons": []}
-        for elem in root.iter("person"):
-            vars["persons"].append({
-                "name": elem.find("name").text,
-                "address": elem.find("address").text,
-            })
-        return vars
+def parse_xml(file):
+    import xml.etree.ElementTree as et
+    tree = et.parse(file.name)
+    root = tree.getroot()
+    variables = {"persons": []}
+    for elem in root.iter("person"):
+        variables["persons"].append({
+            "name": elem.find("name").text,
+            "address": elem.find("address").text,
+        })
+    return variables
     """
 
     cwd = tmpdir.chdir()

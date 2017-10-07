@@ -23,12 +23,4 @@ THE SOFTWARE.
 
 """
 
-import pytoml as toml
-from . import parser
-
-
-class TomlParser(parser.Parser):
-    file_extension = [".toml"]
-
-    def parse(self, file):
-        return toml.load(file)
+TESTS = dict()

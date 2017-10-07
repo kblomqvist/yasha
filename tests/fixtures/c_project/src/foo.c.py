@@ -1,13 +1,9 @@
 import yasha
 
+def postprocess(variables):
+    variables["foo"] = "bar"  # foo should always be bar
+    return variables
 
-def postprocess(vars):
-    vars["foo"] = "bar"  # foo should always be bar
-    return vars
-
-
-class TomlParser(yasha.TomlParser):
-
-    def parse(self, file):
-        vars = yasha.TomlParser.parse(self, file)
-        return postprocess(vars)
+def parse_toml(file):
+	variables = yasha.parsers.parse_toml(file)
+	return postprocess(variables)

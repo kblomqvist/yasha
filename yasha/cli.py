@@ -30,49 +30,87 @@ import click
 from click import ClickException
 
 from . import yasha
-
-
-def parse_variables(file, parsers):
-    filename, filext = os.path.splitext(file.name)
-    for parser in parsers:
-        if filext in parser.file_extension:
-            return parser.parse(file)
-    return {}
-
-
-def parse_template_variables(args):
-    import ast
-    rv = []
-    for i, arg in enumerate(args):
-        if arg[:2] != '--':
-            continue
-        if '=' in arg:
-            opt, val = arg[2:].split('=', 1)
-        else:
-            try:
-                if args[i+1] != '--':
-                    opt = arg[2:]
-                    val = args[i+1]
-            except IndexError:
-                break
-        try:
-            val = ast.literal_eval(val)
-        except ValueError:
-            pass
-        except SyntaxError:
-            pass
-        if isinstance(val, str) and ',' in val:
-            # Convert foo,bar,baz to list ['foo', 'bar', 'baz']
-            val = val.split(',')
-        rv.append((opt, val))
-    return rv
-
+from .tests import TESTS
+from .filters import FILTERS
+from .classes import CLASSES
+from .parsers import PARSERS
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     click.echo(yasha.__version__)
     ctx.exit()
+
+def parse_variable_file(file):
+    try:
+        extension = os.path.splitext(file.name)[1][1:]
+        return PARSERS[extension](file)
+    except AttributeError:
+        return dict()
+    except KeyError:
+        msg = "Unkown variable file extension '.{}'"
+        raise ClickException(msg.format(extension))
+
+def load_python_module(file):
+    try:
+        from importlib.machinery import SourceFileLoader
+        loader = SourceFileLoader(file.name, file.name)
+        module = loader.load_module()
+    except ImportError:  # Fallback to Python2
+        import imp
+        desc = (".py", "rb", imp.PY_SOURCE)
+        module = imp.load_module(file.name, file, file.name, desc)
+    return module
+
+def load_extensions(file):
+    from jinja2.ext import Extension
+    import inspect
+
+    tests   = dict()
+    filters = dict()
+    parsers = dict()
+    classes = []
+
+    try:
+        module = load_python_module(file)
+    except NameError as e:
+        msg = 'Unable to load extensions, {}'
+        raise ClickException(msg.format(e))
+    except SyntaxError as e:
+        msg = "Unable to load extensions\n{} ({}, line {})"
+        error = e.msg[0].upper() + e.msg[1:]
+        filename = os.path.relpath(e.filename)
+        raise ClickException(msg.format(error, filename, e.lineno))
+
+    for attr in [getattr(module, x) for x in dir(module)]:
+        if inspect.isfunction(attr):
+            if attr.__name__.startswith('test_'):
+                name = attr.__name__[5:]
+                tests[name] = attr
+            if attr.__name__.startswith('filter_'):
+                name = attr.__name__[7:]
+                filters[name] = attr
+            if attr.__name__.startswith('parse_'):
+                name = attr.__name__[6:]
+                parsers[name] = attr
+        if inspect.isclass(attr):
+            if issubclass(attr, Extension):
+                classes.append(attr)
+
+    try:
+        TESTS.update(module.TESTS)
+    except AttributeError:
+        TESTS.update(tests)
+
+    try:
+        FILTERS.update(module.FILTERS)
+    except AttributeError:
+        FILTERS.update(filters)
+
+    try:
+        PARSERS.update(module.PARSERS)
+    except AttributeError:
+        PARSERS.update(parsers)
 
 
 @click.command(context_settings=dict(
@@ -119,39 +157,24 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
     # Append include path of referenced templates
     include_path = [os.path.dirname(template.name)] + list(include_path)
 
-    ex = {
-        "tests": [],
-        "filters": [],
-        "classes": [],
-        "variable_parsers": [],
-        "variable_preprocessors": [],
-    }
+    if not extensions or not variables:
+        template_companion = yasha.find_template_companion(template.name)
+        template_companion = list(template_companion)
 
     if not extensions and not no_extension_file:
-        filext = yasha.EXTENSIONS_FORMAT
-        path = yasha.find_template_companion(template.name, filext)
-        extensions = click.open_file(path, "rb") if path else None
+        for file in template_companion:
+            if file.endswith(yasha.EXTENSION_FILE_FORMATS):
+                extensions = click.open_file(file, "rb")
+                break
 
-    if extensions and not no_extension_file:
-        try:
-            e = yasha.load_template_extensions(extensions)
-            ex.update(e)
-        except NameError as e:
-            msg = 'Unable to load extensions, {}'
-            raise ClickException(msg.format(e))
-        except SyntaxError as e:
-            msg = "Unable to load extensions\n{} ({}, line {})"
-            error = e.msg[0].upper() + e.msg[1:]
-            filename = os.path.relpath(e.filename)
-            raise ClickException(msg.format(error, filename, e.lineno))
-
-    # Default variable parsers
-    ex["variable_parsers"] += yasha.DEFAULT_PARSERS
+    if extensions:
+        load_extensions(extensions)
 
     if not variables and not no_variable_file:
-        filext = sum([p.file_extension for p in ex["variable_parsers"]], [])
-        path = yasha.find_template_companion(template.name, tuple(filext))
-        variables = click.open_file(path, "rb") if path else None
+        for file in template_companion:
+            if file.endswith(tuple(PARSERS.keys())):
+                variables = click.open_file(file, "rb")
+                break
 
     if not output:
         if template.name == "<stdin>":
@@ -178,25 +201,29 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
             output_d = click.open_file(output.name + ".d", "wb")
             output_d.write(deps.encode(yasha.ENCODING))
 
-    # Load Jinja and get template
+    # Load Jinja
     jinja = yasha.load_jinja(
-        include_path, ex["tests"], ex["filters"], ex["classes"],
-        not no_trim_blocks, not no_lstrip_blocks, keep_trailing_newline)
+        path=include_path,
+        tests=TESTS,
+        filters=FILTERS,
+        classes=CLASSES,
+        trim_blocks=not no_trim_blocks,
+        lstrip_blocks=not no_lstrip_blocks,
+        keep_trailing_newline=keep_trailing_newline
+    )
+
+    # Get template
     if template.name == "<stdin>":
         stdin = template.read()
         t = jinja.from_string(stdin.decode(yasha.ENCODING))
     else:
         t = jinja.get_template(os.path.basename(template.name))
 
-    # Finally parse variables and render the template
-    vardict = {}
-    if variables and not no_variable_file:
-        vardict.update(parse_variables(variables, ex["variable_parsers"]))
-    for preprocessor in ex["variable_preprocessors"]:
-        vardict = preprocessor(vardict)
-    vardict.update(dict(parse_template_variables(template_variables)))
+    # Parse variables
+    context = parse_variable_file(variables)
+    context.update(yasha.parse_cli_variables(template_variables))
 
-    # Render template and save it into output
-    t_stream = t.stream(vardict)
+    # Finally render template and save it
+    t_stream = t.stream(context)
     t_stream.enable_buffering(size=5)
     t_stream.dump(output, encoding=yasha.ENCODING)

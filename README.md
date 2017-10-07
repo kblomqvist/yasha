@@ -162,20 +162,18 @@ yasha -e extensions.py -v variables.yaml template.j2
 Functions intended to work as a filter have to be either prefixed by `filter_`
 
 ```python
-# extensions.py
-
-def filter_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
-    return value.strftime(format)
+def filter_replace(s, old, new):
+    return s.replace(old, new)
 ```
 
 or defined in `FILTERS` dictionary
 
 ```python
-def to_datetimeformat(value, format='%H:%M / %d-%m-%Y'):
-    return value.strftime(format)
+def do_replace(s, old, new):
+    return s.replace(old, new)
 
 FILTERS = {
-    'datetimeformat': to_datetimeformat,
+    'replace': do_replace,
 }
 ```
 
@@ -184,8 +182,6 @@ FILTERS = {
 Functions intended to work as a test have to be either prefixed by `test_`
 
 ```python
-# extensions.py
-
 def test_even(number):
     return number % 2 == 0
 ```
@@ -193,11 +189,11 @@ def test_even(number):
 of defined in `TESTS` dictionary
 
 ```python
-def to_even(number):
+def is_even(number):
     return number % 2 == 0
 
 TESTS = {
-    'even': to_even,
+    'even': is_even,
 }
 ```
 
@@ -205,31 +201,7 @@ TESTS = {
 
 In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded and available within the template.
 
-### Automatic extension file look up and sharing
-
-Like for variables file, Yasha supports automatic extension file look up and sharing too. In case you are generating Python code and you are relying to Yasha's automatic extension file look up, consider using the following naming convention for your files:
-
-```
-template.py.j2
-template.py.py
-template.py.yaml
-```
-
-In this case the command-line call
-
-```bash
-yasha template.py.j2
-```
-
-equals to
-
-```bash
-yasha -e template.py.py -v template.py.yaml template.py.j2
-```
-
-This guarantees that there's no collision between the names of rendered template and extension files.
-
-### Custom variable file parser
+### Parsers
 
 If none of the built-in parsers fit into your needs, it's possible to declare your own parser within the extension file. For example, below is shown an example XML file and a custom parser for that.
 
@@ -262,6 +234,30 @@ def parse_xml(self, file):
 
     return variables  # Return value has to be dictionary
 ```
+
+### Automatic extension file look up and sharing
+
+Like for variables file, Yasha supports automatic extension file look up and sharing too. In case you are generating Python code and you are relying to Yasha's automatic extension file look up, consider using the following naming convention for your files:
+
+```
+template.py.j2
+template.py.py
+template.py.yaml
+```
+
+In this case the command-line call
+
+```bash
+yasha template.py.j2
+```
+
+equals to
+
+```bash
+yasha -e template.py.py -v template.py.yaml template.py.j2
+```
+
+This guarantees that there's no collision between the names of rendered template and extension files.
 
 ## Built-in filters
 

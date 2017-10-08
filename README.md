@@ -360,7 +360,7 @@ yasha -v variables.yaml -I $HOME/.yasha template.j2
 
 ```jinja
 {% extends "skeleton.j2" %}
-{# Searched also from $HOME/.yasha #}
+{# 'skeleton.j2' is searched also from $HOME/.yasha #}
 
 {% block main %}
     {{ super() }}
@@ -387,7 +387,7 @@ for name, function in PARSERS.items():
     PARSERS[name] = wrapper(function)
 ```
 
-### Loading Ansible filters
+### Using filters from Ansible
 
 Ansible is an IT automation platform that makes your applications and systems easier to deploy. It is based on Jinja2 and offers a large set of filters, which can be easily enabled via Yasha extensions.
 
@@ -400,6 +400,23 @@ pip install ansible
 from ansible.plugins.filter.core import FilterModule
 
 FILTERS = FilterModule().filters()
+```
+
+### Using Python objects of any type in YAML
+
+For security reasons, the built-in YAML parser is using the `safe_load` of [PyYaml](http://pyyaml.org/wiki/PyYAML). This limits variables to be simple Python objects like integers or lists. To work with a Python object of any type, you can overwrite the built-in implementation of the parser.
+
+```python
+# extensions.py
+import yaml
+
+def parse_yaml(file):
+    assert file.name.endswith(('.yaml', '.yml'))
+    variables = yaml.load(file)
+    return variables if variables else dict()
+
+def parse_yml(file):
+    return parse_yaml(file)
 ```
 
 ## Build automation

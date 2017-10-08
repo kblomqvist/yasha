@@ -153,7 +153,7 @@ foo.yaml
 
 ## Template extensions
 
-You can extend Yasha by custom [Jinja extensions](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext), [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) and [filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) by declaring those in a separate Python source file given via command-line option `-e`, or `--extensions` as it is shown below
+You can extend Yasha by custom Jinja [extensions](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext), [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) and [filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) by defining those in a separate Python source file given via command-line option `-e`, or `--extensions` as shown below
 
 ```bash
 yasha -e extensions.py -v variables.yaml template.j2
@@ -354,7 +354,7 @@ Other possible literals are:
 
 Sometimes it would make sense to have common extensions over multiple templates, e.g. for the sake of filters. This can be achieved by setting `YASHA_EXTENSIONS` environment variable.
 
-```
+```bash
 export YASHA_EXTENSIONS=$HOME/.yasha/extensions.py
 yasha -v variables.yaml -o output.txt template.j2
 ```

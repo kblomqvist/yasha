@@ -1,7 +1,7 @@
 Version 4.0
 -----------
 
-Major release, unreleased
+Major release, released 8 Oct 2017
 
 - Reverted the change introduced in version 3.0 to use uppercase `-E`
   and `-V` option flags for extension and variable files. Fixes

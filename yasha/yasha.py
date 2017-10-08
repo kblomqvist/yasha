@@ -28,7 +28,7 @@ import ast
 __version__ = "dev"
 
 ENCODING = 'utf-8'
-EXTENSION_FILE_FORMATS = ('py', 'yasha', 'j2ext', 'jinja-ext')
+EXTENSION_FILE_FORMATS = ('.py', '.yasha', '.j2ext', '.jinja-ext')
 
 def find_template_companion(template, extension='', check=True):
     """

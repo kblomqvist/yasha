@@ -43,13 +43,13 @@ def print_version(ctx, param, value):
 
 def parse_variable_file(file):
     try:
-        extension = os.path.splitext(file.name)[1][1:]
-        return PARSERS[extension](file)
+        file_extension = os.path.splitext(file.name)[1]
+        return PARSERS[file_extension](file)
     except AttributeError:
         return dict()
     except KeyError:
-        msg = "Unkown variable file extension '.{}'"
-        raise ClickException(msg.format(extension))
+        error = "Unkown variable file extension '{}'"
+        raise ClickException(error.format(file_extension))
 
 def load_python_module(file):
     try:
@@ -92,7 +92,7 @@ def load_extensions(file):
                 filters[name] = attr
             if attr.__name__.startswith('parse_'):
                 name = attr.__name__[6:]
-                parsers[name] = attr
+                parsers['.' + name] = attr
         if inspect.isclass(attr):
             if issubclass(attr, Extension):
                 classes.append(attr)

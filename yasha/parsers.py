@@ -61,10 +61,10 @@ def parse_svd(file):
     }
 
 PARSERS = {
-    'json': parse_json,
-    'yaml': parse_yaml,
-    'yml': parse_yaml,
-    'toml': parse_toml,
-    'xml': parse_xml,
-    'svd': parse_svd,
+    '.json': parse_json,
+    '.yaml': parse_yaml,
+    '.yml': parse_yaml,
+    '.toml': parse_toml,
+    '.xml': parse_xml,
+    '.svd': parse_svd,
 }

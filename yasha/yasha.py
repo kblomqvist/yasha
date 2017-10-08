@@ -25,7 +25,7 @@ THE SOFTWARE.
 import os
 import ast
 
-__version__ = "4.0"
+__version__ = "dev"
 
 ENCODING = 'utf-8'
 EXTENSION_FILE_FORMATS = ('.py', '.yasha', '.j2ext', '.jinja-ext')

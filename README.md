@@ -151,11 +151,33 @@ foo.yaml
 
 ## Template extensions
 
-You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file (extensions.py).
+You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file given via `-e`:
 
 ```bash
 yasha -e extensions.py -v variables.yaml template.j2
 ```
+
+Like for variable file, Yasha supports automatic extension file look up and sharing too. In case you are generating Python code and you are relying to Yasha's automatic extension file look up, consider using the following naming convention for your template, extension, and variable files:
+
+```
+template.py.j2
+template.py.py
+template.py.yaml
+```
+
+Now the command-line call
+
+```bash
+yasha template.py.j2
+```
+
+is equal to
+
+```bash
+yasha -e template.py.py -v template.py.yaml template.py.j2
+```
+
+This guarantees that there's no collision between the names of rendered template and extension files.
 
 ### Filters
 
@@ -203,9 +225,12 @@ In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.o
 
 ### Parsers
 
-If none of the built-in parsers fit into your needs, it's possible to declare your own parser within the extension file. For example, below is shown an example XML file and a custom parser for that.
+If none of the built-in parsers fit into your needs, it's possible to declare your own parser within the extension file. Either create a function named as `parse_` + `<file extension>`, or define the parse-function in `PARSERS` dictionary with the key indicating the file extension. Yasha will then pass the variable file object for the function to be parsed and expects to get dictionary as a return value.
+
+For example, below is shown an example XML file and a custom parser for that.
 
 ```xml
+<!-- variables.xml -->
 <persons>
     <person>
         <name>Foo</name>
@@ -219,45 +244,24 @@ If none of the built-in parsers fit into your needs, it's possible to declare yo
 ```
 
 ```python
+# extensions.py
 import xml.etree.ElementTree as et
 
-def parse_xml(self, file):
+def parse_xml(file):
+    assert(file.name.endswith('.xml'))
+
     tree = et.parse(file.name)
     root = tree.getroot()
 
-    variables = {"persons": []}
-    for elem in root.iter("person"):
-        variables["persons"].append({
-            "name": elem.find("name").text,
-            "address": elem.find("address").text,
+    persons = []
+    for elem in root.iter('person'):
+        persons.append({
+            'name': elem.find('name').text,
+            'address': elem.find('address').text,
         })
 
-    return variables  # Return value has to be dictionary
+    return dict(persons=persons)
 ```
-
-### Automatic extension file look up and sharing
-
-Like for variables file, Yasha supports automatic extension file look up and sharing too. In case you are generating Python code and you are relying to Yasha's automatic extension file look up, consider using the following naming convention for your files:
-
-```
-template.py.j2
-template.py.py
-template.py.yaml
-```
-
-In this case the command-line call
-
-```bash
-yasha template.py.j2
-```
-
-equals to
-
-```bash
-yasha -e template.py.py -v template.py.yaml template.py.j2
-```
-
-This guarantees that there's no collision between the names of rendered template and extension files.
 
 ## Built-in filters
 

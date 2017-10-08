@@ -34,7 +34,7 @@ def parse_json(file):
 def parse_yaml(file):
     import yaml
     assert file.name.endswith(('.yaml', '.yml'))
-    variables = yaml.load(file)
+    variables = yaml.safe_load(file)
     return variables if variables else dict()
 
 def parse_toml(file):

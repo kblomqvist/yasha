@@ -23,9 +23,10 @@ Major release, unreleased
   in case of error. Requires Python >= 3.5.
 - Added parser for XML type of variable files. Uses xmltodict.
 - Within extension file, custom variable file parsers are now defined
-  either as a function starting with `parse_` and ending with the file
-  extension, or defined in `PARSERS` dictionary.
-- Within extension file, custom filters and tests can be also defined
+  either as a function named as `parse_`+ `<file extension>`, or the
+  parse-function is given via PARSERS dictionary with the key indicating
+  the file extension.
+- Within extension file, custom filters and tests can be also given
   via `FILTERS` and `TESTS` dictionary. This allows using external
   filters easily, e.g. from Ansible.
 - Added new command-line option `-c` to set template encoding.

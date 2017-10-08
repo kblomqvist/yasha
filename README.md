@@ -153,7 +153,7 @@ foo.yaml
 
 ## Template extensions
 
-You can extend Yasha by custom [Jinja extensions](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext), [filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) by declaring those in a separate Python source file given via command-line option `-e`, or `--extensions` like below
+You can extend Yasha by custom [Jinja extensions](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext), [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) and [filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) by declaring those in a separate Python source file given via command-line option `-e`, or `--extensions` as it is shown below
 
 ```bash
 yasha -e extensions.py -v variables.yaml template.j2
@@ -179,26 +179,6 @@ is equal to
 yasha -e template.py.py -v template.py.yaml template.py.j2
 ```
 
-### Filters
-
-Functions intended to work as a filter have to be either prefixed by `filter_`
-
-```python
-def filter_replace(s, old, new):
-    return s.replace(old, new)
-```
-
-or defined in `FILTERS` dictionary
-
-```python
-def do_replace(s, old, new):
-    return s.replace(old, new)
-
-FILTERS = {
-    'replace': do_replace,
-}
-```
-
 ### Tests
 
 Functions intended to work as a test have to be either prefixed by `test_`
@@ -216,6 +196,26 @@ def is_even(number):
 
 TESTS = {
     'even': is_even,
+}
+```
+
+### Filters
+
+Functions intended to work as a filter have to be either prefixed by `filter_`
+
+```python
+def filter_replace(s, old, new):
+    return s.replace(old, new)
+```
+
+or defined in `FILTERS` dictionary
+
+```python
+def do_replace(s, old, new):
+    return s.replace(old, new)
+
+FILTERS = {
+    'replace': do_replace,
 }
 ```
 
@@ -387,9 +387,9 @@ for name, function in PARSERS.items():
     PARSERS[name] = wrapper(function)
 ```
 
-### Using filters from Ansible
+### Using tests and filters from Ansible
 
-Ansible is an IT automation platform that makes your applications and systems easier to deploy. It is based on Jinja2 and offers a large set of filters, which can be easily enabled via Yasha extensions.
+[Ansible](http://docs.ansible.com/ansible/latest/intro.html) is an IT automation platform that makes your applications and systems easier to deploy. It is based on Jinja2 and offers a large set of [custom tests and filters](http://docs.ansible.com/ansible/latest/playbooks_templating.html), which can be easily taken into use via Yasha extensions.
 
 ```bash
 pip install ansible
@@ -397,9 +397,11 @@ pip install ansible
 
 ```python
 # extensions.py
+from ansible.plugins.test.core import TestModule
 from ansible.plugins.filter.core import FilterModule
 
 FILTERS = FilterModule().filters()
+FILTERS.update(TestModule().tests())  # Ansible tests are filter like
 ```
 
 ### Using Python objects of any type in YAML

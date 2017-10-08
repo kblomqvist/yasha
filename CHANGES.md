@@ -11,22 +11,29 @@ Major release, unreleased
   options which has a proper value are interpreted as a template
   variable, e.g. `--foo=bar` or `--foo bar`. Note that `-v foo bar` is
   not working anymore.
+- Fixed an issue where the command-line call `yasha ../template.j2`
+  searched for template companion files till root folder.
 - Python literals can be used as part of the command-line call,
   e.g. `yasha --foo "['bar', 'baz']" template.j2`.
-- Added new command-line option `-c` to set template encoding.
-  Default is UTF-8.
 - Added `env` template filter to read environment variable.
 - Added `shell` template filter to run a shell command. and to connect
   its standard output. Requires Python >= 3.5.
 - Added `subprocess` template filter to spawn new processes, but unlike
   shell a CompletedProcess instance is returned, or CalledProcessError
   in case of error. Requires Python >= 3.5.
-- Fixed an issue where the command-line call `yasha ../template.j2`
-  searched for template companion files till root folder.
+- Added parser for XML type of variable files. Uses xmltodict.
+- Within extension file, custom variable file parsers are now defined
+  either as a function starting with `parse_` and ending with the file
+  extension, or defined in `PARSERS` dictionary.
+- Within extension file, custom filters and tests can be also defined
+  via `FILTERS` and `TESTS` dictionary. This allows using external
+  filters easily, e.g. from Ansible.
+- Added new command-line option `-c` to set template encoding.
+  Default is UTF-8.
+- Command-line option `--no-variables` changed to `--no-variable-file`.
+- Command-line option `--no-extensions` changed to `--no-extension-file`.
 - Removed the variable/extension file overwrite protection introduced
   in version 3.1. Caused more confusion than protection.
-- Command-line option `--no-variables` is now `--no-variable-file`.
-- Command-line option `--no-extensions` is now `--no-extension-file`.
 
 
 Version 3.1

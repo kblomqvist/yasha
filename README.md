@@ -355,12 +355,12 @@ Other possible literals are:
 By default the referenced templates, i.e. files referred to via Jinja's [extends](http://jinja.pocoo.org/docs/dev/templates/#extends), [include](http://jinja.pocoo.org/docs/dev/templates/#include) or [import](http://jinja.pocoo.org/docs/dev/templates/#import) statements, are searched in relation to the template location. To extend the search path you can use the command-line option `-I` — like you would do with GCC to include C header files.
 
 ```bash
-yasha -v variables.yaml -I ~/.yasha template.j2
+yasha -v variables.yaml -I $HOME/.yasha template.j2
 ```
 
 ```jinja
 {% extends "skeleton.j2" %}
-{# Searched from ~/.yasha #}
+{# Searched also from $HOME/.yasha #}
 
 {% block main %}
     {{ super() }}

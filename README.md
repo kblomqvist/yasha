@@ -76,7 +76,7 @@ Options:
 
 ## Template variables
 
-Template variables can be defined in a separate file. [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) are supported:
+Template variables can be defined in a separate file. [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) are supported.
 
 ```bash
 yasha -v variables.yaml template.j2
@@ -92,7 +92,9 @@ A variable defined via command-line will overwrite a variable defined in file.
 
 ### Automatic variable file look up
 
-If the variable file is not explicitly given, Yasha will look for it by searching a file named in the same way than the corresponding template but with the file extension of JSON, YAML or TOML. For example, consider the following template and template variables files
+If the variable file is not explicitly given, Yasha will look for it by searching a file named in the same way than the corresponding template but with the file extension either `.json`, `.yaml`, `.yml`, `.toml`, or `.xml`.
+
+For example, consider the following template and variable files
 
 ```
 template.j2
@@ -151,13 +153,13 @@ foo.yaml
 
 ## Template extensions
 
-You can use custom [Jinja filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) within your templates by declaring those in separate Python source file given via `-e`:
+You can extend Yasha by custom [Jinja extensions](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext), [filters](http://jinja.pocoo.org/docs/dev/api/#custom-filters) and [tests](http://jinja.pocoo.org/docs/dev/api/#custom-tests) by declaring those in a separate Python source file given via command-line option `-e`, or `--extensions` like below
 
 ```bash
 yasha -e extensions.py -v variables.yaml template.j2
 ```
 
-Like for variable file, Yasha supports automatic extension file look up and sharing too. In case you are generating Python code and you are relying to Yasha's automatic extension file look up, consider using the following naming convention for your template, extension, and variable files:
+Like for variable file, Yasha supports automatic extension file look up and sharing too. To avoid file collisions consider using the following naming convention for your template, extension, and variable files:
 
 ```
 template.py.j2
@@ -176,8 +178,6 @@ is equal to
 ```bash
 yasha -e template.py.py -v template.py.yaml template.py.j2
 ```
-
-This guarantees that there's no collision between the names of rendered template and extension files.
 
 ### Filters
 
@@ -221,7 +221,7 @@ TESTS = {
 
 ### Classes
 
-In addition to filters and tests, [Jinja extension classes](http://jinja.pocoo.org/docs/dev/extensions/#module-jinja2.ext) are also supported. All classes derived from `jinja2.ext.Extension` are loaded and available within the template.
+All classes derived from `jinja2.ext.Extension` are considered as Jinja extensions and will be added to the environment used to render the template.
 
 ### Parsers
 
@@ -390,6 +390,10 @@ for name, function in PARSERS.items():
 ### Loading Ansible filters
 
 Ansible is an IT automation platform that makes your applications and systems easier to deploy. It is based on Jinja2 and offers a large set of filters, which can be easily enabled via Yasha extensions.
+
+```bash
+pip install ansible
+```
 
 ```python
 # extensions.py

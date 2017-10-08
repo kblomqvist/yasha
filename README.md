@@ -404,7 +404,7 @@ FILTERS = FilterModule().filters()
 
 ### Using Python objects of any type in YAML
 
-For security reasons, the built-in YAML parser is using the `safe_load` of [PyYaml](http://pyyaml.org/wiki/PyYAML). This limits variables to be simple Python objects like integers or lists. To work with a Python object of any type, you can overwrite the built-in implementation of the parser.
+For security reasons, the built-in YAML parser is using the `safe_load` of [PyYaml](http://pyyaml.org/wiki/PyYAML). This limits variables to simple Python objects like integers or lists. To work with a Python object of any type, you can overwrite the built-in implementation of the parser.
 
 ```python
 # extensions.py

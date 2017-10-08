@@ -54,12 +54,12 @@ def parse_variable_file(file):
 def load_python_module(file):
     try:
         from importlib.machinery import SourceFileLoader
-        loader = SourceFileLoader(file.name, file.name)
+        loader = SourceFileLoader('yasha_extensions', file.name)
         module = loader.load_module()
     except ImportError:  # Fallback to Python2
         import imp
         desc = (".py", "rb", imp.PY_SOURCE)
-        module = imp.load_module(file.name, file, file.name, desc)
+        module = imp.load_module('yasha_extensions', file, file.name, desc)
     return module
 
 def load_extensions(file):

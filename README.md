@@ -55,7 +55,7 @@ Usage: yasha [OPTIONS] [TEMPLATE_VARIABLES]... TEMPLATE
 Options:
   -o, --output FILENAME         Place the rendered template into FILENAME.
   -v, --variables FILENAME      Read template variables from FILENAME. Built-
-                                in parsers are JSON, YAML and TOML.
+                                in parsers are JSON, YAML, TOML and XML.
   -e, --extensions FILENAME     Read template extensions from FILENAME. A
                                 Python file is expected.
   -c, --encoding TEXT           Default is UTF-8.
@@ -76,7 +76,7 @@ Options:
 
 ## Template variables
 
-Template variables can be defined in a separate file. [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html) and [TOML](https://github.com/toml-lang/toml) are supported:
+Template variables can be defined in a separate file. [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) are supported:
 
 ```bash
 yasha -v variables.yaml template.j2
@@ -248,8 +248,7 @@ For example, below is shown an example XML file and a custom parser for that.
 import xml.etree.ElementTree as et
 
 def parse_xml(file):
-    assert(file.name.endswith('.xml'))
-
+    assert file.name.endswith('.xml')
     tree = et.parse(file.name)
     root = tree.getroot()
 

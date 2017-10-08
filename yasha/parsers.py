@@ -27,21 +27,30 @@ from .yasha import ENCODING
 
 def parse_json(file):
     import json
+    assert file.name.endswith('.json')
     variables = json.loads(file.read().decode(ENCODING))
     return variables if variables else dict()
 
 def parse_yaml(file):
     import yaml
+    assert file.name.endswith(('.yaml', '.yml'))
     variables = yaml.load(file)
     return variables if variables else dict()
 
 def parse_toml(file):
     import pytoml as toml
+    assert file.name.endswith('.toml')
     variables = toml.load(file)
     return variables if variables else dict()
 
+def parse_xml(file):
+    import xmltodict
+    assert file.name.endswith('.xml')
+    variables = xmltodict.parse(file.read().decode(ENCODING))
+    return variables if variables else dict()
+
 def parse_svd(file):
-    """Parse CMSIS-SVD files"""
+    # TODO: To be moved into its own repo
     from .cmsis import SVDFile
     svd = SVDFile(file)
     svd.parse()
@@ -56,5 +65,6 @@ PARSERS = {
     'yaml': parse_yaml,
     'yml': parse_yaml,
     'toml': parse_toml,
+    'xml': parse_xml,
     'svd': parse_svd,
 }

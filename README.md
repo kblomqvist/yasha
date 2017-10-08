@@ -371,7 +371,6 @@ If you need to pre-process template variables before those are passed into the t
 
 ```python
 # extensions.py
-
 from yasha.parsers import PARSERS
 
 def wrapper(parse):
@@ -391,8 +390,8 @@ Ansible is an IT automation platform that makes your applications and systems ea
 
 ```python
 # extensions.py
-
 from ansible.plugins.filter.core import FilterModule
+
 FILTERS = FilterModule().filters()
 ```
 

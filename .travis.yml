@@ -6,6 +6,7 @@ python:
 
 install:
   - pip install scons
+  - scons --version
   - pip install .
 
 script:

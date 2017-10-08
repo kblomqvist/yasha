@@ -121,7 +121,7 @@ def load_extensions(file):
 @click.argument("template", type=click.File("rb"))
 @click.option("--output", "-o", type=click.File("wb"), help="Place the rendered template into FILENAME.")
 @click.option("--variables", "-v", type=click.File("rb"), help="Read template variables from FILENAME. Built-in parsers are JSON, YAML, TOML and XML.")
-@click.option("--extensions", "-e", type=click.File("rb"), help="Read template extensions from FILENAME. A Python file is expected.")
+@click.option("--extensions", "-e", envvar='YASHA_EXTENSIONS', type=click.File("rb"), help="Read template extensions from FILENAME. A Python file is expected.")
 @click.option("--encoding", "-c", default=yasha.ENCODING, help="Default is UTF-8.")
 @click.option("--include_path", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for the referenced templates.")
 @click.option("--no-variable-file", is_flag=True, help="Omit template variable file.")

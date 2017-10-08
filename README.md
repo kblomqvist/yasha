@@ -266,7 +266,7 @@ def parse_xml(file):
 
 ### env
 
-Reads environment variable in a template like
+Reads system environment variable in a template like
 
 ```jinja
 sqlalchemy:
@@ -349,6 +349,15 @@ Other possible literals are:
 - `{'a': 2}` (a dict)
 - `{1, 2, 3}` (a set)
 - `True`, `False` (boolean)
+
+### Common extension file
+
+Sometimes it would make sense to have common extensions over multiple templates, e.g. for the sake of filters. This can be achieved by setting `YASHA_EXTENSIONS` environment variable.
+
+```
+export YASHA_EXTENSIONS=$HOME/.yasha/extensions.py
+yasha -v variables.yaml -o output.txt template.j2
+```
 
 ### Append search path for referenced templates
 

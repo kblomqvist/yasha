@@ -15,7 +15,7 @@ Major release, unreleased
   searched for template companion files till root folder.
 - Python literals can be used as part of the command-line call,
   e.g. `yasha --foo "['bar', 'baz']" template.j2`.
-- Added `env` template filter to read environment variable.
+- Added `env` template filter to read system environment variable.
 - Added `shell` template filter to run a shell command. and to connect
   its standard output. Requires Python >= 3.5.
 - Added `subprocess` template filter to spawn new processes, but unlike
@@ -23,7 +23,7 @@ Major release, unreleased
   in case of error. Requires Python >= 3.5.
 - Added parser for XML type of variable files. Uses xmltodict.
 - Added command-line option `-c` to set template encoding. Default is UTF-8.
-- JSON parser updated to use `safe_load`.
+- JSON parser updated to use `safe_load` (security).
 - Within extension file, custom variable file parsers are now defined
   either as a function named as `parse_`+ `<file extension>`, or the
   parse-function is given via `PARSERS` dictionary with the key indicating
@@ -31,6 +31,8 @@ Major release, unreleased
 - Within extension file, custom filters and tests can be also given
   via `FILTERS` and `TESTS` dictionary. This allows using external
   filters easily, e.g. from Ansible.
+- Common extension file can be now set via `YASHA_EXTENSIONS` system
+  environment variable.
 - Command-line option `--no-variables` changed to `--no-variable-file`.
 - Command-line option `--no-extensions` changed to `--no-extension-file`.
 - Removed the variable/extension file overwrite protection introduced

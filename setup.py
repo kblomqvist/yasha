@@ -30,8 +30,8 @@ setup(
         yasha=yasha.cli:cli
     ''',
     classifiers=[
-        "Programming Language :: Python :: 2.7.13",
-        "Programming Language :: Python :: 3.5.3",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Topic :: Software Development :: Code Generators",
         "Development Status :: 5 - Production/Stable",

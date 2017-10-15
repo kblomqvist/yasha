@@ -28,6 +28,9 @@ import subprocess
 
 import pytest
 
+requires_py3 = pytest.mark.skipif(sys.version_info < (3,5),
+                         reason="Requires Python >= 3.5")
+
 def check_output(*args, **kwargs):
     params = dict(
         stdout=subprocess.PIPE,
@@ -58,14 +61,14 @@ def test_env(tmpdir):
     assert out == b'postgresql://127.0.0.1'
 
 
-@pytest.mark.skipif(sys.version_info < (3,5), reason="Requires Python>=3.5")
+@requires_py3
 def test_shell():
     template = '{{ "uname" | shell }}'
     out, retcode = check_output('yasha', '-', stdin=template)
     assert out.decode() == os.uname().sysname
 
 
-@pytest.mark.skipif(sys.version_info < (3,5), reason="Requires Python>=3.5")
+@requires_py3
 def test_subprocess():
     template = (
         '{% set r = "uname" | subprocess %}'
@@ -75,7 +78,7 @@ def test_subprocess():
     assert out.decode().strip() == os.uname().sysname
 
 
-@pytest.mark.skipif(sys.version_info < (3,5), reason="Requires Python>=3.5")
+@requires_py3
 def test_subprocess_with_unknown_cmd():
     template = '{{ "unknown_cmd" | subprocess }}'
     out, retcode = check_output('yasha', '-', stdin=template)
@@ -83,7 +86,7 @@ def test_subprocess_with_unknown_cmd():
     assert b'unknown_cmd: not found' in out
 
 
-@pytest.mark.skipif(sys.version_info < (3,5), reason="Requires Python>=3.5")
+@requires_py3
 def test_subprocess_with_unknown_cmd_while_check_is_false():
     template = (
         '{% set r = "unknown_cmd" | subprocess(check=False) %}'

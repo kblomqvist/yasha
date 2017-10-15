@@ -29,15 +29,17 @@ from subprocess import call, check_output
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
+requires_py3 = pytest.mark.skipif(sys.version_info < (3,5),
+                         reason="Requires Python >= 3.5")
 
 @pytest.fixture()
 def clean():
     chdir(SCRIPT_PATH + "/fixtures/c_project")
-    call(["make", "clean"])
-    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile("src/" + f)
+    call(("make", "clean")) # Case build dir
+    call(("make", "-C", "src", "clean")) # Case no build dir
 
 
+@pytest.mark.slowtest
 def test_make(clean):
     # First build
     out = check_output(["make"])
@@ -59,6 +61,7 @@ def test_make(clean):
         assert not b"is up to date" in out
 
 
+@pytest.mark.slowtest
 def test_cmake(clean):
     mkdir("build")
     chdir("build")
@@ -83,12 +86,9 @@ def test_cmake(clean):
         out = check_output(["make"])
         assert b"Linking C executable" in out
 
-    # Clean the build
-    call(["make", "clean"])
-    for f in ["foo.c", "foo.h"]:
-        assert not path.isfile("../src/" + f)
 
-
+@requires_py3
+@pytest.mark.slowtest
 def test_scons(clean):
     # First build
     out = check_output(["scons"])
@@ -110,8 +110,3 @@ def test_scons(clean):
         call(["touch", "src/" + dep])
         out = check_output(["scons"])
         assert not b"is up to date" in out
-
-    # Clean the build
-    call(["scons", "-c"])
-    for f in ["foo.c", "foo.c.d", "foo.h", "foo.h.d"]:
-        assert not path.isfile("build/" + f)

@@ -1,4 +1,4 @@
-import yasha
+import yasha.parsers
 
 def postprocess(variables):
     variables["foo"] = "bar"  # foo should always be bar

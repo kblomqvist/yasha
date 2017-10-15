@@ -10,9 +10,7 @@ env = Environment(
 
 sources = ["main.c"]
 templates = ["foo.c.jinja", "foo.h.jinja"]
-
 generated = env.Yasha(templates)
-env.Depends(generated, "foo.toml")
 
 sources += generated
 env.Program("a.out", sources)

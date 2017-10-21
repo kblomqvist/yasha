@@ -29,7 +29,7 @@ import subprocess
 import pytest
 
 requires_py3 = pytest.mark.skipif(sys.version_info < (3,5),
-                         reason="Requires Python >= 3.5")
+                                  reason="Requires Python >= 3.5")
 
 def check_output(*args, **kwargs):
     params = dict(

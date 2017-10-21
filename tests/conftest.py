@@ -23,16 +23,11 @@ THE SOFTWARE.
 """
 
 import pytest
-from os import path, chdir
+import os.path
 
-SCRIPT_PATH = path.dirname(path.realpath(__file__))
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 @pytest.fixture
 def fixtures_dir():
-    return path.join(SCRIPT_PATH, "fixtures")
-
-
-@pytest.fixture()
-def template(tmpdir):
-    return tmpdir.join('template.j2')
+    return os.path.join(SCRIPT_PATH, "fixtures")

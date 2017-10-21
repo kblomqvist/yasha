@@ -22,91 +22,161 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import pytest
 import sys
 from os import path, chdir, mkdir
 from subprocess import call, check_output
 
+import pytest
+
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
-requires_py3 = pytest.mark.skipif(sys.version_info < (3,5),
-                         reason="Requires Python >= 3.5")
+requires_py27_or_py35_or_greater = pytest.mark.skipif(
+    sys.version_info < (2,7) or
+    (sys.version_info >= (3,) and sys.version_info < (3,5)),
+    reason='Requires either Python 2.7 or >= 3.5'
+)
 
-@pytest.fixture()
-def clean():
-    chdir(SCRIPT_PATH + "/fixtures/c_project")
-    call(("make", "clean")) # Case build dir
-    call(("make", "-C", "src", "clean")) # Case no build dir
+def setup_function():
+    chdir(SCRIPT_PATH + '/fixtures/c_project')
+
+
+def teardown_function():
+    chdir(SCRIPT_PATH + '/fixtures/c_project')
+    call(('make', 'clean'))
+    call(('make', '-C', 'src', 'clean'))
+
+build_dependencies = (
+    'foo.c.jinja',
+    'foo.h.jinja',
+    'foo.c.py',
+    'foo.toml',
+    'header.j2inc'
+)
+
+@pytest.mark.slowtest
+def test_make():
+    build_cmd = ('make', '-j4')
+
+    # First build
+    out = check_output(build_cmd)
+    assert not b'is up to date' in out
+    assert path.isfile('build/a.out')
+
+    # Second build shouldn't do anything
+    out = check_output(build_cmd)
+    assert b'is up to date' in out
+
+    # Check program output
+    out = check_output(('./build/a.out'))
+    assert b'bar has 3 chars ...\n' == out
+
+    # Require rebuild after touching dependency
+    for dep in build_dependencies:
+        call(('touch', path.join('src', dep)))
+        out = check_output(build_cmd)
+        assert not b'is up to date' in out
 
 
 @pytest.mark.slowtest
-def test_make(clean):
-    # First build
-    out = check_output(["make"])
-    assert not b"is up to date" in out
-    assert path.isfile("build/a.out")
+def test_cmake():
+    mkdir('build')
+    chdir('build')
+    build_cmd = ('make', '-j4')
 
-    # Second build shouldn't do anything
-    out = check_output(["make"])
-    assert b"is up to date" in out
+    # First build
+    call(('cmake', '..'))
+    out = check_output(build_cmd)
+    assert b'Linking C executable' in out
+    assert path.isfile('a.out')
+
+    # Immediate new build shouldn't do anything
+    out = check_output(build_cmd)
+    assert not b'Linking C executable' in out
 
     # Check program output
-    out = check_output(["./build/a.out"])
-    assert b"bar has 3 chars ...\n" == out
+    out = check_output(['./a.out'])
+    assert b'bar has 3 chars ...\n' == out
 
-    # Test template dependencies
-    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja", "foo.c.py", "header.j2inc"]:
-        call(["touch", "src/" + dep])
-        out = check_output(["make"])
-        assert not b"is up to date" in out
+    # Require rebuild after touching build dependency
+    for dep in build_dependencies:
+        call(('touch', path.join('../src/', dep)))
+        out = check_output(build_cmd)
+        assert b'Linking C executable' in out
 
 
 @pytest.mark.slowtest
-def test_cmake(clean):
-    mkdir("build")
-    chdir("build")
+@requires_py27_or_py35_or_greater
+def test_scons():
+    build_cmd = ('scons', '-Q', '-j4')
 
     # First build
-    call(["cmake", ".."])
-    out = check_output(["make"])
-    assert b"Linking C executable" in out
-    assert path.isfile("a.out")
+    out = check_output(build_cmd)
+    assert not b'is up to date' in out
+    assert path.isfile('build/a.out')
 
-    # Second build shouldn't do anything
-    out = check_output(["make"])
-    assert not b"Linking C executable" in out
+    # Immediate new build shouldn't do anything
+    out = check_output(build_cmd)
+    assert b'is up to date' in out
 
     # Check program output
-    out = check_output(["./a.out"])
-    assert b"bar has 3 chars ...\n" == out
+    out = check_output(('./build/a.out'))
+    assert b'bar has 3 chars ...\n' == out
 
-    # Test template dependencies
-    for dep in ["foo.toml", "foo.h.jinja", "foo.c.jinja", "foo.c.py", "header.j2inc"]:
-        call(["touch", "../src/" + dep])
-        out = check_output(["make"])
-        assert b"Linking C executable" in out
+    # FIXME: Sometimes the rebuild happens sometimes not.
+    for dep in build_dependencies:
+        call(('touch', path.join('src', dep)))
+        out = check_output(build_cmd)
+        #assert not b'is up to date' in out
+        print(out) # For debugging purposes, run 'pytest -s -k scons'
 
 
-@requires_py3
 @pytest.mark.slowtest
-def test_scons(clean):
-    # First build
-    out = check_output(["scons"])
-    assert not b"is up to date" in out
-    assert path.isfile("build/a.out")
+def test_make_without_build_dir():
+    chdir('src')
+    build_cmd = ('make', '-j4')
 
-    # Second build shouldn't do anything
-    out = check_output(["scons"])
-    assert b"is up to date" in out
+    # First build
+    out = check_output(build_cmd)
+    assert not b'is up to date' in out
+    assert path.isfile('a.out')
+
+    # Immediate new build shouldn't do anything
+    out = check_output(build_cmd)
+    assert b'is up to date' in out
 
     # Check program output
-    out = check_output(["./build/a.out"])
-    assert b"bar has 3 chars ...\n" == out
+    out = check_output(('./a.out'))
+    assert b'bar has 3 chars ...\n' == out
 
-# TODO: Fix race condition. Every now and then fails. Though,
-# call() shouldn't return before finished.
+    # Require rebuild after touching dependency
+    for dep in build_dependencies:
+        call(('touch', dep))
+        out = check_output(build_cmd)
+        assert not b'is up to date' in out
 
-    for dep in []:  # ["foo.toml", "foo.h.jinja", "foo.c.jinja"]:
-        call(["touch", "src/" + dep])
-        out = check_output(["scons"])
-        assert not b"is up to date" in out
+
+@pytest.mark.slowtest
+@requires_py27_or_py35_or_greater
+def test_scons_without_build_dir():
+    chdir('src')
+    build_cmd = ('scons', '-Q', '-j4')
+
+    # First build
+    out = check_output(build_cmd)
+    assert not b'is up to date' in out
+    assert path.isfile('a.out')
+
+    # Immediate new build shouldn't do anything
+    out = check_output(build_cmd)
+    assert b'is up to date' in out
+
+    # Check program output
+    out = check_output(('./a.out'))
+    assert b'bar has 3 chars ...\n' == out
+
+    # FIXME: Sometimes the rebuild happens sometimes not.
+    for dep in build_dependencies:
+        call(('touch', dep))
+        out = check_output(build_cmd)
+        #assert not b'is up to date' in out
+        print(out) # for debugging, run 'pytest -s -k scons'

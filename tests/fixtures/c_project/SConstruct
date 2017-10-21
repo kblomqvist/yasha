@@ -20,4 +20,4 @@ else:
     sources += env.Yasha(tmpl)
 
 env.Program("build/a.out", sources)
-env.Decider("timestamp-newer") # Added due to unit testing
+env.Decider("make") # Added due to unit testing

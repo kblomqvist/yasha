@@ -55,7 +55,7 @@ build_dependencies = (
 
 @pytest.mark.slowtest
 def test_make():
-    build_cmd = ('make', '-j4')
+    build_cmd = ('make',)
 
     # First build
     out = check_output(build_cmd)
@@ -81,7 +81,7 @@ def test_make():
 def test_cmake():
     mkdir('build')
     chdir('build')
-    build_cmd = ('make', '-j4')
+    build_cmd = ('make',)
 
     # First build
     call(('cmake', '..'))
@@ -107,7 +107,7 @@ def test_cmake():
 @pytest.mark.slowtest
 @requires_py27_or_py35_or_greater
 def test_scons():
-    build_cmd = ('scons', '-Q', '-j4')
+    build_cmd = ('scons', '-Q')
 
     # First build
     out = check_output(build_cmd)
@@ -133,7 +133,7 @@ def test_scons():
 @pytest.mark.slowtest
 def test_make_without_build_dir():
     chdir('src')
-    build_cmd = ('make', '-j4')
+    build_cmd = ('make',)
 
     # First build
     out = check_output(build_cmd)
@@ -159,7 +159,7 @@ def test_make_without_build_dir():
 @requires_py27_or_py35_or_greater
 def test_scons_without_build_dir():
     chdir('src')
-    build_cmd = ('scons', '-Q', '-j4')
+    build_cmd = ('scons', '-Q')
 
     # First build
     out = check_output(build_cmd)

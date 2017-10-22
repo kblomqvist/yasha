@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 import sys
 from os import path, chdir, mkdir
-from subprocess import call, check_output
+from subprocess import check_output, check_call
 
 import pytest
 
@@ -40,10 +40,14 @@ def setup_function():
     chdir(SCRIPT_PATH + '/fixtures/c_project')
 
 
-def teardown_function():
+def teardown_function(function):
     chdir(SCRIPT_PATH + '/fixtures/c_project')
-    call(('make', 'clean'))
-    call(('make', '-C', 'src', 'clean'))
+    if 'scons' in function.__name__:
+        check_call(('scons', '-c'))
+        check_call(('scons', '-C', 'src', '-c'))
+    else:
+        check_call(('make', 'clean'))
+        check_call(('make', '-C', 'src', 'clean'))
 
 build_dependencies = (
     'foo.c.jinja',
@@ -72,7 +76,7 @@ def test_make():
 
     # Require rebuild after touching dependency
     for dep in build_dependencies:
-        call(('touch', path.join('src', dep)))
+        check_call(('touch', path.join('src', dep)))
         out = check_output(build_cmd)
         assert not b'is up to date' in out
 
@@ -84,7 +88,7 @@ def test_cmake():
     build_cmd = ('make',)
 
     # First build
-    call(('cmake', '..'))
+    check_call(('cmake', '..'))
     out = check_output(build_cmd)
     assert b'Linking C executable' in out
     assert path.isfile('a.out')
@@ -99,7 +103,7 @@ def test_cmake():
 
     # Require rebuild after touching build dependency
     for dep in build_dependencies:
-        call(('touch', path.join('../src/', dep)))
+        check_call(('touch', path.join('../src/', dep)))
         out = check_output(build_cmd)
         assert b'Linking C executable' in out
 
@@ -124,7 +128,7 @@ def test_scons():
 
     # FIXME: Sometimes the rebuild happens sometimes not.
     for dep in build_dependencies:
-        call(('touch', path.join('src', dep)))
+        check_call(('touch', path.join('src', dep)))
         out = check_output(build_cmd)
         #assert not b'is up to date' in out
         print(out) # For debugging purposes, run 'pytest -s -k scons'
@@ -150,7 +154,7 @@ def test_make_without_build_dir():
 
     # Require rebuild after touching dependency
     for dep in build_dependencies:
-        call(('touch', dep))
+        check_call(('touch', dep))
         out = check_output(build_cmd)
         assert not b'is up to date' in out
 
@@ -176,7 +180,7 @@ def test_scons_without_build_dir():
 
     # FIXME: Sometimes the rebuild happens sometimes not.
     for dep in build_dependencies:
-        call(('touch', dep))
+        check_call(('touch', dep))
         out = check_output(build_cmd)
         #assert not b'is up to date' in out
         print(out) # for debugging, run 'pytest -s -k scons'

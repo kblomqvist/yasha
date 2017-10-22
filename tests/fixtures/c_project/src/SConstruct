@@ -5,13 +5,11 @@ import yasha.scons
 
 env = Environment(
     ENV = os.environ,
-    BUILDERS = {"Yasha": yasha.scons.CBuilder()}
+    BUILDERS = {'Yasha': yasha.scons.CBuilder()}
 )
 
-sources = ["main.c"]
-templates = ["foo.c.jinja", "foo.h.jinja"]
-generated = env.Yasha(templates)
+templates = Glob('*.jinja')
+sources = ['main.c'] + env.Yasha(templates)
 
-sources += generated
-env.Program("a.out", sources)
-env.Decider("make") # Added due to unit testing
+env.Program('a.out', sources)
+env.Decider('make') # Added due to unit testing

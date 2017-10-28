@@ -189,3 +189,14 @@ def test_stdin_and_out():
     cmd = ("echo -n \"foo\"", "|", "yasha", "-")
     out = check_output(cmd, shell=True)
     assert out == b"foo"
+
+
+def test_json_template(tmpdir):
+    """gh-34, and gh-35"""
+    tmpdir.chdir()
+
+    tmpl = tmpdir.join("template.json")
+    tmpl.write('{"foo": {{\'"%s"\'|format(bar)}}}')
+
+    out = check_output(('yasha', '--bar=baz', '-o-', 'template.json'))
+    assert out == b'{"foo": "baz"}'

@@ -40,24 +40,32 @@ def find_template_companion(template, extension='', check=True):
         return # May be '<stdin>' (click)
 
     template = os.path.abspath(template)
+    template_dirname = os.path.dirname(template)
     template_basename = os.path.basename(template).split('.')
 
-    current_path = os.path.dirname(template)
+    current_path = template_dirname
     stop_path = os.path.commonprefix((os.getcwd(), current_path))
-    stop_path = os.path.dirname(stop_path) # Make sure to remove 'test_' from '/tmp/pytest-of-foo/pytest-111/test_'
+    stop_path = os.path.dirname(stop_path)
 
     token = template_basename[0] + '.'
 
     while True:
+
         for file in sorted(os.listdir(current_path)):
             if not file.startswith(token):
                 continue
             if not file.endswith(extension):
                 continue
-            file = file.split('.')
+
+            file_parts = file.split('.')
             for i in range(1, len(template_basename)):
-                if template_basename[:-i] == file[:-1]:
-                    yield os.path.join(current_path, '.'.join(file))
+                if template_basename[:-i] != file_parts[:-1]:
+                    continue
+                if current_path == template_dirname:
+                    if file_parts == template_basename:
+                        continue # Do not accept template itself
+
+                yield os.path.join(current_path, file)
 
         if current_path == stop_path:
             break

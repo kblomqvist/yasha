@@ -1,3 +1,12 @@
+Version 4.1
+-----------
+
+Minor release, released 29 Oct 2017
+
+- Fixed a bug related to automatic variable file lookup. Variable
+  file like templates, e.g. templates with `.json` extension, were
+  erronously used as a variable file too.
+
 Version 4.0
 -----------
 

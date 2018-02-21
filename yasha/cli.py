@@ -220,8 +220,9 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
         t = jinja.get_template(os.path.basename(template.name))
 
     # Parse variables
+    context = dict()
     for file in variables:
-        context = parse_variable_file(file)
+        context.update(parse_variable_file(file))
     context.update(yasha.parse_cli_variables(template_variables))
 
     # Finally render template and save it

@@ -23,7 +23,6 @@ THE SOFTWARE.
 """
 
 import os
-import re
 from SCons.Builder import BuilderBase
 from click.testing import CliRunner
 

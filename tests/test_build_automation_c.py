@@ -23,8 +23,8 @@ THE SOFTWARE.
 """
 
 import sys
+import subprocess
 from os import path, chdir, mkdir
-from subprocess import check_output, check_call
 
 import pytest
 
@@ -35,6 +35,22 @@ requires_py27_or_py35_or_greater = pytest.mark.skipif(
     (sys.version_info >= (3,) and sys.version_info < (3,5)),
     reason='Requires either Python 2.7 or >= 3.5'
 )
+
+def check_output(cmd):
+    try:
+        return subprocess.check_output(cmd)
+    except FileNotFoundError as e:
+        msg = str(e)
+        pytest.skip(msg)
+
+
+def check_call(cmd):
+    try:
+        return subprocess.check_call(cmd)
+    except FileNotFoundError as e:
+        msg = str(e)
+        pytest.skip(msg)
+
 
 def setup_function():
     chdir(SCRIPT_PATH + '/fixtures/c_project')

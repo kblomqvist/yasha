@@ -23,7 +23,6 @@ THE SOFTWARE.
 """
 
 import os
-import re
 from SCons.Builder import BuilderBase
 from click.testing import CliRunner
 
@@ -32,30 +31,28 @@ from . import cli
 
 class Builder(BuilderBase):
 
-    def __init__(self, action="yasha $SOURCE -o $TARGET"):
+    def __init__(self, action="yasha -o $TARGET $SOURCE"):
         def scan(node, env, path):
             src = str(node.srcnode())
             src_dir = os.path.dirname(src)
             variant_dir = os.path.dirname(str(node))
 
-            cli_command = [src, "-M"]
-            extensions = re.search(r"(-e|--extensions)\s*(.+)", action)
-            variables = re.search(r"(-v|--variables)\s*(.+)", action)
+            cmd = action.replace('$SOURCE', src)
+            cmd = ['-M'] + cmd.split()[1:]
 
-            if extensions:
-                cli_command += ["-e", extensions.group(2)]
-            if variables:
-                cli_command += ["-v", extensions.group(2)]
-            if re.match(r"--no-variables", action):
-                cli_command += ["--no-variable-file"]
-            if re.match(r"--no-extensions", action):
-                cli_command += ["--no-extension-file"]
+            try: # Remove $TARGET from action
+                index = cmd.index('-o')
+                del cmd[index]
+                del cmd[index]
+            except ValueError:
+                pass
 
             runner = CliRunner()
-            result = runner.invoke(cli.cli, cli_command)
+            result = runner.invoke(cli.cli, cmd)
 
             deps = result.output[:-1].split(" ")[2:]
             deps = [d.replace(src_dir, variant_dir) for d in deps]
+
             return env.File(deps)
 
         def emit(target, source, env):

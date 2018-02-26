@@ -173,7 +173,7 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
     if not variables and not no_variable_file:
         for file in template_companion:
             if file.endswith(tuple(PARSERS.keys())):
-                variables = click.open_file(file, "rb")
+                variables = [click.open_file(file, "rb")]
                 break
 
     if not output:
@@ -185,8 +185,8 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
 
     if m or md:
         deps = [os.path.relpath(template.name)]
-        if variables:
-            deps.append(os.path.relpath(variables.name))
+        for file in variables:
+            deps.append(os.path.relpath(file.name))
         if extensions:
             deps.append(os.path.relpath(extensions.name))
         for d in yasha.find_referenced_templates(template, include_path):

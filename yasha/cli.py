@@ -173,7 +173,7 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
     if not variables and not no_variable_file:
         for file in template_companion:
             if file.endswith(tuple(PARSERS.keys())):
-                variables = [click.open_file(file, "rb")]
+                variables = (click.open_file(file, "rb"),)
                 break
 
     if not output:

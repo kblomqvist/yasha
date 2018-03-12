@@ -1,3 +1,10 @@
+Version 4.2
+-----------
+
+Minor release, unreleased
+
+- Added support for multiple variables files.
+
 Version 4.1
 -----------
 

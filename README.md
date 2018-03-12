@@ -87,7 +87,7 @@ Multiple variable files can be given:
 ```bash
 yasha -v variables.yaml -v settings.yaml template.j2
 ```
-
+Note that variables redefined in later variable files will take precedence.
 
 Additionally you may define variables as part of the command-line call, e.g.
 

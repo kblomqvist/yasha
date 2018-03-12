@@ -58,6 +58,26 @@ def test_explicit_variable_file(tmpdir, varfile):
     assert output.read() == '1'
 
 
+def test_two_explicitly_given_variables_files(tmpdir):
+    # Template to calculate a + b + c:
+    tpl = tmpdir.join('template.j2')
+    tpl.write('{{ a + b + c }}')
+
+    # First variable file defines a & b:
+    a = tmpdir.join('a.yaml')
+    a.write('a: 1\nb: 100')
+
+    # Second variable file redefines b & defines c:
+    b = tmpdir.join('b.toml')
+    b.write('b = 2\nc = 3')
+
+    errno = call(('yasha', '-v', str(a), '-v', str(b), str(tpl)))
+    assert errno == 0
+
+    output = tmpdir.join('template')
+    assert output.read() == '6'  # a + b + c = 1 + 2 + 3 = 6
+
+
 def test_variable_file_lookup(tmpdir, vartpl):
     # /cwd
     #   /sub

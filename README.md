@@ -82,6 +82,13 @@ Template variables can be defined in a separate file. [JSON](http://www.json.org
 yasha -v variables.yaml template.j2
 ```
 
+Multiple variable files can be given:
+
+```bash
+yasha -v variables.yaml -v settings.yaml template.j2
+```
+Note that variables redefined in later variable files will take precedence.
+
 Additionally you may define variables as part of the command-line call, e.g.
 
 ```bash
@@ -92,7 +99,7 @@ A variable defined via command-line will overwrite a variable defined in file.
 
 ### Automatic variable file look up
 
-If the variable file is not explicitly given, Yasha will look for it by searching a file named in the same way than the corresponding template but with the file extension either `.json`, `.yaml`, `.yml`, `.toml`, or `.xml`.
+If no variable file is explicitly given, Yasha will look for one by searching for a file named in the same way than the corresponding template but with the file extension either `.json`, `.yaml`, `.yml`, `.toml`, or `.xml`.
 
 For example, consider the following template and variable files
 
@@ -107,7 +114,7 @@ Because of automatic variable file look up, the command-line call
 yasha template.j2
 ```
 
-equals to
+is equal to
 
 ```bash
 yasha -v template.yaml template.j2

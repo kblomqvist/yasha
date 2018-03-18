@@ -54,7 +54,7 @@ use core::ops::Drop;
     {{ register(r)|indent }}
     {% endfor %}
 }
-{% endmacro %}
+{%- endmacro %}
 
 {% for p in peripherals %}
 ioregs! ({{ p.name }} @ {{ "%#010x"|format(p.baseAddress) }}

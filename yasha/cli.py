@@ -120,7 +120,7 @@ def load_extensions(file):
 @click.argument("template_variables", nargs=-1, type=click.UNPROCESSED)
 @click.argument("template", type=click.File("rb"))
 @click.option("--output", "-o", type=click.File("wb"), help="Place the rendered template into FILENAME.")
-@click.option("--variables", "-v", type=click.File("rb"), help="Read template variables from FILENAME. Built-in parsers are JSON, YAML, TOML and XML.")
+@click.option("--variables", "-v", type=click.File("rb"), multiple=True, help="Read template variables from FILENAME. Built-in parsers are JSON, YAML, TOML and XML.")
 @click.option("--extensions", "-e", envvar='YASHA_EXTENSIONS', type=click.File("rb"), help="Read template extensions from FILENAME. A Python file is expected.")
 @click.option("--encoding", "-c", default=yasha.ENCODING, help="Default is UTF-8.")
 @click.option("--include_path", "-I", type=click.Path(exists=True, file_okay=False), multiple=True, help="Add DIRECTORY to the list of directories to be searched for the referenced templates.")
@@ -144,7 +144,7 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
         yasha --hello=world -o output.txt template.j2
 
     defines a variable 'hello' for a template like:
-    
+
         Hello {{ hello }} !
     """
 
@@ -173,7 +173,7 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
     if not variables and not no_variable_file:
         for file in template_companion:
             if file.endswith(tuple(PARSERS.keys())):
-                variables = click.open_file(file, "rb")
+                variables = (click.open_file(file, "rb"),)
                 break
 
     if not output:
@@ -185,8 +185,8 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
 
     if m or md:
         deps = [os.path.relpath(template.name)]
-        if variables:
-            deps.append(os.path.relpath(variables.name))
+        for file in variables:
+            deps.append(os.path.relpath(file.name))
         if extensions:
             deps.append(os.path.relpath(extensions.name))
         for d in yasha.find_referenced_templates(template, include_path):
@@ -220,7 +220,9 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
         t = jinja.get_template(os.path.basename(template.name))
 
     # Parse variables
-    context = parse_variable_file(variables)
+    context = dict()
+    for file in variables:
+        context.update(parse_variable_file(file))
     context.update(yasha.parse_cli_variables(template_variables))
 
     # Finally render template and save it

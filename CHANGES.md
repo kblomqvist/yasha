@@ -1,7 +1,7 @@
 Version 4.2
 -----------
 
-Minor release, unreleased
+Minor release, released 18 March 2018
 
 - Added support for multiple variables files.
 

@@ -121,14 +121,16 @@ def parse_cli_variables(args):
     return variables
 
 
-def load_jinja(path, tests, filters, classes, trim_blocks, lstrip_blocks, keep_trailing_newline):
+def load_jinja(path, tests, filters, classes, trim_blocks, lstrip_blocks, keep_trailing_newline, pedantic):
     from jinja2 import Environment, FileSystemLoader
+    from jinja2 import Undefined, StrictUndefined
     jinja = Environment(
         loader=FileSystemLoader(path),
         extensions=classes,
         trim_blocks=trim_blocks,
         lstrip_blocks=lstrip_blocks,
-        keep_trailing_newline=keep_trailing_newline
+        keep_trailing_newline=keep_trailing_newline,
+        undefined=StrictUndefined if pedantic else Undefined
     )
     jinja.tests.update(tests)
     jinja.filters.update(filters)

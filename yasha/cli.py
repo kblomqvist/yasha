@@ -26,6 +26,7 @@ THE SOFTWARE.
 import os
 import encodings
 
+import jinja2
 import click
 from click import ClickException
 
@@ -129,10 +130,11 @@ def load_extensions(file):
 @click.option("--no-trim-blocks", is_flag=True, help="Load Jinja with trim_blocks=False.")
 @click.option("--no-lstrip-blocks", is_flag=True, help="Load Jinja with lstrip_blocks=False.")
 @click.option("--keep-trailing-newline", is_flag=True, help="Load Jinja with keep_trailing_newline=True.")
+@click.option("--pedantic", is_flag=True, help="Yasha becomes extremely picky.")
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside the rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
-def cli(template_variables, template, output, variables, extensions, encoding, include_path, no_variable_file, no_extension_file, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, m, md):
+def cli(template_variables, template, output, variables, extensions, encoding, include_path, no_variable_file, no_extension_file, no_trim_blocks, no_lstrip_blocks, keep_trailing_newline, pedantic, m, md):
     """Reads the given Jinja TEMPLATE and renders its content
     into a new file. For example, a template called 'foo.c.j2'
     will be written into 'foo.c' in case the output file is not
@@ -209,7 +211,8 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
         classes=CLASSES,
         trim_blocks=not no_trim_blocks,
         lstrip_blocks=not no_lstrip_blocks,
-        keep_trailing_newline=keep_trailing_newline
+        keep_trailing_newline=keep_trailing_newline,
+        pedantic=pedantic
     )
 
     # Get template
@@ -226,6 +229,9 @@ def cli(template_variables, template, output, variables, extensions, encoding, i
     context.update(yasha.parse_cli_variables(template_variables))
 
     # Finally render template and save it
-    t_stream = t.stream(context)
-    t_stream.enable_buffering(size=5)
-    t_stream.dump(output, encoding=yasha.ENCODING)
+    try:
+        t_stream = t.stream(context)
+        t_stream.enable_buffering(size=5)
+        t_stream.dump(output, encoding=yasha.ENCODING)
+    except jinja2.exceptions.UndefinedError as e:
+        click.echo("UndefinedError: {}".format(e), err=True)

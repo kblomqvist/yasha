@@ -66,7 +66,10 @@ Options:
   --no-trim-blocks              Load Jinja with trim_blocks=False.
   --no-lstrip-blocks            Load Jinja with lstrip_blocks=False.
   --keep-trailing-newline       Load Jinja with keep_trailing_newline=True.
-  --pedantic                    Yasha becomes extremely picky.
+  --mode [pedantic|debug]       In pedantic mode Yasha becomes extremely picky
+                                on templates, e.g. undefined variables will
+                                raise an error. In debug mode undefined
+                                variables will print as is.
   -M                            Outputs Makefile compatible list of
                                 dependencies. Doesn't render the template.
   -MD                           Creates Makefile compatible .d file alongside

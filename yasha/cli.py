@@ -26,9 +26,9 @@ THE SOFTWARE.
 import os
 import encodings
 
-import jinja2
 import click
 from click import ClickException
+from jinja2.exceptions import UndefinedError as JinjaUndefinedError
 
 from . import yasha
 from .tests import TESTS
@@ -97,6 +97,11 @@ def load_extensions(file):
         if inspect.isclass(attr):
             if issubclass(attr, Extension):
                 classes.append(attr)
+
+    import jinja2.defaults
+    for name, obj in inspect.getmembers(module):
+        if name in jinja2.defaults.__all__:
+            setattr(jinja2.defaults, name, obj)
 
     try:
         TESTS.update(module.TESTS)
@@ -237,5 +242,5 @@ def cli(
         t_stream = t.stream(context)
         t_stream.enable_buffering(size=5)
         t_stream.dump(output, encoding=yasha.ENCODING)
-    except jinja2.exceptions.UndefinedError as e:
+    except JinjaUndefinedError as e:
         click.echo("UndefinedError: {}".format(e), err=True)

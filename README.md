@@ -273,6 +273,21 @@ def parse_xml(file):
     return dict(persons=persons)
 ```
 
+### Jinja’s syntax
+
+You may change the template syntax via file extensions by redefining
+the Jinja's parser/lexer. The example below mimics the LaTeX environment.
+
+```python
+# extensions.py
+BLOCK_START_STRING = '<%'
+BLOCK_END_STRING = '%>'
+VARIABLE_START_STRING = '<<'
+VARIABLE_END_STRING = '>>'
+COMMENT_START_STRING = '<#'
+COMMENT_END_STRING = '#>'
+```
+
 ## Built-in filters
 
 ### env

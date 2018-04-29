@@ -134,13 +134,23 @@ def load_jinja(
     else:
         undefined = Undefined
 
+    from jinja2.defaults import BLOCK_START_STRING, BLOCK_END_STRING, \
+        VARIABLE_START_STRING, VARIABLE_END_STRING, \
+        COMMENT_START_STRING, COMMENT_END_STRING
+
     jinja = Environment(
         loader=FileSystemLoader(path),
         extensions=classes,
         trim_blocks=trim_blocks,
         lstrip_blocks=lstrip_blocks,
         keep_trailing_newline=keep_trailing_newline,
-        undefined=undefined
+        undefined=undefined,
+        block_start_string=BLOCK_START_STRING,
+        block_end_string=BLOCK_END_STRING,
+        variable_start_string=VARIABLE_START_STRING,
+        variable_end_string=VARIABLE_END_STRING,
+        comment_start_string=COMMENT_START_STRING,
+        comment_end_string=COMMENT_END_STRING
     )
     jinja.tests.update(tests)
     jinja.filters.update(filters)

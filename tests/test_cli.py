@@ -224,14 +224,14 @@ def test_json_template(tmpdir):
 
 
 def test_mode_is_none():
-    ###gh-42, and gh-44"""
+    """gh-42, and gh-44"""
     cmd = r'echo -n "{{ foo }}" | yasha -'
     out = check_output(cmd, shell=True)
     assert out == b''
 
 
 def test_mode_is_pedantic():
-    ###gh-42"""
+    """gh-42"""
     cmd = r'echo -n "{{ foo }}" | yasha --mode=pedantic -'
     out = check_output(cmd, shell=True, stderr=subprocess.STDOUT)
     assert out == b"UndefinedError: 'foo' is undefined\n"

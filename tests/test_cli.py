@@ -206,10 +206,10 @@ def test_broken_extensions_name_error(tmpdir):
     assert b"name 'asd' is not defined" in e.value.output
 
 
-def test_stdin_and_out():
-    cmd = ("echo -n \"foo\"", "|", "yasha", "-")
+def test_render_template_from_stdin_to_stdout():
+    cmd = r'echo -n "{{ foo }}" | yasha --foo=bar -'
     out = check_output(cmd, shell=True)
-    assert out == b"foo"
+    assert out == b"bar"
 
 
 def test_json_template(tmpdir):

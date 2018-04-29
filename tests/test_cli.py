@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 import pytest
 from os import path, chdir
+import subprocess
 from subprocess import call, check_output
 
 @pytest.fixture(params=('json', 'yaml', 'yml', 'toml'))
@@ -220,3 +221,24 @@ def test_json_template(tmpdir):
 
     out = check_output(('yasha', '--bar=baz', '-o-', 'template.json'))
     assert out == b'{"foo": "baz"}'
+
+
+def test_mode_is_none():
+    ###gh-42, and gh-44"""
+    cmd = r'echo -n "{{ foo }}" | yasha -'
+    out = check_output(cmd, shell=True)
+    assert out == b''
+
+
+def test_mode_is_pedantic():
+    ###gh-42"""
+    cmd = r'echo -n "{{ foo }}" | yasha --mode=pedantic -'
+    out = check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+    assert out == b"UndefinedError: 'foo' is undefined\n"
+
+
+def test_mode_is_debug():
+    """gh-44"""
+    cmd = r'echo -n "{{ foo }}" | yasha --mode=debug -'
+    out = check_output(cmd, shell=True)
+    assert out == b'{{ foo }}'

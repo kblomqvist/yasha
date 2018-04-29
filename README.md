@@ -80,28 +80,25 @@ Options:
 
 ## Template variables
 
-Template variables can be defined in a separate file. [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) are supported.
+Template variables can be defined in a separate file:
 
 ```bash
 yasha -v variables.yaml template.j2
 ```
 
-Multiple variable files can be given:
+[JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) are supported. In case multiple files are given, the variables redefined in later files will take precedence.
 
 ```bash
 yasha -v variables.yaml -v settings.yaml template.j2
 ```
-Note that file variables redefined in later files will take precedence.
 
-Additionally you may define variables as part of the command-line call, e.g.
+Additionally you may define variables as part of the command-line call. A variable defined via command-line will overwrite a variable defined in a file.
 
 ```bash
 yasha -v variables.yaml --foo=bar template.j2
 ```
 
-A variable defined via command-line will overwrite a variable defined in file.
-
-### Automatic variable file look up
+### Automatic file variables look up
 
 If no variable file is explicitly given, Yasha will look for one by searching for a file named in the same way than the corresponding template but with the file extension either `.json`, `.yaml`, `.yml`, `.toml`, or `.xml`.
 
@@ -126,7 +123,7 @@ yasha -v template.yaml template.j2
 
 In case you want to omit the variable file in spite of its existence, use ``--no-variable-file`` option flag.
 
-### Shared file variables
+### Shared template file variables
 
 Imagine that you would be writing C code and have the following two templates in two different folders
 

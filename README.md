@@ -80,22 +80,22 @@ Options:
 
 ## Template variables
 
-Template variables can be defined in a separate file:
+Template variables can be defined in a separate file. By default [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) formats are supported.
 
 ```bash
 yasha -v variables.yaml template.j2
 ```
 
-[JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) are supported. In case multiple files are given, the variables redefined in later files will take precedence.
+In case multiple files are given, the variables redefined in later files will take precedence.
 
 ```bash
-yasha -v variables.yaml -v settings.yaml template.j2
+yasha -v variables.yaml -v additional_variables.yaml template.j2
 ```
 
 Additionally you may define variables as part of the command-line call. A variable defined via command-line will overwrite a variable defined in a file.
 
 ```bash
-yasha -v variables.yaml --foo=bar template.j2
+yasha --foo=bar -v variables.yaml template.j2
 ```
 
 ### Automatic file variables look up
@@ -109,7 +109,7 @@ template.j2
 template.yaml
 ```
 
-Because of automatic variable file look up, the command-line call
+Because of automatic file variables look up, the command-line call
 
 ```bash
 yasha template.j2
@@ -121,7 +121,7 @@ is equal to
 yasha -v template.yaml template.j2
 ```
 
-In case you want to omit the variable file in spite of its existence, use ``--no-variable-file`` option flag.
+In case you want to omit the file variables in spite of its existence, use ``--no-variable-file`` option flag.
 
 ### Shared template file variables
 

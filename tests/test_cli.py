@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 import pytest
 from os import path, chdir
+import subprocess
 from subprocess import call, check_output
 
 @pytest.fixture(params=('json', 'yaml', 'yml', 'toml'))
@@ -205,18 +206,76 @@ def test_broken_extensions_name_error(tmpdir):
     assert b"name 'asd' is not defined" in e.value.output
 
 
-def test_stdin_and_out():
-    cmd = ("echo -n \"foo\"", "|", "yasha", "-")
+def test_render_template_from_stdin_to_stdout():
+    cmd = r'echo -n "{{ foo }}" | yasha --foo=bar -'
     out = check_output(cmd, shell=True)
-    assert out == b"foo"
+    assert out == b'bar'
 
 
 def test_json_template(tmpdir):
     """gh-34, and gh-35"""
     tmpdir.chdir()
 
-    tmpl = tmpdir.join("template.json")
+    tmpl = tmpdir.join('template.json')
     tmpl.write('{"foo": {{\'"%s"\'|format(bar)}}}')
 
     out = check_output(('yasha', '--bar=baz', '-o-', 'template.json'))
     assert out == b'{"foo": "baz"}'
+
+
+def test_mode_is_none():
+    """gh-42, and gh-44"""
+    cmd = r'echo -n "{{ foo }}" | yasha -'
+    out = check_output(cmd, shell=True)
+    assert out == b''
+
+
+def test_mode_is_pedantic():
+    """gh-42"""
+    cmd = r'echo -n "{{ foo }}" | yasha --mode=pedantic -'
+    out = check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+    assert out == b"UndefinedError: 'foo' is undefined\n"
+
+
+def test_mode_is_debug():
+    """gh-44"""
+    cmd = r'echo -n "{{ foo }}" | yasha --mode=debug -'
+    out = check_output(cmd, shell=True)
+    assert out == b'{{ foo }}'
+
+
+def test_template_syntax_for_latex(tmpdir):
+    """gh-43"""
+    template = r"""
+\begin{itemize}
+<% for x in range(0, 3) %>
+    \item Counting: << x >>
+<% endfor %>
+\end{itemize}
+"""
+
+    extensions = r"""
+BLOCK_START_STRING = '<%'
+BLOCK_END_STRING = '%>'
+VARIABLE_START_STRING = '<<'
+VARIABLE_END_STRING = '>>'
+COMMENT_START_STRING = '<#'
+COMMENT_END_STRING = '#>'
+"""
+
+    expected_output = r"""
+\begin{itemize}
+    \item Counting: 0
+    \item Counting: 1
+    \item Counting: 2
+\end{itemize}
+"""
+
+    tpl = tmpdir.join('template.tex')
+    tpl.write(template)
+
+    ext = tmpdir.join('extensions.py')
+    ext.write(extensions)
+
+    out = check_output(('yasha', '--keep-trailing-newline', '-e', str(ext), '-o-', str(tpl)))
+    assert out.decode() == expected_output

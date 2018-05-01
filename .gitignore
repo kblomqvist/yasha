@@ -1,9 +1,28 @@
+# Python caches
 __pycache__/
-yasha.egg-info/
+*.py[cod]
+*$py.class
+
+
+# Distribution and packaging
 dist/
 build/
+*.egg-info/
+*.egg
 
-*.pyc
+
+# Unit test and coverage reports
+.cache/
+.pytest_cache/
+
+
+# Environments
+env/
+venv/
+.env/
+.venv/
+
+
 tests/**/build/
 tests/**/CMakeFiles/
 tests/**/.sconsign.dblite
@@ -12,5 +31,3 @@ tests/**/CMakeCache.txt
 tests/**/*.cmake
 tests/fixtures/nrf51.rs
 tests/fixtures/nrf51.rs.j2extc
-
-.cache/

@@ -1,3 +1,12 @@
+Version 4.3
+-----------
+
+Minor release, unreleased
+
+- Added new option `--mode [pedantic|debug]`. In pedantic mode Yasha
+  becomes extremely picky on templates, e.g. undefined variables will
+  raise an error. In debug mode undefined variables will print as is.
+
 Version 4.2
 -----------
 

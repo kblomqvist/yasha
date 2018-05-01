@@ -11,4 +11,4 @@ install:
 
 script:
   - echo "def foo pass" > foo.py # Test issue #25
-  - py.test -v tests
+  - pytest -v tests

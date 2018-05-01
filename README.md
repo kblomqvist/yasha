@@ -66,6 +66,10 @@ Options:
   --no-trim-blocks              Load Jinja with trim_blocks=False.
   --no-lstrip-blocks            Load Jinja with lstrip_blocks=False.
   --keep-trailing-newline       Load Jinja with keep_trailing_newline=True.
+  --mode [pedantic|debug]       In pedantic mode Yasha becomes extremely picky
+                                on templates, e.g. undefined variables will
+                                raise an error. In debug mode undefined
+                                variables will print as is.
   -M                            Outputs Makefile compatible list of
                                 dependencies. Doesn't render the template.
   -MD                           Creates Makefile compatible .d file alongside
@@ -76,28 +80,25 @@ Options:
 
 ## Template variables
 
-Template variables can be defined in a separate file. [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) are supported.
+Template variables can be defined in a separate file. By default [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) formats are supported.
 
 ```bash
 yasha -v variables.yaml template.j2
 ```
 
-Multiple variable files can be given:
+In case multiple files are given, the variables redefined in later files will take precedence.
 
 ```bash
-yasha -v variables.yaml -v settings.yaml template.j2
+yasha -v variables.yaml -v additional_variables.yaml template.j2
 ```
-Note that variables redefined in later variable files will take precedence.
 
-Additionally you may define variables as part of the command-line call, e.g.
+Additionally you may define variables as part of the command-line call. A variable defined via command-line will overwrite a variable defined in a file.
 
 ```bash
-yasha -v variables.yaml --foo=bar template.j2
+yasha --foo=bar -v variables.yaml template.j2
 ```
 
-A variable defined via command-line will overwrite a variable defined in file.
-
-### Automatic variable file look up
+### Automatic file variables look up
 
 If no variable file is explicitly given, Yasha will look for one by searching for a file named in the same way than the corresponding template but with the file extension either `.json`, `.yaml`, `.yml`, `.toml`, or `.xml`.
 
@@ -108,7 +109,7 @@ template.j2
 template.yaml
 ```
 
-Because of automatic variable file look up, the command-line call
+Because of automatic file variables look up, the command-line call
 
 ```bash
 yasha template.j2
@@ -120,9 +121,9 @@ is equal to
 yasha -v template.yaml template.j2
 ```
 
-In case you want to omit the variable file in spite of its existence, use ``--no-variable-file`` option flag.
+In case you want to omit the file variables in spite of its existence, use ``--no-variable-file`` option flag.
 
-### Variable file sharing
+### Shared template file variables
 
 Imagine that you would be writing C code and have the following two templates in two different folders
 
@@ -132,7 +133,7 @@ root/
     source/foo.c.j2
 ```
 
-and you would like to share the same variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` you can create `foo.yaml` under the root folder:
+and you would like to share the same file variables between these two templates. So instead of creating separate `foo.h.yaml` and `foo.c.yaml` you can create `foo.yaml` under the root folder:
 
 ```
 root/
@@ -269,6 +270,21 @@ def parse_xml(file):
     return dict(persons=persons)
 ```
 
+### Template syntax
+
+You may change the template syntax via file extensions by redefining
+the Jinja parser / lexer. The example below mimics the LaTeX environment.
+
+```python
+# extensions.py
+BLOCK_START_STRING = '<%'
+BLOCK_END_STRING = '%>'
+VARIABLE_START_STRING = '<<'
+VARIABLE_END_STRING = '>>'
+COMMENT_START_STRING = '<#'
+COMMENT_END_STRING = '#>'
+```
+
 ## Built-in filters
 
 ### env
@@ -357,7 +373,7 @@ Other possible literals are:
 - `{1, 2, 3}` (a set)
 - `True`, `False` (boolean)
 
-### Common extension file
+### Common file extensions
 
 Sometimes it would make sense to have common extensions over multiple templates, e.g. for the sake of filters. This can be achieved by setting `YASHA_EXTENSIONS` environment variable.
 
@@ -386,7 +402,7 @@ yasha -v variables.yaml -I $HOME/.yasha template.j2
 
 ### Variable pre-processing before template rendering
 
-If you need to pre-process template variables before those are passed into the template, you can do that within an extension file by wrapping the built-in parsers.
+If you need to pre-process template variables before those are passed into the template, you can do that via file extensions by wrapping the built-in parsers.
 
 ```python
 # extensions.py
@@ -405,7 +421,7 @@ for name, function in PARSERS.items():
 
 ### Using tests and filters from Ansible
 
-[Ansible](http://docs.ansible.com/ansible/latest/intro.html) is an IT automation platform that makes your applications and systems easier to deploy. It is based on Jinja2 and offers a large set of [custom tests and filters](http://docs.ansible.com/ansible/latest/playbooks_templating.html), which can be easily taken into use via Yasha extensions.
+[Ansible](http://docs.ansible.com/ansible/latest/intro.html) is an IT automation platform that makes your applications and systems easier to deploy. It is based on Jinja2 and offers a large set of [custom tests and filters](http://docs.ansible.com/ansible/latest/playbooks_templating.html), which can be easily taken into use via Yasha's file extensions.
 
 ```bash
 pip install ansible

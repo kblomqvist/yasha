@@ -1,3 +1,12 @@
+Version 5.0
+-----------
+
+Major release, unreleased
+
+- The option `--keep-trailing-newline` was removed in favor of making
+  it default. The old behaviour can be achieved with the new option
+  `--remove-trailing-newline`.
+
 Version 4.3
 -----------
 

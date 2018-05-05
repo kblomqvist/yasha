@@ -134,7 +134,7 @@ def load_extensions(file):
 @click.option("--no-extension-file", is_flag=True, help="Omit template extension file.")
 @click.option("--no-trim-blocks", is_flag=True, help="Load Jinja with trim_blocks=False.")
 @click.option("--no-lstrip-blocks", is_flag=True, help="Load Jinja with lstrip_blocks=False.")
-@click.option("--keep-trailing-newline", is_flag=True, help="Load Jinja with keep_trailing_newline=True.")
+@click.option("--remove-trailing-newline", is_flag=True, help="Load Jinja with keep_trailing_newline=False.")
 @click.option("--mode", type=click.Choice(['pedantic', 'debug']), help="In pedantic mode Yasha becomes extremely picky on templates, e.g. undefined variables will raise an error. In debug mode undefined variables will print as is.")
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside the rendered template.")
@@ -142,7 +142,7 @@ def load_extensions(file):
 def cli(
         template_variables, template, output, variables, extensions,
         encoding, include_path, no_variable_file, no_extension_file,
-        no_trim_blocks, no_lstrip_blocks, keep_trailing_newline,
+        no_trim_blocks, no_lstrip_blocks, remove_trailing_newline,
         mode, m, md):
     """Reads the given Jinja TEMPLATE and renders its content
     into a new file. For example, a template called 'foo.c.j2'
@@ -221,7 +221,7 @@ def cli(
         mode=mode,
         trim_blocks=not no_trim_blocks,
         lstrip_blocks=not no_lstrip_blocks,
-        keep_trailing_newline=keep_trailing_newline
+        keep_trailing_newline=not remove_trailing_newline
    )
 
     # Get template

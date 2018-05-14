@@ -231,10 +231,12 @@ def test_mode_is_none():
 
 
 def test_mode_is_pedantic():
-    """gh-42"""
-    cmd = r'echo -n "{{ foo }}" | yasha --mode=pedantic -'
-    out = check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-    assert out == b"UndefinedError: 'foo' is undefined\n"
+    """gh-42, and gh-48"""
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        cmd = r'echo -n "{{ foo }}" | yasha --mode=pedantic -'
+        out = check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+    out = err.value.output
+    assert out == b"Error: Variable 'foo' is undefined\n"
 
 
 def test_mode_is_debug():

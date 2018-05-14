@@ -243,4 +243,4 @@ def cli(
         t_stream.enable_buffering(size=5)
         t_stream.dump(output, encoding=yasha.ENCODING)
     except JinjaUndefinedError as e:
-        click.echo("UndefinedError: {}".format(e), err=True)
+        raise ClickException("Variable {}".format(e))

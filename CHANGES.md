@@ -6,6 +6,7 @@ Major release, unreleased
 - The option `--keep-trailing-newline` was removed in favor of making
   it default. The old behaviour can be achieved with the new option
   `--remove-trailing-newline`.
+- Fixed an exit code in case of undefined variable from 0 to 1.
 
 Version 4.3
 -----------

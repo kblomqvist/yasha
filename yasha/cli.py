@@ -118,6 +118,11 @@ def load_extensions(file):
     except AttributeError:
         PARSERS.update(parsers)
 
+    try:
+        CLASSES.extend(module.CLASSES)
+    except AttributeError:
+        CLASSES.extend(classes)
+
 
 @click.command(context_settings=dict(
     help_option_names=["-h", "--help"],

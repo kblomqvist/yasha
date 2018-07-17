@@ -281,3 +281,17 @@ COMMENT_END_STRING = '#>'
 
     out = check_output(('yasha', '-e', str(ext), '-o-', str(tpl)))
     assert out.decode() == expected_output
+
+
+def test_extensions_file_with_do(tmpdir):
+    """gh-52"""
+    tmpdir.chdir()
+
+    extensions = tmpdir.join('extensions.py')
+    extensions.write('from jinja2.ext import do')
+
+    tmpl = tmpdir.join('template.j2')
+    tmpl.write(r'{% set list = [1, 2, 3] %}{% do list.append(4) %}{{ list }}')
+
+    out = check_output(('yasha', '-e', str(extensions), '-o-', str(tmpl)))
+    assert out == b'[1, 2, 3, 4]'

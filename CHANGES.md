@@ -7,6 +7,7 @@ Major release, unreleased
   it default. The old behaviour can be achieved with the new option
   `--remove-trailing-newline`.
 - Fixed an exit code in case of undefined variable from 0 to 1.
+- Fixed a bug that caused extension classes not to load.
 
 Version 4.3
 -----------

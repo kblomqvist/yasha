@@ -49,6 +49,12 @@ def parse_xml(file):
     variables = xmltodict.parse(file.read().decode(ENCODING))
     return variables if variables else dict()
 
+def parse_ini(inifile):
+    import configparser
+    cnf = configparser.ConfigParser()
+    cnf.read(inifile)
+    return cnf
+
 def parse_svd(file):
     # TODO: To be moved into its own repo
     from .cmsis import SVDFile
@@ -66,5 +72,6 @@ PARSERS = {
     '.yml': parse_yaml,
     '.toml': parse_toml,
     '.xml': parse_xml,
+    '.ini': parse_ini,
     '.svd': parse_svd,
 }

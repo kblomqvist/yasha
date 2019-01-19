@@ -76,3 +76,15 @@ def test_dictionary(t):
     t.write("{{ var is mapping }}, {% for k in 'abc' %}{{ var[k] }}{% endfor %}")
     out = check_output(['yasha', '--var', "{'a': 1, 'b': 2, 'c': 3}", '-o-', str(t)])
     assert out == b'True, 123'
+
+def test_commas_in_quoted_string(t):
+    """ gh-57 """
+    t.write('{{ str is string }}, {{ str }}')
+    out = check_output(['yasha', '--str', '\'"foo,bar,baz"\'', '-o-', str(t)])
+    assert out == b'True, foo,bar,baz'
+
+def test_quoted_comma_in_comma_separated_list(t):
+    """ gh-57 """
+    t.write('{{ lst is sequence }}, {{ lst | join(".") }}')
+    out = check_output(['yasha', '--lst', '\'"foo,bar",baz\'', '-o-', str(t)])
+    assert out == b'True, foo,bar.baz'

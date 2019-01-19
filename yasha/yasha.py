@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 import os
 import ast
+import csv
 import jinja2 as jinja
 
 __version__ = "dev"
@@ -115,9 +116,13 @@ def parse_cli_variables(args):
             pass
         except SyntaxError:
             pass
-        if isinstance(val, str) and ',' in val:
-            # Convert foo,bar,baz to list ['foo', 'bar', 'baz']
-            val = val.split(',')
+        if isinstance(val, str):
+            # Convert foo,bar,baz to list ['foo', 'bar', 'baz'] and
+            # '"foo,bar,baz"' to string 'foo,bar,baz'
+            reader = csv.reader([val], delimiter=',', quotechar='"')
+            val = list(reader)[0]
+            if len(val) == 1:
+                val = val[0]
         variables[opt] = val
     return variables
 

@@ -8,6 +8,7 @@ Major release, unreleased
   `--remove-trailing-newline`.
 - Fixed an exit code in case of undefined variable from 0 to 1.
 - Fixed a bug that caused extension classes not to load.
+- Quoted string variable with commas is not converted to list anymore (gh-57).
 
 Version 4.3
 -----------

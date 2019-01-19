@@ -354,13 +354,19 @@ cat template.j2 | yasha -v variables.yaml -
 Variables given as part of the command-line call can be Python literals, e.g. a list would be defined like this
 
 ```bash
-yasha --foo="['foo', 'bar', 'baz']" template.j2
+yasha --lst="['foo', 'bar', 'baz']" template.j2
 ```
 
 The following is also interpreted as a list
 
 ```bash
-yasha --foo=foo,bar,baz template.j2
+yasha --lst=foo,bar,baz template.j2
+```
+
+Note that in case you like to pass a string with commas as a variable you have to quote it as
+
+```bash
+yasha --str='"foo,bar,baz"' template.j2
 ```
 
 Other possible literals are:

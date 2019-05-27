@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import base64
 import os
 import sys
 import subprocess
@@ -47,6 +48,24 @@ def check_output(*args, **kwargs):
     else:
         cp = subprocess.run(args, **params)
         return (cp.stdout, cp.returncode)
+
+
+@requires_py3
+def test_base64():
+    template = '{{ "Hello, Wörld" | base64 }}'
+    out, retcode = check_output('yasha', '-', stdin=template)
+    assert out == base64.b64encode(bytes("Hello, Wörld", "utf-8"))
+
+
+@requires_py3
+def test_base64_list():
+    template = '{{ my_var | base64 }}'
+    out, retcode = check_output('yasha', '--my_var="Hello,World"', '-', stdin=template)
+    assert out == (b"['" +
+        base64.b64encode(bytes("Hello", "utf-8")) +
+        b"', '" +
+        base64.b64encode(bytes("World", "utf-8")) +
+        b"']")
 
 
 def test_env(tmpdir):

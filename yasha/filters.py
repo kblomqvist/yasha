@@ -22,12 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import base64
 import os
 import sys
 import subprocess
 
 from click import ClickException
 from .yasha import ENCODING
+
+def do_base64(value):
+    if isinstance(value, list):
+        return [do_base64(sub_value) for sub_value in value]
+    return base64.b64encode(bytes(value, encoding=ENCODING)).decode(encoding=ENCODING)
 
 def do_env(value, default=None):
     return os.environ.get(value, default)
@@ -64,6 +70,7 @@ def do_shell(cmd, strip=True, check=True, timeout=2):
         return result.stdout.decode(encoding=ENCODING).strip()
 
 FILTERS = {
+    'base64': do_base64,
     'env': do_env,
     'shell': do_shell,
     'subprocess': do_subprocess,

@@ -287,6 +287,14 @@ COMMENT_END_STRING = '#>'
 
 ## Built-in filters
 
+### base64
+
+Do a base64 encoding of a variable (e.g. for use with Kubernetes manifests) like:
+```jinja
+data:
+  ACCESS_KEY: {{ access_key | base64 }}
+```
+
 ### env
 
 Reads system environment variable in a template like

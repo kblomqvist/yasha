@@ -100,7 +100,7 @@ def load_extensions(file):
 
     import jinja2.defaults
     for name, obj in inspect.getmembers(module):
-        if name in jinja2.defaults.__all__:
+        if name in tuple(x for x in dir(jinja2.defaults) if x.isupper()):
             setattr(jinja2.defaults, name, obj)
 
     try:

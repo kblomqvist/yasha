@@ -83,7 +83,7 @@ def test_subprocess_with_unknown_cmd():
     template = '{{ "unknown_cmd" | subprocess }}'
     out, retcode = check_output('yasha', '-', stdin=template)
     assert retcode != 0
-    assert b'unknown_cmd: not found' in out
+    assert b'not found' in out
 
 
 @requires_py3

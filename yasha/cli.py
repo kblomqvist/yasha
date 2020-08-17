@@ -249,3 +249,7 @@ def cli(
         t_stream.dump(output, encoding=yasha.ENCODING)
     except JinjaUndefinedError as e:
         raise ClickException("Variable {}".format(e))
+
+if __name__ == '__main__':
+    import sys
+    cli(sys.argv[1:])

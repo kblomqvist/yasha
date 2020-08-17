@@ -71,7 +71,7 @@ def testdata(request):
             {% endfor %}"""),
         csv_with_header=wrap("""
             {% for row in data %}
-            cell 1 is {{ row.first_column }}, cell 2 is {{ row.second_column }}
+            cell 1 is {{ row.first_column }}, cell 2 is {{ row['second column'] }}
             {% endfor %}""")
     )
     output = dict(
@@ -175,7 +175,7 @@ def testdata(request):
             templates['csv_with_header'],
             output['csv'],
             wrap("""
-                first_column,second_column
+                first_column,second column
                 value1,2
                 value3,4
                 value5,6

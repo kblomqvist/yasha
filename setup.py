@@ -20,7 +20,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "Click",
-        "Jinja2",
+        "Jinja2<2.11",
         "pytoml",
         "pyyaml",
         "xmltodict",

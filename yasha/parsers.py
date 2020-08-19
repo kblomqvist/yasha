@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 """
+import sys
 
 from .yasha import ENCODING
 
@@ -62,7 +63,10 @@ def parse_svd(file):
 
 
 def parse_ini(file):
-    from configparser import ConfigParser
+    if sys.version_info[0] == 2:
+        from ConfigParser import ConfigParser
+    else:
+        from configparser import ConfigParser
     from io import TextIOWrapper
     cfg = ConfigParser()
     # yasha opens files in binary mode, configparser expects files in text mode

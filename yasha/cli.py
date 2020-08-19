@@ -59,8 +59,10 @@ def load_python_module(file):
         module = loader.load_module()
     except ImportError:  # Fallback to Python2
         import imp
-        desc = (".py", "rb", imp.PY_SOURCE)
-        module = imp.load_module('yasha_extensions', file, file.name, desc)
+        with open(file.name) as f:
+            desc = (".py", "rb", imp.PY_SOURCE)
+            module = imp.load_module('yasha_extensions', f, file.name, desc)
+        pass
     return module
 
 def load_extensions(file):

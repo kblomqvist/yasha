@@ -24,9 +24,9 @@ THE SOFTWARE.
 
 import pytest
 import os.path
+import sys
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-
 
 @pytest.fixture
 def fixtures_dir():

@@ -24,6 +24,7 @@ setup(
         "pytoml",
         "pyyaml",
         "xmltodict",
+        'configparser;python_version<"3.5"'
     ],
     entry_points='''
         [console_scripts]

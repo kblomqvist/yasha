@@ -63,11 +63,7 @@ def parse_svd(file):
 
 
 def parse_ini(file):
-    if sys.version_info[0] == 2:
-        from ConfigParser import ConfigParser
-    else:
-        from configparser import ConfigParser
-    from io import TextIOWrapper
+    from configparser import ConfigParser
     cfg = ConfigParser()
     # yasha opens files in binary mode, configparser expects files in text mode
     content = file.read().decode(ENCODING)

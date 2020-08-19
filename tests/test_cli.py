@@ -26,13 +26,18 @@ from os import path, chdir
 import subprocess
 from subprocess import call, check_output
 from textwrap import dedent
+import sys
 
 import pytest
 from yasha.cli import cli
 from click.testing import CliRunner
 
+
 def wrap(text):
     return dedent(text).lstrip()
+
+
+PY2 = True if sys.version_info[0] == 2 else False
 
 
 @pytest.fixture(params=('json', 'yaml', 'yml', 'toml'))
@@ -356,8 +361,8 @@ def test_broken_extensions_name_error(tmpdir):
 
 
 def test_render_template_from_stdin_to_stdout():
-    cmd = r'yasha --foo=bar -'
-    out = check_output(cmd, shell=True, input=b"{{ foo }}")
+    cmd = r'echo {{ foo }} | yasha --foo=bar -'
+    out = check_output(cmd, shell=True)
     assert out == b'bar'
 
 
@@ -374,24 +379,24 @@ def test_json_template(tmpdir):
 
 def test_mode_is_none():
     """gh-42, and gh-44"""
-    cmd = r'yasha -'
-    out = check_output(cmd, shell=True, input=b"{{ foo }}")
+    cmd = r'echo {{ foo }} | yasha -'
+    out = check_output(cmd, shell=True)
     assert out == b''
 
 
 def test_mode_is_pedantic():
     """gh-42, and gh-48"""
     with pytest.raises(subprocess.CalledProcessError) as err:
-        cmd = r'yasha --mode=pedantic -'
-        out = check_output(cmd, shell=True, stderr=subprocess.STDOUT, input=b"{{ foo }}")
+        cmd = r'echo {{ foo }} | yasha --mode=pedantic -'
+        out = check_output(cmd, shell=True, stderr=subprocess.STDOUT)
     out = err.value.output
     assert out == b"Error: Variable 'foo' is undefined\n"
 
 
 def test_mode_is_debug():
     """gh-44"""
-    cmd = r'yasha --mode=debug -'
-    out = check_output(cmd, shell=True, input=b"{{ foo }}")
+    cmd = r'echo {{ foo }} | yasha --mode=debug -'
+    out = check_output(cmd, shell=True)
     assert out == b'{{ foo }}'
 
 

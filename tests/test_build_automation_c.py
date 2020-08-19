@@ -28,6 +28,9 @@ from os import path, chdir, mkdir
 
 import pytest
 
+if sys.version_info[0] == 2:
+    FileNotFoundError = IOError
+
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 
 requires_py27_or_py35_or_greater = pytest.mark.skipif(

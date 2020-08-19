@@ -19,6 +19,7 @@ Minor release, last release with python2.7 support, unreleased
 - Quoted string variable with commas is not converted to list anymore (gh-57).
 - Implemented workaround for jinja 2.11 compatability issue (gh-60)
 - Added support for INI and CSV file parsing
+- Fixed a bug that caused Yasha to crash when loading file extensions (regression bug likely caused by Click)
 
 Version 4.3
 -----------

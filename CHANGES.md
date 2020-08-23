@@ -1,18 +1,7 @@
-Version 5.0
------------
-
-Major release, unreleased
-
-- Dropped support for Python 2.7.
-- The option `--keep-trailing-newline` was removed in favor of making
-  it default. The old behaviour can be achieved with the new option
-  `--remove-trailing-newline`.
-- Fixed Jinja 2.11.x compatability issue (gh-60).
-
 Version 4.4
 -----------
 
-Minor release (last with Python 2.7 support), unreleased
+Minor release (last with Python 2.7 support), 23 Aug 2020
 
 - Fixed an exit code in case of undefined variable from 0 to 1.
 - Fixed a bug that caused extension classes not to load.

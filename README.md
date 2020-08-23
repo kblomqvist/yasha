@@ -1,7 +1,7 @@
 # Yasha
 [![Build Status](https://travis-ci.org/kblomqvist/yasha.svg?branch=master)](https://travis-ci.org/kblomqvist/yasha)
-![MIT license](https://img.shields.io/pypi/l/yasha.svg)
-<img src="https://raw.githubusercontent.com/kblomqvist/yasha/master/yasha.png" align="right" />
+![PyPI - License](https://img.shields.io/pypi/l/yasha)
+![PyPI - Downloads](https://img.shields.io/pypi/dw/yasha)
 
 Yasha is a code generator based on [Jinja2](http://jinja.pocoo.org/) template engine. At its simplest, a command-line call
 

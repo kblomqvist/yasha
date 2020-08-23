@@ -4,20 +4,20 @@ Version 5.0
 Major release, unreleased
 
 - Dropped support for Python 2.7.
+- Fixed Jinja 2.11.x compatibility issue (gh-60).
 - The option `--keep-trailing-newline` was removed in favor of making
   it default. The old behaviour can be achieved with the new option
   `--remove-trailing-newline`.
-- Fixed Jinja 2.11.x compatability issue (gh-60).
 
 Version 4.4
 -----------
 
-Minor release (last with Python 2.7 support), unreleased
+Minor release (last with Python 2.7 support), 23 Aug 2020
 
 - Fixed an exit code in case of undefined variable from 0 to 1.
 - Fixed a bug that caused extension classes not to load.
 - Quoted string variable with commas is not converted to list anymore (gh-57).
-- Implemented workaround for Jinja 2.11 compatability issue (gh-60)
+- Implemented workaround for Jinja 2.11 compatibility issue (gh-60)
 - Added support for INI and CSV file parsing.
 - Fixed a bug that caused Yasha to crash when loading file extensions
   (regression likely caused by Click).

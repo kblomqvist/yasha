@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2017 Kim Blomqvist
+Copyright (c) 2015-2020 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,9 @@ THE SOFTWARE.
 
 import pytest
 import os.path
+import sys
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-
 
 @pytest.fixture
 def fixtures_dir():

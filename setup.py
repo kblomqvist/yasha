@@ -20,10 +20,11 @@ setup(
     include_package_data=True,
     install_requires=[
         "Click",
-        "Jinja2",
+        "Jinja2<2.11",
         "pytoml",
         "pyyaml",
         "xmltodict",
+        'configparser;python_version<"3.5"'
     ],
     entry_points='''
         [console_scripts]

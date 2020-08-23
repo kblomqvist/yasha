@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2017 Kim Blomqvist
+Copyright (c) 2015-2020 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 """
+import sys
 
 from .yasha import ENCODING
 
@@ -60,6 +61,38 @@ def parse_svd(file):
         "peripherals": svd.peripherals,
     }
 
+
+def parse_ini(file):
+    from configparser import ConfigParser
+    cfg = ConfigParser()
+    # yasha opens files in binary mode, configparser expects files in text mode
+    content = file.read().decode(ENCODING)
+    cfg.read_string(content)
+    result = dict(cfg)
+    for section, data in result.items():
+        result[section] = dict(data)
+    return result
+
+
+def parse_csv(file):
+    from csv import reader, DictReader, Sniffer
+    from io import TextIOWrapper
+    from os.path import basename, splitext
+    assert file.name.endswith('.csv')
+    name = splitext(basename(file.name))[0]  # get the filename without the extension
+    content = TextIOWrapper(file, encoding='utf-8', errors='replace')
+    sample = content.read(1024)
+    content.seek(0)
+    csv = list()
+    if Sniffer().has_header(sample):
+        for row in DictReader(content):
+            csv.append(dict(row))
+    else:
+        for row in reader(content):
+            csv.append(row)
+    return {name: csv}
+
+
 PARSERS = {
     '.json': parse_json,
     '.yaml': parse_yaml,
@@ -67,4 +100,6 @@ PARSERS = {
     '.toml': parse_toml,
     '.xml': parse_xml,
     '.svd': parse_svd,
+    '.ini': parse_ini,
+    '.csv': parse_csv
 }

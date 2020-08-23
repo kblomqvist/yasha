@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2017 Kim Blomqvist
+Copyright (c) 2015-2020 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@ THE SOFTWARE.
 
 import os
 import ast
+import csv
+import jinja2 as jinja
 
 __version__ = "4.3"
 
@@ -114,9 +116,13 @@ def parse_cli_variables(args):
             pass
         except SyntaxError:
             pass
-        if isinstance(val, str) and ',' in val:
-            # Convert foo,bar,baz to list ['foo', 'bar', 'baz']
-            val = val.split(',')
+        if isinstance(val, str):
+            # Convert foo,bar,baz to list ['foo', 'bar', 'baz'] and
+            # '"foo,bar,baz"' to string 'foo,bar,baz'
+            reader = csv.reader([val], delimiter=',', quotechar='"')
+            val = list(reader)[0]
+            if len(val) == 1:
+                val = val[0]
         variables[opt] = val
     return variables
 
@@ -124,34 +130,35 @@ def parse_cli_variables(args):
 def load_jinja(
         path, tests, filters, classes, mode,
         trim_blocks, lstrip_blocks, keep_trailing_newline):
-    from jinja2 import Environment, FileSystemLoader
-    from jinja2 import Undefined, StrictUndefined, DebugUndefined
-
-    if mode == 'pedantic':
-        undefined = StrictUndefined
-    elif mode == 'debug':
-        undefined = DebugUndefined
-    else:
-        undefined = Undefined
-
     from jinja2.defaults import BLOCK_START_STRING, BLOCK_END_STRING, \
         VARIABLE_START_STRING, VARIABLE_END_STRING, \
-        COMMENT_START_STRING, COMMENT_END_STRING
+        COMMENT_START_STRING, COMMENT_END_STRING, \
+        LINE_STATEMENT_PREFIX, LINE_COMMENT_PREFIX, \
+        NEWLINE_SEQUENCE
 
-    jinja = Environment(
-        loader=FileSystemLoader(path),
-        extensions=classes,
-        trim_blocks=trim_blocks,
-        lstrip_blocks=lstrip_blocks,
-        keep_trailing_newline=keep_trailing_newline,
-        undefined=undefined,
+    undefined = {
+        'pedantic': jinja.StrictUndefined,
+        'debug': jinja.DebugUndefined,
+        None: jinja.Undefined,
+    }
+
+    env = jinja.Environment(
         block_start_string=BLOCK_START_STRING,
         block_end_string=BLOCK_END_STRING,
         variable_start_string=VARIABLE_START_STRING,
         variable_end_string=VARIABLE_END_STRING,
         comment_start_string=COMMENT_START_STRING,
-        comment_end_string=COMMENT_END_STRING
+        comment_end_string=COMMENT_END_STRING,
+        line_statement_prefix=LINE_STATEMENT_PREFIX,
+        line_comment_prefix=LINE_COMMENT_PREFIX,
+        trim_blocks=trim_blocks,
+        lstrip_blocks=lstrip_blocks,
+        newline_sequence=NEWLINE_SEQUENCE,
+        keep_trailing_newline=keep_trailing_newline,
+        extensions=classes,
+        undefined=undefined[mode],
+        loader=jinja.FileSystemLoader(path)
     )
-    jinja.tests.update(tests)
-    jinja.filters.update(filters)
-    return jinja
+    env.tests.update(tests)
+    env.filters.update(filters)
+    return env

@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2017 Kim Blomqvist
+Copyright (c) 2015-2020 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,9 @@ import subprocess
 from os import path, chdir, mkdir
 
 import pytest
+
+if sys.version_info[0] == 2:
+    FileNotFoundError = IOError
 
 SCRIPT_PATH = path.dirname(path.realpath(__file__))
 

@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2017 Kim Blomqvist
+Copyright (c) 2015-2020 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import pytest
 from os import path, chdir
 import subprocess
 from subprocess import call, check_output
+from textwrap import dedent
+import sys
+
+import pytest
+from yasha.cli import cli
+from click.testing import CliRunner
+
+
+def wrap(text):
+    return dedent(text).lstrip()
+
+
+PY2 = True if sys.version_info[0] == 2 else False
+
 
 @pytest.fixture(params=('json', 'yaml', 'yml', 'toml'))
 def vartpl(request):
@@ -39,24 +52,162 @@ def vartpl(request):
     return (template[fmt], fmt)
 
 
-@pytest.fixture
-def varfile(vartpl, tmpdir):
-    content = {'int': 1}
-    template, filext = vartpl
-    file = tmpdir.join('variables.{}'.format(filext))
-    file.write(template.format(**content))
-    return file
+@pytest.fixture(params=('json', 'yaml', 'yml', 'toml', 'ini', 'csv', 'csv_with_header'))
+def testdata(request):
+    templates = dict(
+        default=wrap("""
+            {% for item in list_data %}
+            "{{ item.key1 }}"=>{{ item.key2 }}
+            {% endfor %}
+            {{ a_variable }}
+            {{ a.nested.variable }}"""),
+        # Ini files don't support the kinds of arbitrarily nested data structures found in the default template,
+        # so they can only be tested with a template which uses data structured in ini-format (ie a dict (the ini file)
+        # of dicts(the sections of the ini file) of keys (whose values can be None or strings)
+        ini=wrap("""
+            Section One, variable one: {{ section_one.variable_one }}
+            {{ section_two.key }}"""),
+        # CSV files don't support the kinds of arbitrarily nested data structures found in the default template,
+        # so they can only be tested with a template which uses data structured in csv-format
+        # ie. a list of dicts if the csv file has a header row, a list of lists if it doesn't
+        csv=wrap("""
+            {% for row in data %}
+            cell 1 is {{ row[0] }}, cell 2 is {{ row[1] }}
+            {% endfor %}"""),
+        csv_with_header=wrap("""
+            {% for row in data %}
+            cell 1 is {{ row.first_column }}, cell 2 is {{ row['second column'] }}
+            {% endfor %}""")
+    )
+    output = dict(
+        default=wrap("""
+            "some value"=>key2 value
+            "another value"=>another key2 value
+            a variable value
+            a nested value"""),
+        ini=wrap("""
+            Section One, variable one: S1 V1 value
+            S2 key value"""),
+        csv=wrap("""
+            cell 1 is value1, cell 2 is 2
+            cell 1 is value3, cell 2 is 4
+            cell 1 is value5, cell 2 is 6
+            cell 1 is value7, cell 2 is 8
+            cell 1 is value9, cell 2 is 10
+            """)
+    )
+    data = dict(
+        # Each entry is a list of strings [template, expected_output, data, extension]
+        json=[
+            templates['default'],
+            output['default'],
+            wrap("""
+                {
+                    "list_data": [
+                        {
+                            "key1": "some value",
+                            "key2": "key2 value"
+                        },
+                        {
+                            "key1": "another value",
+                            "key2": "another key2 value"
+                        }
+                    ],
+                    "a_variable": "a variable value",
+                    "a": {
+                        "nested": {
+                            "variable": "a nested value"
+                        }
+                    }
+                }"""),
+            'json'
+        ],
+        yaml=[
+            templates['default'],
+            output['default'],
+            wrap("""
+                list_data:
+                  - key1: some value
+                    key2: key2 value
+                  - key1: another value
+                    key2: another key2 value
+                a_variable: a variable value
+                a:
+                  nested:
+                    variable: a nested value
+                """),
+            'yaml'
+        ],
+        toml=[
+            templates['default'],
+            output['default'],
+            wrap("""
+                a_variable = "a variable value"
+                [[list_data]]
+                key1 = "some value"
+                key2 = "key2 value"
+                [[list_data]]
+                key1 = "another value"
+                key2 = "another key2 value"
+                [a.nested]
+                variable = "a nested value"
+                """),
+            'toml'
+        ],
+        ini=[
+            templates['ini'],
+            output['ini'],
+            wrap("""
+                [section_one]
+                variable_one = S1 V1 value
+                [section_two]
+                key = S2 key value
+                """),
+            'ini'
+        ],
+        csv=[
+            templates['csv'],
+            output['csv'],
+            wrap("""
+                value1,2
+                value3,4
+                value5,6
+                value7,8
+                value9,10"""),
+            'csv'
+        ],
+        csv_with_header=[
+            templates['csv_with_header'],
+            output['csv'],
+            wrap("""
+                first_column,second column
+                value1,2
+                value3,4
+                value5,6
+                value7,8
+                value9,10"""),
+            'csv'
+        ]
+    )
+    data['yml'] = data['yaml']
+    data['yml'][3] = 'yml'
+    fmt = request.param
+    return data[fmt]
 
 
-def test_explicit_variable_file(tmpdir, varfile):
+def test_explicit_variable_file(tmpdir, testdata):
+    template, expected_output, data, extension = testdata
     tpl = tmpdir.join('template.j2')
-    tpl.write('{{ int }}')
+    tpl.write(template)
+    datafile = tmpdir.join('data.{}'.format(extension))
+    datafile.write(data)
 
-    errno = call(('yasha', '-v', str(varfile), str(tpl)))
-    assert errno == 0
+    runner = CliRunner()
+    result = runner.invoke(cli, ['-v', str(datafile), str(tpl)])
+    assert result.exit_code == 0
 
     output = tmpdir.join('template')
-    assert output.read() == '1'
+    assert output.read() == expected_output
 
 
 def test_two_explicitly_given_variables_files(tmpdir):
@@ -72,8 +223,9 @@ def test_two_explicitly_given_variables_files(tmpdir):
     b = tmpdir.join('b.toml')
     b.write('b = 2\nc = 3')
 
-    errno = call(('yasha', '-v', str(a), '-v', str(b), str(tpl)))
-    assert errno == 0
+    runner = CliRunner()
+    result = runner.invoke(cli, ['-v', str(a), '-v', str(b), str(tpl)])
+    assert result.exit_code == 0
 
     output = tmpdir.join('template')
     assert output.read() == '6'  # a + b + c = 1 + 2 + 3 = 6
@@ -98,8 +250,9 @@ def test_variable_file_lookup(tmpdir, vartpl):
         varfile = tmpdir.join(varfile)
         varfile.write(vartpl[0].format(int=i))
 
-        errno = call(('yasha', 'sub/foo.c.j2'))
-        assert errno == 0
+        runner = CliRunner()
+        result = runner.invoke(cli, ['sub/foo.c.j2'])
+        assert result.exit_code == 0
         assert path.isfile('sub/foo.c')
 
         output = tmpdir.join('sub/foo.c')
@@ -152,8 +305,9 @@ def parse_xml(file):
     file = tmpdir.join("foo.j2ext")
     file.write(extensions)
 
-    errno = call(["yasha", "foo.toml.jinja"])
-    assert errno == 0
+    runner = CliRunner()
+    result = runner.invoke(cli, ['foo.toml.jinja'])
+    assert result.exit_code == 0
     assert path.isfile("foo.toml")
 
     o = tmpdir.join("foo.toml")
@@ -180,11 +334,11 @@ def test_broken_extensions(tmpdir):
     ext = tmpdir.join("foo.j2ext")
     ext.write(extensions)
 
-    with pytest.raises(CalledProcessError) as e:
-        cmd = ["yasha", "foo.jinja"]
-        check_output(cmd, stderr=STDOUT)
-    assert e.value.returncode == 1
-    assert b"Invalid syntax (foo.j2ext, line 1)" in e.value.output
+    runner = CliRunner()
+    result = runner.invoke(cli, ['foo.jinja'])
+    assert result.exit_code == 1
+    assert result.exception
+    assert "Invalid syntax (foo.j2ext, line 1)" in result.stdout
 
 
 def test_broken_extensions_name_error(tmpdir):
@@ -199,15 +353,15 @@ def test_broken_extensions_name_error(tmpdir):
     ext = tmpdir.join("foo.j2ext")
     ext.write(extensions)
 
-    with pytest.raises(CalledProcessError) as e:
-        cmd = ["yasha", "foo.jinja"]
-        check_output(cmd, stderr=STDOUT)
-    assert e.value.returncode == 1
-    assert b"name 'asd' is not defined" in e.value.output
+    runner = CliRunner()
+    result = runner.invoke(cli, ['foo.jinja'])
+    assert result.exit_code == 1
+    assert result.exception
+    assert "name 'asd' is not defined" in result.stdout
 
 
 def test_render_template_from_stdin_to_stdout():
-    cmd = r'echo -n "{{ foo }}" | yasha --foo=bar -'
+    cmd = r'echo {{ foo }} | yasha --foo=bar -'
     out = check_output(cmd, shell=True)
     assert out == b'bar'
 
@@ -225,21 +379,23 @@ def test_json_template(tmpdir):
 
 def test_mode_is_none():
     """gh-42, and gh-44"""
-    cmd = r'echo -n "{{ foo }}" | yasha -'
+    cmd = r'echo {{ foo }} | yasha -'
     out = check_output(cmd, shell=True)
     assert out == b''
 
 
 def test_mode_is_pedantic():
-    """gh-42"""
-    cmd = r'echo -n "{{ foo }}" | yasha --mode=pedantic -'
-    out = check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-    assert out == b"UndefinedError: 'foo' is undefined\n"
+    """gh-42, and gh-48"""
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        cmd = r'echo {{ foo }} | yasha --mode=pedantic -'
+        out = check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+    out = err.value.output
+    assert out == b"Error: Variable 'foo' is undefined\n"
 
 
 def test_mode_is_debug():
     """gh-44"""
-    cmd = r'echo -n "{{ foo }}" | yasha --mode=debug -'
+    cmd = r'echo {{ foo }} | yasha --mode=debug -'
     out = check_output(cmd, shell=True)
     assert out == b'{{ foo }}'
 
@@ -279,3 +435,17 @@ COMMENT_END_STRING = '#>'
 
     out = check_output(('yasha', '--keep-trailing-newline', '-e', str(ext), '-o-', str(tpl)))
     assert out.decode() == expected_output
+
+
+def test_extensions_file_with_do(tmpdir):
+    """gh-52"""
+    tmpdir.chdir()
+
+    extensions = tmpdir.join('extensions.py')
+    extensions.write('from jinja2.ext import do')
+
+    tmpl = tmpdir.join('template.j2')
+    tmpl.write(r'{% set list = [1, 2, 3] %}{% do list.append(4) %}{{ list }}')
+
+    out = check_output(('yasha', '-e', str(extensions), '-o-', str(tmpl)))
+    assert out == b'[1, 2, 3, 4]'

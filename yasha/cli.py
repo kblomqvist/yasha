@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2017 Kim Blomqvist
+Copyright (c) 2015-2020 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -59,8 +59,10 @@ def load_python_module(file):
         module = loader.load_module()
     except ImportError:  # Fallback to Python2
         import imp
-        desc = (".py", "rb", imp.PY_SOURCE)
-        module = imp.load_module('yasha_extensions', file, file.name, desc)
+        with open(file.name) as f:
+            desc = (".py", "rb", imp.PY_SOURCE)
+            module = imp.load_module('yasha_extensions', f, file.name, desc)
+        pass
     return module
 
 def load_extensions(file):
@@ -117,6 +119,11 @@ def load_extensions(file):
         PARSERS.update(module.PARSERS)
     except AttributeError:
         PARSERS.update(parsers)
+
+    try:
+        CLASSES.extend(module.CLASSES)
+    except AttributeError:
+        CLASSES.extend(classes)
 
 
 @click.command(context_settings=dict(
@@ -243,4 +250,4 @@ def cli(
         t_stream.enable_buffering(size=5)
         t_stream.dump(output, encoding=yasha.ENCODING)
     except JinjaUndefinedError as e:
-        click.echo("UndefinedError: {}".format(e), err=True)
+        raise ClickException("Variable {}".format(e))

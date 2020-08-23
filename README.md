@@ -55,7 +55,7 @@ Usage: yasha [OPTIONS] [TEMPLATE_VARIABLES]... TEMPLATE
 Options:
   -o, --output FILENAME         Place the rendered template into FILENAME.
   -v, --variables FILENAME      Read template variables from FILENAME. Built-
-                                in parsers are JSON, YAML, TOML and XML.
+                                in parsers are JSON, YAML, TOML, INI, XML and CSV.
   -e, --extensions FILENAME     Read template extensions from FILENAME. A
                                 Python file is expected.
   -c, --encoding TEXT           Default is UTF-8.
@@ -80,7 +80,7 @@ Options:
 
 ## Template variables
 
-Template variables can be defined in a separate file. By default [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml) and [XML](https://github.com/martinblech/xmltodict) formats are supported.
+Template variables can be defined in a separate file. By default [JSON](http://www.json.org), [YAML](http://www.yaml.org/start.html), [TOML](https://github.com/toml-lang/toml), [INI](https://docs.python.org/3/library/configparser.html#supported-ini-file-structure), [XML](https://github.com/martinblech/xmltodict) and [CSV](https://tools.ietf.org/html/rfc4180#section-2) formats are supported.
 
 ```bash
 yasha -v variables.yaml template.j2
@@ -97,6 +97,58 @@ Additionally you may define variables as part of the command-line call. A variab
 ```bash
 yasha --foo=bar -v variables.yaml template.j2
 ```
+
+### CSV files
+
+to use the data stored in a csv variable file in templates, the name of the variable in the template has to match the name of the csv variable file.
+
+For example, consider the following template and variable files
+
+```
+template.j2
+mydata.csv
+```
+
+And the following contents in `mydata.csv`
+
+```csv
+cell1,cell2,cell3
+cell4,cell5,cell6
+```
+
+to access the rows of cells, you use the following syntax in your template (note that 'mydata' here matches the file name of the csv file)
+
+```jinja2
+{% for row in mydata %}
+cell 1's value is {{row[0]}},
+cell 2's value is {{row[1]}}
+{% endfor %}
+```
+
+By default, each row in the csv file is accessed in the template as a list of values (`row[0]`, `row[1]`, etc). 
+You can make each row accessible instead as a mapping by adding a header to the csv file.
+
+For example, consider the following contents of `mydata.csv`
+
+```csv
+first_column,column2,third column
+cell1,cell2,cell3
+cell4,cell5,cell6
+```
+
+and the following Jinja template
+
+```jinja2
+{% for row in mydata %}
+cell 1's value is {{row.first_column}},
+cell 2's value is {{row.column2}},
+cell 3's value is {{row['third column']}}
+{% endfor %}
+```
+
+As you can see, cells can be accessed by column name instead of column index. 
+If the column name has no spaces in it, the cell can be accessed with 'dotted notation' (ie `row.first_column`) or 'square-bracket notation' (ie `row['third column']`.
+If the column name has a space in it, the cell can only be accessed with 'square-bracket notation'
 
 ### Automatic file variables look up
 
@@ -354,13 +406,19 @@ cat template.j2 | yasha -v variables.yaml -
 Variables given as part of the command-line call can be Python literals, e.g. a list would be defined like this
 
 ```bash
-yasha --foo="['foo', 'bar', 'baz']" template.j2
+yasha --lst="['foo', 'bar', 'baz']" template.j2
 ```
 
 The following is also interpreted as a list
 
 ```bash
-yasha --foo=foo,bar,baz template.j2
+yasha --lst=foo,bar,baz template.j2
+```
+
+Note that in case you like to pass a string with commas as a variable you have to quote it as
+
+```bash
+yasha --str='"foo,bar,baz"' template.j2
 ```
 
 Other possible literals are:

@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2017 Kim Blomqvist
+Copyright (c) 2015-2020 Kim Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -83,7 +83,7 @@ def test_subprocess_with_unknown_cmd():
     template = '{{ "unknown_cmd" | subprocess }}'
     out, retcode = check_output('yasha', '-', stdin=template)
     assert retcode != 0
-    assert b'unknown_cmd: not found' in out
+    assert b'not found' in out
 
 
 @requires_py3

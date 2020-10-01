@@ -418,7 +418,7 @@ yasha --lst=foo,bar,baz template.j2
 Note that in case you like to pass a string with commas as a variable you have to quote it as
 
 ```bash
-yasha --str='"foo,bar,baz"' template.j2
+yasha --str="'\"foo,bar,baz\"'" template.j2
 ```
 
 Other possible literals are:

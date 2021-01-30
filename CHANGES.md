@@ -17,7 +17,7 @@ Minor release (last with Python 2.7 support), 23 Aug 2020
 - Fixed an exit code in case of undefined variable from 0 to 1.
 - Fixed a bug that caused extension classes not to load.
 - Quoted string variable with commas is not converted to list anymore (gh-57).
-- Implemented workaround for Jinja 2.11 compatibility issue (gh-60)
+- Implemented workaround for Jinja 2.11 compatibility issue (gh-60).
 - Added support for INI and CSV file parsing.
 - Fixed a bug that caused Yasha to crash when loading file extensions
   (regression likely caused by Click).

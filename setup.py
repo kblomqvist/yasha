@@ -18,9 +18,10 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
+    python_requires=">=3.5",
     install_requires=[
         "Click",
-        "Jinja2<2.11",
+        "Jinja2>=2.11",
         "pytoml",
         "pyyaml",
         "xmltodict",
@@ -31,9 +32,6 @@ setup(
         yasha=yasha.cli:cli
     ''',
     classifiers=[
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Topic :: Software Development :: Code Generators",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",

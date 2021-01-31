@@ -361,7 +361,7 @@ def test_broken_extensions_name_error(tmpdir):
 
 
 def test_render_template_from_stdin_to_stdout():
-    cmd = r'echo {{ foo }} | yasha --foo=bar -'
+    cmd = r'echo -n {{ foo }} | yasha --foo=bar -'
     out = check_output(cmd, shell=True)
     assert out == b'bar'
 
@@ -379,7 +379,7 @@ def test_json_template(tmpdir):
 
 def test_mode_is_none():
     """gh-42, and gh-44"""
-    cmd = r'echo {{ foo }} | yasha -'
+    cmd = r'echo -n {{ foo }} | yasha -'
     out = check_output(cmd, shell=True)
     assert out == b''
 
@@ -395,7 +395,7 @@ def test_mode_is_pedantic():
 
 def test_mode_is_debug():
     """gh-44"""
-    cmd = r'echo {{ foo }} | yasha --mode=debug -'
+    cmd = r'echo -n {{ foo }} | yasha --mode=debug -'
     out = check_output(cmd, shell=True)
     assert out == b'{{ foo }}'
 

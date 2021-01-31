@@ -5,10 +5,12 @@ python:
   - nightly
 
 install:
-  - pip install scons
-  - scons --version
+  - pip install scons twine
   - pip install .
+  - pip list
 
 script:
   - echo "def foo pass" > foo.py # Test issue #25
   - pytest -v tests
+  - python setup.py sdist
+  - twine check dist/*

@@ -1,5 +1,5 @@
 # Yasha
-[![Build Status](https://travis-ci.org/kblomqvist/yasha.svg?branch=master)](https://travis-ci.org/kblomqvist/yasha)
+[![Build Status](https://img.shields.io/travis/kblomqvist/yasha?logo=travis)](https://travis-ci.org/kblomqvist/yasha)
 ![PyPI - License](https://img.shields.io/pypi/l/yasha)
 ![PyPI - Downloads](https://img.shields.io/pypi/dw/yasha)
 

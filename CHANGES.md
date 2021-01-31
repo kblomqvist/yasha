@@ -1,7 +1,7 @@
 Version 5.0
 -----------
 
-Major release (requires Jinja2>=2.11 and Python>=3.6), unreleased
+Major release (requires Jinja2>=2.11 and Python>=3.6), 31 Jan 2021
 
 - Dropped support for Python 2.7. From this version onwards Python 3.6
   or newer is required (preparing for the upcoming major release of Jinja2).

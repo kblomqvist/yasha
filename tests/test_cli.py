@@ -433,7 +433,7 @@ COMMENT_END_STRING = '#>'
     ext = tmpdir.join('extensions.py')
     ext.write(extensions)
 
-    out = check_output(('yasha', '--keep-trailing-newline', '-e', str(ext), '-o-', str(tpl)))
+    out = check_output(('yasha', '-e', str(ext), '-o-', str(tpl)))
     assert out.decode() == expected_output
 
 

@@ -18,14 +18,13 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     install_requires=[
         "Click",
         "Jinja2>=2.11",
         "pytoml",
         "pyyaml",
         "xmltodict",
-        'configparser;python_version<"3.5"'
     ],
     entry_points='''
         [console_scripts]

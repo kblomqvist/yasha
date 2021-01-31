@@ -1,10 +1,12 @@
 Version 5.0
 -----------
 
-Major release, unreleased
+Major release (requires Jinja2>=2.11 and Python>=3.6), unreleased
 
-- Dropped support for Python 2.7.
-- Fixed Jinja 2.11.x compatibility issue (gh-60).
+- Dropped support for Python 2.7. From this version onwards Python 3.6
+  or newer is required (preparing for the upcoming major release of Jinja2).
+- Fixed compatibility issue with Jinja 2.11.x (gh-60). From this version
+  onwards Yasha requires Jinja 2.11 or newer.
 - The option `--keep-trailing-newline` was removed in favor of making
   it default. The old behaviour can be achieved with the new option
   `--remove-trailing-newline`.

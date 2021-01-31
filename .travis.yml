@@ -1,14 +1,18 @@
 language: python
 python:
   - 3.6
-  - 3.7  # Debian Buster
+  - 3.7 # Debian Buster
+  - 3.8
+  - 3.9
   - nightly
 
 install:
-  - pip install scons
-  - scons --version
+  - pip install scons twine
   - pip install .
+  - pip list
 
 script:
   - echo "def foo pass" > foo.py # Test issue #25
   - pytest -v tests
+  - python setup.py sdist
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.8 ]]; then twine check dist/*; fi

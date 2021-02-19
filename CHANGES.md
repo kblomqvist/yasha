@@ -10,6 +10,7 @@ Major release (requires Jinja2>=2.11 and Python>=3.6), unreleased
 - Removed option `--keep-trailing-newline` in favor of keeping the trailing
   newline by default. The old behavior can be achieved with a new option
   `--remove-trailing-newline`.
+- Fixed issue with extension inherited classes never getting loaded.
 
 Version 4.4
 -----------

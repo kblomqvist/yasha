@@ -72,7 +72,6 @@ def load_extensions(file):
     tests   = dict()
     filters = dict()
     parsers = dict()
-    classes = []
 
     try:
         module = load_python_module(file)
@@ -98,7 +97,7 @@ def load_extensions(file):
                 parsers['.' + name] = attr
         if inspect.isclass(attr):
             if issubclass(attr, Extension):
-                classes.append(attr)
+                CLASSES.append(attr)
 
     import jinja2.defaults
     for name, obj in inspect.getmembers(module):

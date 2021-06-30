@@ -129,7 +129,7 @@ def parse_cli_variables(args):
 
 def load_jinja(
         path, tests, filters, classes, mode,
-        trim_blocks, lstrip_blocks, keep_trailing_newline):
+        trim_blocks, lstrip_blocks, keep_trailing_newline, latex_support):
     from jinja2.defaults import BLOCK_START_STRING, BLOCK_END_STRING, \
         VARIABLE_START_STRING, VARIABLE_END_STRING, \
         COMMENT_START_STRING, COMMENT_END_STRING, \
@@ -142,23 +142,44 @@ def load_jinja(
         None: jinja.Undefined,
     }
 
-    env = jinja.Environment(
-        block_start_string=BLOCK_START_STRING,
-        block_end_string=BLOCK_END_STRING,
-        variable_start_string=VARIABLE_START_STRING,
-        variable_end_string=VARIABLE_END_STRING,
-        comment_start_string=COMMENT_START_STRING,
-        comment_end_string=COMMENT_END_STRING,
-        line_statement_prefix=LINE_STATEMENT_PREFIX,
-        line_comment_prefix=LINE_COMMENT_PREFIX,
-        trim_blocks=trim_blocks,
-        lstrip_blocks=lstrip_blocks,
-        newline_sequence=NEWLINE_SEQUENCE,
-        keep_trailing_newline=keep_trailing_newline,
-        extensions=classes,
-        undefined=undefined[mode],
-        loader=jinja.FileSystemLoader(path)
-    )
+    if latex_support:
+        env = jinja.Environment(
+            block_start_string= '\BLOCK{',
+            block_end_string='}',
+            variable_start_string='\VAR{',
+            variable_end_string='}',
+            comment_start_string='\#{',
+            comment_end_string='}',
+            line_statement_prefix='%%',
+            line_comment_prefix='%#',
+            trim_blocks=True,
+            lstrip_blocks=lstrip_blocks,
+            autoescape = False,
+            newline_sequence=NEWLINE_SEQUENCE,
+            keep_trailing_newline=keep_trailing_newline,
+            extensions=classes,
+            undefined=undefined[mode],
+            loader=jinja.FileSystemLoader(path)
+        )
+    else:
+        env = jinja.Environment(
+            block_start_string=BLOCK_START_STRING,
+            block_end_string=BLOCK_END_STRING,
+            variable_start_string=VARIABLE_START_STRING,
+            variable_end_string=VARIABLE_END_STRING,
+            comment_start_string=COMMENT_START_STRING,
+            comment_end_string=COMMENT_END_STRING,
+            line_statement_prefix=LINE_STATEMENT_PREFIX,
+            line_comment_prefix=LINE_COMMENT_PREFIX,
+            trim_blocks=trim_blocks,
+            lstrip_blocks=lstrip_blocks,
+            newline_sequence=NEWLINE_SEQUENCE,
+            keep_trailing_newline=keep_trailing_newline,
+            extensions=classes,
+            undefined=undefined[mode],
+            loader=jinja.FileSystemLoader(path)
+        )
+
     env.tests.update(tests)
     env.filters.update(filters)
     return env

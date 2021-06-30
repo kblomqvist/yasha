@@ -146,11 +146,12 @@ def load_extensions(file):
 @click.option("-M", is_flag=True, help="Outputs Makefile compatible list of dependencies. Doesn't render the template.")
 @click.option("-MD", is_flag=True, help="Creates Makefile compatible .d file alongside the rendered template.")
 @click.option('--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True, help="Print version and exit.")
+@click.option("--latex", "-latex", is_flag=True, help="Interpret template file in LaTeX format.")
 def cli(
         template_variables, template, output, variables, extensions,
         encoding, include_path, no_variable_file, no_extension_file,
         no_trim_blocks, no_lstrip_blocks, remove_trailing_newline,
-        mode, m, md):
+        mode, m, md, latex):
     """Reads the given Jinja TEMPLATE and renders its content
     into a new file. For example, a template called 'foo.c.j2'
     will be written into 'foo.c' in case the output file is not
@@ -228,7 +229,8 @@ def cli(
         mode=mode,
         trim_blocks=not no_trim_blocks,
         lstrip_blocks=not no_lstrip_blocks,
-        keep_trailing_newline=not remove_trailing_newline
+        keep_trailing_newline=not remove_trailing_newline,
+        latex_support=latex
    )
 
     # Get template
